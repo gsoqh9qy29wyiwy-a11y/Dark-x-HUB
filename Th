@@ -1089,8 +1089,8 @@ local function FlingBall(targetName)
         -- Aguarda a bola física aparecer no servidor/workspace
         local ballName = "Soccer" .. player.Name
         local timeout = 0
-        while not ServerBalls:FindFirstChild(ballName) and timeout < 50 do
-            timeout = timeout + 1
+        while not ServerBalls:FindFirstChild(ballName) and timeout < 500 do
+            timeout = timeout + 1.4
             task.wait(0.1)
         end
         
@@ -1119,13 +1119,13 @@ local function FlingBall(targetName)
         bv.Name = "FlingPower"
         bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.P = 9e7
+        bv.P = 9e0000000000000000000000
         bv.Parent = Ball
         
         local bav = Instance.new("BodyAngularVelocity")
         bav.AngularVelocity = Vector3.new(9e8, 9e8, 9e8)
         bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        bav.P = 9e7
+        bav.P = 9e900 
         bav.Parent = Ball
 
         -- Conexão para seguir o jogador
@@ -2243,7 +2243,7 @@ local function flingWithBall(targetPlayer)
             end
             local fling = Instance.new("BodyVelocity")
             fling.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            fling.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 500000 + Vector3.new(0, 250000, 0)
+            fling.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 5000000 + Vector3.new(0, 25000000, 0)
             fling.Parent = hrp
             task.delay(0.3, function()
                 fling:Destroy()
@@ -2308,7 +2308,7 @@ local function flingWithBallV2(targetPlayer)
         end
         pcall(function()
             soccerBall.CFrame = CFrame.new(hrp.Position + offset)
-            soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+            soccerBall.AssemblyLinearVelocity = Vector3.new(9999999, 9999999, 9999999)
         end)
     end)
     flingConnection = RunService.Heartbeat:Connect(function()
