@@ -1089,8 +1089,8 @@ local function FlingBall(targetName)
         -- Aguarda a bola física aparecer no servidor/workspace
         local ballName = "Soccer" .. player.Name
         local timeout = 0
-        while not ServerBalls:FindFirstChild(ballName) and timeout < 50 do
-            timeout = timeout + 1
+        while not ServerBalls:FindFirstChild(ballName) and timeout < 500 do
+            timeout = timeout + 1.4
             task.wait(0.1)
         end
         
@@ -1119,13 +1119,13 @@ local function FlingBall(targetName)
         bv.Name = "FlingPower"
         bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.P = 9e7
+        bv.P = 9e0000000000000000000000
         bv.Parent = Ball
         
         local bav = Instance.new("BodyAngularVelocity")
         bav.AngularVelocity = Vector3.new(9e8, 9e8, 9e8)
         bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        bav.P = 9e7
+        bav.P = 9e900 
         bav.Parent = Ball
 
         -- Conexão para seguir o jogador
@@ -1442,13 +1442,13 @@ Tab9:AddButton({
                     bv.Name = "FlingPower"
                     bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
                     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                    bv.P = 9e900
+                    bv.P = 9e9000000000000000000000
                     bv.Parent = Ball
                     mundo.CurrentCamera.CameraSubject = thum
 
                     repeat
                         if troot.Velocity.Magnitude > 0 then
-                            local pos = troot.Position + (troot.Velocity / 1.5)
+                            local pos = troot.Position + (troot.Velocity / 3.5)
                             Ball.CFrame = CFrame.new(pos)
                             Ball.Orientation += Vector3.new(45, 60, 30)
                         else
@@ -3569,3 +3569,162 @@ Tab3:AddParagraph({
     Title = "Vai ter mais coisas aqui na próxima atualização",
     Content = ""
 })
+local SelectHouse = nil
+local HouseDropdown = nil
+
+local function getHouseList()
+    local Tabela = {}
+    local lots = workspace:FindFirstChild("001_Lots")
+    if lots then
+        for _, House in ipairs(lots:GetChildren()) do
+            if House.Name ~= "For Sale" and House:IsA("Model") then
+                table.insert(Tabela, House.Name)
+            end
+        end
+    end
+    return Tabela
+end
+pcall(function()
+    HouseDropdown = Tab4:AddDropdown({
+        Name = "Selecione a Casa",
+        Options = getHouseList(),
+        Default = "...",
+        Callback = function(Value)
+            SelectHouse = Value
+            print("Casa selecionada: " .. tostring(Value))
+        end
+    })
+end)
+
+pcall(function()
+    Tab4:AddButton({
+        Name = "Atualizar Lista de Casas",
+        Callback = function()
+            local novaLista = getHouseList()
+            if HouseDropdown then
+                pcall(function()
+                    HouseDropdown:Set(novaLista)
+                end)
+            end
+            print("✅ Lista de casas atualizada!")
+        end
+    })
+end)
+
+pcall(function()
+    Tab4:AddButton({
+        Name = "Teleportar para Casa",
+        Callback = function()
+            local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+            if House and game.Players.LocalPlayer.Character then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
+            else
+                print("Casa nao encontrada: " .. tostring(SelectHouse))
+            end
+        end
+    })
+end)
+
+
+-- Teleportar para casa
+pcall(function()
+    Tab4:AddButton({
+        Name = "Teleportar para Casa",
+        Callback = function()
+            local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+            if House and game.Players.LocalPlayer.Character then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
+            else
+                print("Casa no encontrada: " .. tostring(SelectHouse))
+            end
+        end
+    })
+end)
+
+-- Teleportar para cofre
+pcall(function()
+    Tab4:AddButton({
+        Name = "Teleportar para Cofre",
+        Callback = function()
+            local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+            if House and House:FindFirstChild("HousePickedByPlayer") and game.Players.LocalPlayer.Character then
+                local safe = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
+                if safe then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position)
+                else
+                    print("Cofre no encontrado na casa: " .. tostring(SelectHouse))
+                end
+            else
+                print("Casa no encontrada: " .. tostring(SelectHouse))
+            end
+        end
+    })
+end)
+
+Tab4:AddParagraph({
+    Title = "Funções para você usar em você",
+    Content = ""
+})
+
+-- Botão para remover ban de todas as casas
+Tab4:AddButton({
+    Name = "Remover Ban de Todas as Casas",
+    Description = "Tenta remover o ban de todas as casas ",
+    Callback = function()
+        local successCount = 0
+        local failCount = 0
+        for i = 1, 37 do
+            local bannedBlockName = "BannedBlock" .. i
+            local bannedBlock = Workspace:FindFirstChild(bannedBlockName, true)
+            if bannedBlock then
+                local success, _ = pcall(function()
+                    bannedBlock:Destroy()
+                end)
+                if success then
+                    successCount = successCount + 1
+                else
+                    failCount = failCount + 1
+                end
+            end
+        end
+        for _, house in pairs(Workspace:GetDescendants()) do
+            if house.Name:match("BannedBlock") then
+                local success, _ = pcall(function()
+                    house:Destroy()
+                end)
+                if success then
+                    successCount = successCount + 1
+                else
+                    failCount = failCount + 1
+                end
+            end
+        end
+        if successCount > 0 then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Sucesso",
+                Text = "Bans removidos de " .. successCount .. " casas!",
+                Duration = 5
+            })
+        end
+        if failCount > 0 then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Aviso",
+                Text = "Falha ao remover bans de " .. failCount .. " casas.",
+                Duration = 5
+            })
+        end
+        if successCount == 0 and failCount == 0 then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Aviso",
+                Text = "Nenhum ban encontrado para remover.",
+                Duration = 5
+            })
+        end
+    end
+})
+
+Tab4:AddParagraph({
+    Title = "to sem ideias para colocar aqui._.",
+    Content = ""
+})
+
