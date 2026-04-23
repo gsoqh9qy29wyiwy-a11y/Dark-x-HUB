@@ -44,8 +44,6 @@ local autorizados = {
 _G.SelectedPlayer = ""
 _G.AntiSit = false
 _G.AntiVoid = false
-_G.RGBName = false
-_G.RainbowBio = false
 _G.AntiFling = false 
 _G.AntiLag = false 
 _G.BlackHoleActive = false
@@ -54,6 +52,10 @@ _G.IsTrapping = false
 _G.FlingToggle = false
 
 -- [4. VARIÁVEIS E FUNÇÕES DE SUPORTE]
+local rgbSpeed = 1
+local nameBioRGBActive = false
+local carRGBActive = false
+local radioRGBActive = false
 local antiToolSit, antiCarSit, antiVehicleCollision = false, false, false
 local keywords = { "bomb", "soccer", "boat" }
 local carKeyword = "car"
