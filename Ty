@@ -16,26 +16,6 @@ local TextChatService = game:GetService("TextChatService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- [ 2. SUAS VARIÁVEIS SOLICITADAS (ESCOPO GLOBAL DO SCRIPT) ]
-local LocalPlayer = Players.LocalPlayer
-local selectedPlayer = nil
-local isFollowingKill = false
-local isFollowingPull = false
-local running = false
-local connection = nil
-local flingConnection = nil
-local originalPosition = nil
-local savedPosition = nil
-local originalProperties = {}
-local selectedKillPullMethod = nil
-local selectedFlingMethod = nil
-local soccerBall = nil
-local couch = nil
-local isSpectating = false
-local spectatedPlayer = nil
-local characterConnection = nil
-local flingToggle = nil
-
 -- Referências de Serviços (Brookhaven usa muito RE e caminhos específicos)
 local vu6 = game:GetService("Players")
 local vu7 = game:GetService("Players").LocalPlayer
@@ -58,7 +38,7 @@ if lp then UsuariosDoHub[lp.Name] = true end
 -- Lista de autorizados (admins)
 local autorizados = {
     ["HACKELINDO3"] = "Dono-Admin",
-    ["FX_OLSADO22"] = "Admin"
+    [""] = "Admin"
 }
 -- [3. ESTADOS GLOBAIS]
 _G.SelectedPlayer = ""
@@ -2992,6 +2972,8 @@ Tab8:AddButton({
         tocarMusica("")
     end
 })
+
+
 local Players = game:GetService("Players")
 
 local Workspace = game:GetService("Workspace")
