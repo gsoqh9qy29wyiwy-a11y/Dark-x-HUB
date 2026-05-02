@@ -672,9 +672,8 @@ TabTroll:AddButton({Name = "Jail player V1", Callback = function()
         end
     end)
 end})
-TabTroll:AddSection({ "Antis" })
-TabTroll:AddToggle({ Name = "Anti-Void", Callback = function(s) _G.AntiVoid = s end })
-TabTroll:AddToggle({ Name = "Anti-Sit", Callback = function(s) _G.AntiSit = s end })
+
+
 local CasasTab = Window:MakeTab({
     Title = "Casas",
     Icon = "home"
