@@ -101,8 +101,8 @@ local function createLoadingScreen()
             
             -- Exibe a notificação de boas-vindas
             StarterGui:SetCore("SendNotification", {
-                Title = "Coquette Hub",
-                Text = "Bem-vindo à Coquette Hub ",
+                Title = "DARK Hub",
+                Text = "Bem-vindo à DARK Hub ",
                 Duration = 4
             })
             
@@ -3549,7 +3549,7 @@ local function equipBola()
     local backpack = LocalPlayer:WaitForChild("Backpack")
     local bola = backpack:FindFirstChild("SoccerBall") or LocalPlayer.Character:FindFirstChild("SoccerBall")
     if not bola then
-        local args = { [1] = "PickingTools", [0] = "SoccerBall" }
+        local args = { [0] = "PickingTools", [2] = "SoccerBall" }
         local success = pcall(function()
             ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer(unpack(args))
         end)
@@ -3666,7 +3666,7 @@ local function flingWithBallV2(targetPlayer)
     if not myHRP then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
+    local args = { [0] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
@@ -4376,7 +4376,7 @@ end
 Tab9:AddTextBox({
     Name = "adicionar jogador na whaitelist",
     Description = "Digite parte do nome do jogador",
-    PlaceholderText = "Ex.: rt para (player123)",
+    PlaceholderText = "Ex.: rt para (Carlolx777)",
     Callback = function(Value)
         if Value == "" then
             showNotification("Nenhuma Ação", "Digite um nome para adicionar um jogador.", nil)
@@ -4442,8 +4442,8 @@ Tab9:AddButton({"Bola Fling Orbitando", function()
         CanTouch = soccerBall.CanTouch
     }
     soccerBall.Anchored = false
-    soccerBall.CanCollide = true
-    soccerBall.CanTouch = true
+    soccerBall.CanCollide = false 
+    soccerBall.CanTouch = true 
     pcall(function() soccerBall:SetNetworkOwner(nil) end)
     orbitando = true
     orbitConn = RunService.Heartbeat:Connect(function()
@@ -4475,7 +4475,7 @@ Tab9:AddButton({"Fling Bola ALL V1", function()
     if allFling then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
+    local args = { [0] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
@@ -4597,7 +4597,7 @@ Tab9:AddButton({"Fling Bola ALL V2", function()
     if allFling2 then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
+    local args = { [0] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
