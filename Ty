@@ -35,7 +35,7 @@ local function createLoadingScreen()
     image.Size = UDim2.new(0, 300, 0, 300)
     image.Position = UDim2.new(0.5, -150, 0.35, -150)
     image.BackgroundTransparency = 1
-    image.Image = "rbxassetid://"
+    image.Image = "rbxassetid://113088956809836"
     image.Parent = frame
 
     local nameText = Instance.new("TextLabel")
@@ -135,8 +135,8 @@ print("Loading completo! Agora executando o resto do script...")
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/minhdepzai-v/LibraryRobloc/refs/heads/main/RedzLibrary.lua"))()
 
 local Window = redzlib:MakeWindow({
-    Title = "FANTASMA HUB",
-    SubTitle = "by gaga",
+    Title = "DARK HUB",
+    SubTitle = "by Carlolx777",
     SaveFolder = "teste"
   })
 
@@ -353,7 +353,7 @@ Tab2:AddSlider({
     Name = "Speed Player",
     Increase = 1,
     MinValue = 16,
-    MaxValue = 888,
+    MaxValue = 2000,
     Default = 16,
     Callback = function(Value)
         local player = game.Players.LocalPlayer
@@ -370,7 +370,7 @@ Tab2:AddSlider({
     Name = "Jumppower",
     Increase = 1,
     MinValue = 50,
-    MaxValue = 500,
+    MaxValue = 5000,
     Default = 50,
     Callback = function(Value)
         local player = game.Players.LocalPlayer
@@ -3549,7 +3549,7 @@ local function equipBola()
     local backpack = LocalPlayer:WaitForChild("Backpack")
     local bola = backpack:FindFirstChild("SoccerBall") or LocalPlayer.Character:FindFirstChild("SoccerBall")
     if not bola then
-        local args = { [1] = "PickingTools", [2] = "SoccerBall" }
+        local args = { [1] = "PickingTools", [0] = "SoccerBall" }
         local success = pcall(function()
             ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer(unpack(args))
         end)
@@ -3642,7 +3642,7 @@ local function flingWithBall(targetPlayer)
             end
             local fling = Instance.new("BodyVelocity")
             fling.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            fling.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 500000 + Vector3.new(0, 250000, 0)
+            fling.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 50000000 + Vector3.new(0, 25000000, 0)
             fling.Parent = hrp
             task.delay(0.3, function()
                 fling:Destroy()
@@ -3666,7 +3666,7 @@ local function flingWithBallV2(targetPlayer)
     if not myHRP then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
+    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
@@ -3707,7 +3707,7 @@ local function flingWithBallV2(targetPlayer)
         end
         pcall(function()
             soccerBall.CFrame = CFrame.new(hrp.Position + offset)
-            soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+            soccerBall.AssemblyLinearVelocity = Vector3.new(9999999, 9999999, 9999999)
         end)
     end)
     flingConnection = RunService.Heartbeat:Connect(function()
@@ -4462,8 +4462,8 @@ Tab9:AddButton({"Bola Fling Orbitando", function()
             originalProperties = nil
             return
         end
-        local t = tick() * 10
-        local radius = 3
+        local t = tick() * 200
+        local radius = 7
         local offset = Vector3.new(math.cos(t) * radius, -1, math.sin(t) * radius)
         soccerBall.CFrame = CFrame.new(myHRP.Position + offset)
         soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
@@ -4475,7 +4475,7 @@ Tab9:AddButton({"Fling Bola ALL V1", function()
     if allFling then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
+    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
@@ -4578,7 +4578,7 @@ Tab9:AddButton({"Fling Bola ALL V1", function()
                 offset = Vector3.new(sideX, 1, waveZ)
             end
             soccerBall.CFrame = CFrame.new(hrp.Position + offset)
-            soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+            soccerBall.AssemblyLinearVelocity = Vector3.new(9999999, 9999999, 9999999)
             if (soccerBall.Position - hrp.Position).Magnitude < 4 then
                 local fling = Instance.new("BodyVelocity")
                 fling.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
@@ -4597,7 +4597,7 @@ Tab9:AddButton({"Fling Bola ALL V2", function()
     if allFling2 then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
+    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
@@ -4669,7 +4669,7 @@ Tab9:AddButton({"Fling Bola ALL V2", function()
                     offset = Vector3.new(sideX, 1, waveZ)
                 end
                 soccerBall.CFrame = CFrame.new(hrp.Position + offset)
-                soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+                soccerBall.AssemblyLinearVelocity = Vector3.new(9999999, 9999999, 9999999)
                 if (soccerBall.Position - hrp.Position).Magnitude < 4 then
                     local fling = Instance.new("BodyVelocity")
                     fling.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
