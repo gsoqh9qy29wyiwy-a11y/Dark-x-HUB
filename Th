@@ -386,35 +386,21 @@ Window:AddMinimizeButton({
     Corner = { CornerRadius = UDim.new(0, 8) },
 }) 
 
-local Tab1 = Window:MakeTab({"Credits", "info"})
-Tab1:AddDiscordInvite({
-    Name = "Dark x hub",
-    Description = "Servidor oficial",
-    Logo = "rbxassetid://",
-    Invite = "",
-})
-
-local function detectExecutor()
-    if identifyexecutor then
-        return identifyexecutor()
-    elseif syn then
-        return "Synapse X"
-    elseif KRNL_LOADED then
-        return "KRNL"
-    elseif is_sirhurt_closure then
-        return "SirHurt"
-    elseif pebc_execute then
-        return "ProtoSmasher"
-    elseif getexecutorname then
-        return getexecutorname()
-    else
-        return "Executor Desconhecido"
+local InfoTab = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473" })
+InfoTab:AddSection({ "Informações do Script" })
+InfoTab:AddParagraph({ "Owner / Developer:", "Carlolx777." })
+InfoTab:AddParagraph({ "Colaborações:", "Carlolx777," })
+InfoTab:AddParagraph({ "Você está usando:", "Dark x Hub Brookhaven RP" })
+InfoTab:AddParagraph({"executor Delta:", })
+InfoTab:AddParagraph({"Version1.0:", })
+InfoTab:AddSection({ "Rejoin" })
+InfoTab:AddButton({
+    Name = "Rejoin",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
     end
-end
-
-local executorName = detectExecutor()
-Tab1:AddParagraph({"Executor", executorName})
-Tab1:AddSection({"VersÃ£o do Hub 3.7"})
+})
 
 
 -- --- ABA: TROLL ---
