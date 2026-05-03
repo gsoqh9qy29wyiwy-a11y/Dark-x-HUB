@@ -1,4 +1,4 @@
-local Library = loadstring(game:HttpGet("https://pastefy.app/QrJLAr8A/raw"))()  
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 -- 1. SERVIÇOS E VARIÁVEIS
 local vu6 = game:GetService("Players")
@@ -385,7 +385,22 @@ Window:AddMinimizeButton({
     Corner = { CornerRadius = UDim.new(0, 8) },
 }) 
 
-local InfoTab = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473" })
+local InfoTab = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
+local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
+local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
+local TabTP = Window:MakeTab({" Teleportes", "map"})
+local TrollTab = Window:MakeTab({"Controls", "settings"})
+local Tab3  = Window:MakeTab({"Avatar", "shirt"})
+local TabAntis = Window:MakeTab({"Antis", "shield"})
+local TabLag = Window:MakeTab({"Lag Server", "bomb"})
+local Tab5 = Window:MakeTab({"Carro", "car"})
+local Tab7 = Window:MakeTab({"Music All", "radio"})    
+local Tab8 = Window:MakeTab({"Music", "music"}) 
+local Tab6 = Window:MakeTab({"RGB", "brush"})
+local TabExpansao = Window:MakeTab({"Expansão", "sparkles"})
+local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
+
+
 InfoTab:AddSection({ "Informações do Script" })
 InfoTab:AddParagraph({ "Owner / Developer:", "Carlolx777." })
 InfoTab:AddParagraph({ "Colaborações:", "Carlolx777," })
@@ -403,7 +418,7 @@ InfoTab:AddButton({
 
 
 -- --- ABA: TROLL ---
-local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
+
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selection" })
 local PlayerDrop = TabTroll:AddDropdown({
@@ -1094,10 +1109,7 @@ TabTroll:AddButton({Name = "Spawn", Callback = function()
 end})
 
 
-local CasasTab = Window:MakeTab({
-    Title = "Casas",
-    Icon = "home"
-})
+
 
 local SelectHouse = nil
 local HouseDropdown = nil
@@ -1276,7 +1288,7 @@ CasasTab:AddToggle({Name = "Auto Remover Ban", Callback = function(s) pcall(func
 
 
 -- --- ABA: TELEPORTES ---
-local TabTP = Window:MakeTab({" Teleportes", "map"})
+
 
 local teleportButtons = {
     {Nome = "Agência", Ponto = CFrame.new(179, 4, -464)},
@@ -1397,7 +1409,8 @@ vu10.Heartbeat:Connect(function()
     end
     if viewEnabled then updateCamera() end
 end) 
-local TrollTab = Window:MakeTab({"Controls", "settings"})
+
+
 Window:SelectTab(TabTroll)
 local Section = TrollTab:AddSection({"Funções"})
 TrollTab:AddSection({ "Puxar Parts" })
@@ -1899,7 +1912,7 @@ end)
 ----------------------------------------------------------------------------------------------------------------------------
 -- Tab3: Avatar Editor
 ----------------------------------------------------------------------------------------------------------------------------
-local Tab3  = Window:MakeTab({"Avatar", "shirt"})
+
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -2161,7 +2174,7 @@ Tab3:AddParagraph({
     Title = "Vai ter mais coisas aqui na prÃ³xima atualizaÃ§Ã£o",
     Content = ""
 })
-local TabAntis = Window:MakeTab({"Antis", "shield"})
+
 
 local antiToolSit, antiCarSit, antiVehicleCollision = false, false, false
 local keywords = { "bomb", "soccer", "boat" }
@@ -2249,7 +2262,7 @@ TabAntis:AddSection({"Anti Fling"})
     TabAntis:AddSection({"Anti Lag"})
 TabAntis:AddToggle({ Name = "Anti-Lag", Callback = function(s) _G.AntiLag = s ApplyAntiLag(s) end })
 
-local TabLag = Window:MakeTab({"Lag Server", "bomb"})
+
 
 TabLag:AddSection({ Name = "Shutdown Personalizado" })
 
@@ -3157,7 +3170,7 @@ TabLag:AddParagraph({ "Informação", "O lag começa após cerca de 35 segundos.
 ----------------------------------------------------------------------------------------------------------------------------
                                           -- === Tab 5: Car === --
 ---------------------------------------------------------------------------------------------------------------------------------
-local Tab5 = Window:MakeTab({"Carro", "car"})
+
 local Section = Tab5:AddSection({"all car functions"})
 
 -- VariÃ¡veis
@@ -4066,7 +4079,7 @@ Tab5:AddButton({
 ---------------------------------------------------------------------------------------------------------------------------
 -- === Tab 7: Sons/Memes/Efeitos === --
 ---------------------------------------------------------------------------------------------------------------------------
-local Tab7 = Window:MakeTab({"Music All", "radio"})    
+
 
 local loopAtivo = false  
 local InputID = ""  
@@ -4260,7 +4273,7 @@ createSoundDropdown("Selecione um terror ou efeito", {
 ------------------------------------------------------------------------------------------------------------------------------
 -- === Tab 8: Troll MÃºsica === --
 ------------------------------------------------------------------------------------------------------------------------------
-local Tab8 = Window:MakeTab({"Music", "music"}) 
+
 
 local function tocarMusica(id)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -4412,7 +4425,7 @@ Tab8:AddButton({
 ---------------------------------------------------------------------------------------------------------------------------------
                                                    -- === Tab 6: RGB === --
 ---------------------------------------------------------------------------------------------------------------------------------
-local Tab6 = Window:MakeTab({"RGB", "brush"})
+
 
 
 local Section = Tab6:AddSection({"RBGS"})
@@ -4668,7 +4681,7 @@ ToggleRosquinha:Callback(function(Value)
     end)
 end)
 
-local TabExpansao = Window:MakeTab({"Expansão", "sparkles"})
+
 TabExpansao:AddButton({
     Name = "ExpansÃ£o de DomÃ­nio🌌”®",
     Description = "Ativa a expansÃ£o de domÃ­nio permanente",
@@ -4774,8 +4787,7 @@ TabExpansao:AddButton({
     end
 })
 
-local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
-TabSky:AddButton({
+
     Name = "Ativar Tubers93 (Shelby)",
     Description = "TransformaÃ§Ã£o completa Tubers93 by Shelby",
     Callback = function()
@@ -4935,4 +4947,3 @@ TabSky:AddButton({
         end)
     end
 })
-
