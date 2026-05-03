@@ -3609,10 +3609,10 @@ Tab5:AddButton({
         end
     end
 })
-
 ---------------------------------------------------------------------------------------------------------------------------
 -- === Tab 7: Sons/Memes/Efeitos === --
 ---------------------------------------------------------------------------------------------------------------------------
+local Tab7 = Window:MakeTab({"Music All", "radio"})    
 
 local loopAtivo = false  
 local InputID = ""  
@@ -3801,9 +3801,12 @@ createSoundDropdown("Selecione um terror ou efeito", {
         {name = "gritomedo", id = "113029085566978"}  
         -- adicione os outros conforme necessÃ¡rio
     }  
-}, "jumpscar")------------------------------------------------------------------------------------------------------------------------------
+}, "jumpscar")
+
+------------------------------------------------------------------------------------------------------------------------------
 -- === Tab 8: Troll MÃºsica === --
 ------------------------------------------------------------------------------------------------------------------------------
+local Tab8 = Window:MakeTab({"Music", "music"}) 
 
 local function tocarMusica(id)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -3951,3 +3954,4 @@ Tab8:AddButton({
         tocarMusica("")
     end
 })
+
