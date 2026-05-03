@@ -1,6 +1,6 @@
     
 
-local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
+local Library = loadstring(game:HttpGet("https://pastefy.app/QrJLAr8A/raw"))()  
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 -- 1. SERVIÇOS E VARIÁVEIS
 local vu6 = game:GetService("Players")
@@ -4937,6 +4937,7 @@ TabSky:AddButton({
         end)
     end
 })
+local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
 -- [[ SERVIÇOS ]] --
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
