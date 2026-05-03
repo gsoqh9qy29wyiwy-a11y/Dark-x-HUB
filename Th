@@ -4481,9 +4481,7 @@ TabSky:AddButton({
     end
 })
 
-local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
-
--- Serviços
+-- [[ SERVIÇOS ]] --
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
@@ -4493,27 +4491,21 @@ local TweenService = game:GetService("TweenService")
 local TextChatService = game:GetService("TextChatService")
 local RunService = game:GetService("RunService")
 
+-- [[ CONFIGURAÇÕES E ESTADO ]] --
 local lp = Players.LocalPlayer
 workspace.FallenPartsDestroyHeight = -math.huge
 
--- Lista de usuários que abriram o Hub
-local UsuariosDoHub = {}
-UsuariosDoHub[lp.Name] = true
-
--- Lista de autorizados (admins)
-local autorizados = {
-    ["HACKELINDO3"] = "Dono-Admin",
-    [""] = "Admin",
-
-}
-
-
--- Donos especiais
-local Donos = {
-    ["HACKELINDO3"] = true,
-    [""] = true,
-    [""] = true,
-    [""] = true
+local AdminSettings = {
+    Admins = {
+        ["HACKELINDO3"] = "Dono-Admin",
+        [""] = "Admin",
+    },
+    Donos = {
+        ["HACKELINDO3"] = true,
+    },
+    UsuariosHub = {
+        [lp.Name] = true
+    }
 }
 
 -- Estado
