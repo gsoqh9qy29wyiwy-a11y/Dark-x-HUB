@@ -3610,4 +3610,344 @@ Tab5:AddButton({
     end
 })
 
+---------------------------------------------------------------------------------------------------------------------------
+-- === Tab 7: Sons/Memes/Efeitos === --
+---------------------------------------------------------------------------------------------------------------------------
 
+local loopAtivo = false  
+local InputID = ""  
+
+-- Caixa de texto para ID de Ã¡udio
+Tab7:AddTextBox({  
+    Name = "Insira o ID Audio All",  
+    Description = "Digite o ID do som que deseja tocar",  
+    Default = "",  
+    PlaceholderText = "Exemplo: 6832470734",  
+    ClearTextOnFocus = true,  
+    Callback = function(text)  
+        InputID = tonumber(text)  
+    end  
+})  
+
+-- FunÃ§Ã£o para disparar eventos
+local function fireServer(eventName, args)  
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")  
+    local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild(eventName)  
+    if event then  
+        pcall(function()  
+            event:FireServer(unpack(args))  
+        end)  
+    end  
+end  
+
+-- BotÃ£o para tocar som manualmente
+Tab7:AddButton({  
+    Name = "Tocar Som",  
+    Description = "Clique para tocar a mÃºsica inserida",  
+    Callback = function()  
+        if InputID then  
+            fireServer("1Gu1nSound1s", {Workspace, InputID, 1})  
+            local globalSound = Instance.new("Sound", Workspace)  
+            globalSound.SoundId = "rbxassetid://" .. InputID  
+            globalSound.Looped = false  
+            globalSound:Play()  
+            task.spawn(function()  
+                task.wait(3)  
+                globalSound:Destroy()  
+            end)  
+        end  
+    end  
+})  
+
+-- Toggle para loop do ID manual
+Tab7:AddToggle({  
+    Name = "Loop",  
+    Description = "Ative para colocar o som em loop",  
+    Default = false,  
+    Callback = function(state)  
+        loopAtivo = state  
+        if state then  
+            task.spawn(function()  
+                while loopAtivo do  
+                    if InputID then  
+                        fireServer("1Gu1nSound1s", {Workspace, InputID, 1})  
+                        local globalSound = Instance.new("Sound", Workspace)  
+                        globalSound.SoundId = "rbxassetid://" .. InputID  
+                        globalSound.Looped = false  
+                        globalSound:Play()  
+                        task.spawn(function()  
+                            task.wait(3)  
+                            globalSound:Destroy()  
+                        end)  
+                    end  
+                    task.wait(1)  
+                end  
+            end)  
+        end  
+    end  
+})  
+
+-- FunÃ§Ã£o para criar dropdowns de sons
+local function createSoundDropdown(title, musicOptions, defaultOption)  
+    local musicNames = {}  
+    local categoryMap = {}  
+    for category, sounds in pairs(musicOptions) do  
+        for _, music in ipairs(sounds) do  
+            if music.name ~= "" and music.id ~= "4354908569" then  
+                table.insert(musicNames, music.name)  
+                categoryMap[music.name] = {id = music.id, category = category}  
+            end  
+        end  
+    end  
+
+    local selectedSoundID = nil  
+    local currentVolume = 1  
+    local currentPitch = 1  
+
+    local function playSound(soundId, volume, pitch)  
+        fireServer("1Gu1nSound1s", {Workspace, soundId, volume})  
+        local globalSound = Instance.new("Sound")  
+        globalSound.Parent = Workspace  
+        globalSound.SoundId = "rbxassetid://" .. soundId  
+        globalSound.Volume = volume  
+        globalSound.Pitch = pitch  
+        globalSound.Looped = false  
+        globalSound:Play()  
+        task.spawn(function()  
+            task.wait(3)  
+            globalSound:Destroy()  
+        end)  
+    end  
+
+    Tab7:AddDropdown({  
+        Name = title,  
+        Description = "Escolha um som para tocar no servidor",  
+        Default = defaultOption,  
+        Multi = false,  
+        Options = musicNames,  
+        Callback = function(selectedSound)  
+            if selectedSound and categoryMap[selectedSound] then  
+                selectedSoundID = categoryMap[selectedSound].id  
+            else  
+                selectedSoundID = nil  
+            end  
+        end  
+    })  
+
+    Tab7:AddButton({  
+        Name = "Tocar Som Selecionado",  
+        Description = "Clique para tocar o som do dropdown",  
+        Callback = function()  
+            if selectedSoundID then  
+                playSound(selectedSoundID, currentVolume, currentPitch)  
+            end  
+        end  
+    })  
+
+    -- Toggle de loop para dropdown
+    local dropdownLoopActive = false  
+    Tab7:AddToggle({  
+        Name = "Loop",  
+        Description = "Ativa o loop do som selecionado",  
+        Default = false,  
+        Callback = function(state)  
+            dropdownLoopActive = state  
+            if state then  
+                task.spawn(function()  
+                    while dropdownLoopActive do  
+                        if selectedSoundID then  
+                            playSound(selectedSoundID, currentVolume, currentPitch)  
+                        end  
+                        task.wait(1)  
+                    end  
+                end)  
+            end  
+        end  
+    })  
+end  
+
+-- Dropdown "Memes"
+createSoundDropdown("Selecione um meme", {  
+    ["Memes"] = {  
+        {name = "pankapakan", id = "122547522269143"},  
+        {name = "Gemido ultra rÃ¡pido", id = "128863565301778"},  
+        {name = "vai g0z@?", id = "116293771329297"},  
+        {name = "G0z33iiii", id = "93462644278510"},  
+        {name = "Hommmm ", id = "133135656929513"},  
+        {name = "gemido1", id = "105263704862377"},  
+        {name = "gemido2", id = "92186909873950"},  
+        {name = "sus sex", id = "128137573022197"},  
+        {name = "gemido estranho", id = "131219411501419"},  
+        {name = "gemido kawai", id = "100409245129170"},  
+        {name = "Hentai wiaaaaan", id = "88332347208779"},  
+        {name = "iamete cunasai", id = "108494476595033"},  
+        {name = "dodichan onnn...", id = "134640594695384"},  
+        {name = "Loly gemiD0", id = "119277017538197"},  
+        {name = "ai poison", id = "115870718113313"},  
+        {name = "chegachega SUS", id = "77405864184828"},  
+        {name = "uwu", id = "76820720070248"},  
+        {name = "ai meu cuzin", id = "130714479795369"}  
+        -- adicione os outros conforme necessÃ¡rio
+    }  
+}, "pankapakan")  
+
+-- Dropdown "Efeito/Terror"
+createSoundDropdown("Selecione um terror ou efeito", {  
+    ["efeito/terror"] = {  
+        {name = "jumpscar", id = "91784486966761"},  
+        {name = "n se preocupe", id = "87041057113780"},  
+        {name = "eles estao todos mortos", id = "70605158718179"},  
+        {name = "gritoestourado", id = "7520729342"},  
+        {name = "gritomedo", id = "113029085566978"}  
+        -- adicione os outros conforme necessÃ¡rio
+    }  
+}, "jumpscar")------------------------------------------------------------------------------------------------------------------------------
+-- === Tab 8: Troll MÃºsica === --
+------------------------------------------------------------------------------------------------------------------------------
+
+local function tocarMusica(id)
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    
+    -- RÃ¡dio (ToolMusicText)
+    local argsRadio = { [1] = "ToolMusicText", [2] = id }
+    ReplicatedStorage:WaitForChild("RE"):WaitForChild("PlayerToolEvent"):FireServer(unpack(argsRadio))
+    
+    -- Casa (PickHouseMusicText)
+    local argsCasa = { [1] = "PickHouseMusicText", [2] = id }
+    ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Player1sHous1e"):FireServer(unpack(argsCasa))
+
+    -- Carro (PickingCarMusicText)
+    local argsCarro = { [1] = "PickingCarMusicText", [2] = id }
+    ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Player1sCa1r"):FireServer(unpack(argsCarro))
+
+    -- Scooter (PickingScooterMusicText)
+    local argsScooter = { [1] = "PickingScooterMusicText", [2] = id }
+    ReplicatedStorage:WaitForChild("RE"):WaitForChild("1NoMoto1rVehicle1s"):FireServer(unpack(argsScooter))
+end
+
+-- Caixa de texto para ID da mÃºsica
+Tab8:AddTextBox({
+    Name = "ID da mÃºsica",
+    PlaceholderText = "Digite o ID e pressione Enter",
+    Callback = function(value)
+        if value and value ~= "" then
+            tocarMusica(tostring(value))
+        end
+    end
+})
+
+-- FunÃ§Ã£o para criar dropdowns de mÃºsica
+local function createMusicDropdown(title, musicOptions, defaultOption)
+    local musicNames = {}
+    local categoryMap = {}
+    for category, sounds in pairs(musicOptions) do
+        for _, music in ipairs(sounds) do
+            if music.name ~= "" then
+                table.insert(musicNames, music.name)
+                categoryMap[music.name] = {id = music.id, category = category}
+            end
+        end
+    end
+
+    local function playMusic(soundId)
+        tocarMusica(tostring(soundId))
+    end
+
+    Tab8:AddDropdown({
+        Name = title,
+        Description = "all",
+        Default = defaultOption,
+        Multi = false,
+        Options = musicNames,
+        Callback = function(selectedSound)
+            if selectedSound and categoryMap[selectedSound] then
+                local soundId = categoryMap[selectedSound].id
+                if soundId and soundId ~= "" and soundId ~= "4354908569" then
+                    playMusic(soundId)
+                end
+            end
+        end
+    })
+end
+
+-- Dropdown "ForrÃ³"
+createMusicDropdown("ForrÃ³", {
+    ["forro"] = {
+        {name = "forrÃ³ ja cansou", id = "74812784884330"},
+        {name = "lenbro ate hoje", id = "71531533552899"},
+        {name = "escolha certa", id = "107088620814881"},
+        {name = "forrÃ³ da rezenha", id = "120973520531216"},
+        {name = "forrÃ³ dudu", id = "74404168179733"},
+        {name = "forrÃ³ sao joao", id = "106364874935196"},
+        {name = "forrÃ³ engraÃ§ado paia", id = "76524290482399"},
+        {name = "100% forro vaquejada", id = "92295159623916"},
+        {name = "PASTOR MIRIM E A LÃNGUA DOS ANJOS", id = "71153532555470"},
+        {name = "PARA NÃƒO ESQUECER QUEM SOMOS", id = "88937498361674"},
+        {name = "Uno zero", id = "112959083808887"},
+        {name = "Iate do neymar", id = "135738534706063"},
+        {name = "Batidao na aldeia", id = "79953696595578"}
+    }
+}, "Option 1")
+
+-- Dropdown "MÃºsicas e Memes AleatÃ³rio"
+createMusicDropdown("MÃºsicas e Memes AleatÃ³rio", {
+    ["memes"] = {
+        {name = "ANXIETY (Amapiano Re-fix)", id = "101483901475189"}, 
+        {name = "Meu corpo, minhas regras", id = "127587901595282"},
+        {name = "$$$$gg$$$$gg", id = "137471775091253"},
+        {name = "Megalovania but its only the melodies", id = "104500091160463"},
+        {name = "androphono strikes back", id = "78312089943968"},
+        {name = "Bamm Bamm", id = "128730685516895"},
+        {name = "chupa cabra", id = "132890273173295"},
+        {name = "longe de mais", id = "124478512057763"},
+        {name = "Garoto de Copacabana", id = "135648634110254"},
+        {name = "CELL!", id = "117634275895085"},
+        {name = "Boa vibe em Ubatuba", id = "139059061493558"},
+        {name = "SLIP AWAY", id = "126152928520174"},
+        {name = "Alone in Motion", id = "122379348696948"},
+        {name = "Fade Away", id = "81002139735874"},
+        {name = "Wounds & Wishes", id = "109347979566607"},
+        {name = "AscensÃ£o do Monarca", id = "101864243033211"},
+        {name = "carro do ovo", id = "3148329638"},
+        {name = "ingles bus (fling ou kill bus)", id = "123268013026823"},
+        {name = "MIKU MIKU HATSUNE", id = "112783541496955"},
+        {name = "Five Nights at Freddy's", id = "110733765539890"},
+        {name = "Rat Dance", id = "133496635668044"},
+        {name = "Escalando a SeleÃ§Ã£o Brasileira para a Copa", id = "116546457407236"}
+    }
+}, "Option 1")
+
+-- Dropdown "Funk"
+createMusicDropdown("Funk", {
+    ["funk"] = {
+        {name = "sua mulher funk", id = "90844637105538"},
+        {name = "fuga na viatura", id = "131891110268352"},
+        {name = "funkphonk fumando verde", id = "112143944982807"},
+        {name = "cauma xmara", id = "95664293972405"},
+        {name = "que que sharke", id = "129546408528391"}
+        -- Adicione os demais se quiser
+    }
+}, "Option 1")
+
+-- Dropdown "Phonk"
+createMusicDropdown("Phonk", {
+    ["phonk"] = {
+        {name = "wyles", id = "85385155970460"},
+        {name = "phonk kawai", id = "91502410121438"},
+        {name = "querendo da a bucet@", id = "72720721570850"},
+        {name = "vem no pocpoc", id = "102333419023382"},
+        {name = "tatiu wim", id = "122871512353520"},
+        {name = "novinha sapeca", id = "111668097052966"},
+        {name = "novinha representa", id = "93786060174790"}
+        -- Adicione o restante da lista se quiser
+    }
+}, "Option 1")
+
+-- BotÃ£o para parar todas as mÃºsicas
+Tab8:AddButton({
+    Name = "Stop",
+    Description = "ALL music",
+    Callback = function()
+        tocarMusica("")
+    end
+})
