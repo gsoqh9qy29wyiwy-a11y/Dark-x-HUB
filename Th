@@ -8,18 +8,6 @@ local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
 local vuCam = vu9.CurrentCamera
 
-workspace.FallenPartsDestroyHeight = -math.huge
-
--- Lista de usuários que abriram o Hub
-local UsuariosDoHub = {}
-if lp then UsuariosDoHub[lp.Name] = true end
-
--- Lista de autorizados (admins)
-local autorizados = {
-    ["HACKELINDO3"] = "Dono-Admin",
-    [""] = "Admin"
-}
-
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
@@ -4496,6 +4484,17 @@ TabSky:AddButton({
 
 local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
 
+workspace.FallenPartsDestroyHeight = -math.huge
+
+-- Lista de usuários que abriram o Hub
+local UsuariosDoHub = {}
+if lp then UsuariosDoHub[lp.Name] = true end
+
+-- Lista de autorizados (admins)
+local autorizados = {
+    ["HACKELINDO3"] = "Dono-Admin",
+    [""] = "Admin"
+}
 
 -- Donos especiais
 local Donos = {
