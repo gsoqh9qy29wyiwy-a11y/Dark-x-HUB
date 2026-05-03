@@ -8,6 +8,18 @@ local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
 local vuCam = vu9.CurrentCamera
 
+workspace.FallenPartsDestroyHeight = -math.huge
+
+-- Lista de usuários que abriram o Hub
+local UsuariosDoHub = {}
+if lp then UsuariosDoHub[lp.Name] = true end
+
+-- Lista de autorizados (admins)
+local autorizados = {
+    ["HACKELINDO3"] = "Dono-Admin",
+    [""] = "Admin"
+}
+
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
@@ -3954,6 +3966,7 @@ Tab8:AddButton({
         tocarMusica("")
     end
 })
+
 ---------------------------------------------------------------------------------------------------------------------------------
                                                    -- === Tab 6: RGB === --
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -4481,31 +4494,15 @@ TabSky:AddButton({
     end
 })
 
--- [[ SERVIÇOS ]] --
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui = game:GetService("StarterGui")
-local Workspace = game:GetService("Workspace")
-local Debris = game:GetService("Debris")
-local TweenService = game:GetService("TweenService")
-local TextChatService = game:GetService("TextChatService")
-local RunService = game:GetService("RunService")
+local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
 
--- [[ CONFIGURAÇÕES E ESTADO ]] --
-local lp = Players.LocalPlayer
-workspace.FallenPartsDestroyHeight = -math.huge
 
-local AdminSettings = {
-    Admins = {
-        ["HACKELINDO3"] = "Dono-Admin",
-        [""] = "Admin",
-    },
-    Donos = {
-        ["HACKELINDO3"] = true,
-    },
-    UsuariosHub = {
-        [lp.Name] = true
-    }
+-- Donos especiais
+local Donos = {
+    ["HACKELINDO3"] = true,
+    [""] = true,
+    [""] = true,
+    [""] = true
 }
 
 -- Estado
