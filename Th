@@ -679,8 +679,6 @@ local CasasTab = Window:MakeTab({
 
 Variáveis
 local isUnbanActive = false
-local SelectHouse = nil
-local NoclipDoor = nil
 
 -- ==================== MÚSICA NA CASA ====================
 CasasTab:AddSection({("Música na Casa (Game Pass)")})
@@ -3354,13 +3352,13 @@ function TeleportCarro:AtualizarListaCarros()
 end
 
 -- ParÃ¡grafo
-Tab5:AddParagraph({
+TabCar:AddParagraph({
     Title = "use o void protection",
     Content = ""
 })
 
 -- Toggle para matar todos os carros
-Tab5:AddToggle({
+TabCar:AddToggle({
     Name = "Matar todos os carros do server",
     Description = "Teleporta os carros para o void",
     Default = false,
@@ -3422,7 +3420,7 @@ Tab5:AddToggle({
 local Section = Tab5:AddSection({"functions dos carro"})
 
 -- Criar o dropdown
-local Dropdown = Tab5:AddDropdown({
+local Dropdown = TabCar:AddDropdown({
     Name = "Selecionar Carro do Jogador",
     Description = "Selecione o carro de um jogador",
     Default = nil,
@@ -3433,7 +3431,7 @@ local Dropdown = Tab5:AddDropdown({
 })
 
 -- Toggle para ver a cÃ¢mera do carro selecionado
-Tab5:AddToggle({
+TabCar:AddToggle({
     Name = "Ver CÃ¢mera do Carro Selecionado",
     Description = "Foca a cÃ¢mera no carro selecionado",
     Default = false,
@@ -3494,7 +3492,7 @@ end)
 local Section = Tab5:AddSection({"functions kill e trazer"})
 
 -- BotÃ£o para destruir carro selecionado
-Tab5:AddButton({
+TabCar:AddButton({
     Name = "Destruir Carro Selecionado <Void>",
     Description = "Teleporta o carro selecionado para o void",
     Callback = function()
@@ -3548,7 +3546,7 @@ Tab5:AddButton({
 })
 
 -- BotÃ£o para trazer carro selecionado
-Tab5:AddButton({
+TabCar:AddButton({
     Name = "Trazer Carro Selecionado",
     Description = "Teleporta o carro selecionado para sua posiÃ§Ã£o",
     Callback = function()
@@ -3602,7 +3600,7 @@ Tab5:AddButton({
 })
 
 -- BotÃ£o para trazer todos os carros
-Tab5:AddButton({
+TabCar:AddButton({
     Name = "Trazer Todos os Carros",
     Description = "Teleporta todos os carros do servidor para sua posiÃ§Ã£o",
     Callback = function()
