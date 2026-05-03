@@ -638,3 +638,162 @@ TabTroll:AddButton({Name = "Spawn", Callback = function()
         end
     end)
 end})
+
+-- Aba Casas / Home
+local CasasTab = Window:MakeTab({
+    Title = "Casas",
+    Icon = "home"
+})
+
+-- Variáveis
+local isUnbanActive = false
+local SelectHouse = nil
+local NoclipDoor = nil
+local HouseDropdown -- Variável para armazenar o objeto do dropdown
+
+-- Função para obter lista de casas
+local function getHouseList()
+    local Tabela = {}
+    local lots = workspace:FindFirstChild("001_Lots")
+    if lots then
+        for _, House in ipairs(lots:GetChildren()) do
+            -- Filtra apenas as casas que têm dono (normalmente o nome muda para o nome do jogador)
+            if House.Name ~= "For Sale" and House:IsA("Model") then
+                table.insert(Tabela, House.Name)
+            end
+        end
+    end
+    if #Tabela == 0 then table.insert(Tabela, "Nenhuma casa encontrada") end
+    return Tabela
+end
+
+-- Criar o Dropdown e salvar na variável HouseDropdown
+HouseDropdown = CasasTab:AddDropdown({
+    Name = "Selecione a Casa",
+    Options = getHouseList(),
+    Default = "...",
+    Callback = function(Value)
+        SelectHouse = Value
+        if NoclipDoor then
+            -- Opcional: resetar o noclip ao trocar de casa
+            -- NoclipDoor:Set(false) 
+        end
+        print("Casa selecionada: " .. tostring(Value))
+    end
+})
+
+-- Botão para atualizar lista de casas
+CasasTab:AddButton({
+    Name = "Atualizar Lista de Casas",
+    Callback = function()
+        local novaLista = getHouseList()
+        -- O segredo está aqui: usamos o método :Refresh() do próprio dropdown
+        HouseDropdown:Refresh(novaLista, true)
+    end
+})
+
+-- Teleportar para casa
+CasasTab:AddButton({
+    Name = "Teleportar para Casa",
+    Callback = function()
+        local lots = workspace:FindFirstChild("001_Lots")
+        local House = lots and lots:FindFirstChild(tostring(SelectHouse))
+        if House and game.Players.LocalPlayer.Character then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = House:GetPivot()
+        else
+            warn("Casa não encontrada: " .. tostring(SelectHouse))
+        end
+    end
+})
+
+-- Teleportar para cofre
+CasasTab:AddButton({
+    Name = "Teleportar para Cofre",
+    Callback = function()
+        local lots = workspace:FindFirstChild("001_Lots")
+        local House = lots and lots:FindFirstChild(tostring(SelectHouse))
+        if House and House:FindFirstChild("HousePickedByPlayer") then
+            local safe = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
+            if safe and game.Players.LocalPlayer.Character then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = safe:GetPivot()
+            else
+                print("Cofre não encontrado nesta casa.")
+            end
+        end
+    end
+})
+
+-- Toggle para atravessar porta
+NoclipDoor = CasasTab:AddToggle({
+    Name = "Atravessar Porta da Casa",
+    Default = false,
+    Callback = function(Value)
+        pcall(function()
+            local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+            if House and House:FindFirstChild("HousePickedByPlayer") then
+                local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
+                if doors and doors:FindFirstChild("HouseDoorFront") then
+                    for _, Base in ipairs(doors.HouseDoorFront:GetChildren()) do
+                        if Base:IsA("BasePart") then
+                            Base.CanCollide = not Value
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Toggle para tocar campainha
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Tocar Campainha",
+        Description = "",
+        Default = false,
+        Callback = function(Value)
+            getgenv().ChaosHubAutoSpawnDoorbellValue = Value
+            spawn(function()
+                while getgenv().ChaosHubAutoSpawnDoorbellValue do
+                    local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+                    if House and House:FindFirstChild("HousePickedByPlayer") then
+                        local doorbell = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_DoorBell")
+                        if doorbell and doorbell:FindFirstChild("TouchBell") then
+                            pcall(function()
+                                fireclickdetector(doorbell.TouchBell.ClickDetector)
+                            end)
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        end
+    })
+end)
+
+-- Toggle para bater na porta
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Bater na Porta",
+        Description = "",
+        Default = false,
+        Callback = function(Value)
+            getgenv().ChaosHubAutoSpawnDoorValue = Value
+            spawn(function()
+                while getgenv().ChaosHubAutoSpawnDoorValue do
+                    local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+                    if House and House:FindFirstChild("HousePickedByPlayer") then
+                        local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
+                        if doors and doors:FindFirstChild("HouseDoorFront") and doors.HouseDoorFront:FindFirstChild("Knock") then
+                            pcall(function()
+                                fireclickdetector(doors.HouseDoorFront.Knock.TouchBell.ClickDetector)
+                            end)
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        end
+    })
+end)
+CasasTab:AddButton({Name = "Remover Banimento", Callback = function() pcall(function() vu2:removeBanHouses() end) end})
+CasasTab:AddToggle({Name = "Auto Remover Ban", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
