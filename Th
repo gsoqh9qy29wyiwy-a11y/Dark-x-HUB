@@ -1,15 +1,3 @@
--- Variáveis Iniciais
-local lp = game.Players.LocalPlayer
-
--- Registro de quem abriu o Hub (Aparece no F9 do Roblox)
-local UsuariosDoHub = {}
-if lp then 
-    UsuariosDoHub[lp.Name] = true 
-    print("------------------------------------------")
-    print("DARK Hub Carregado por: " .. lp.Name)
-    print("ID do Usuário: " .. lp.UserId)
-    print("------------------------------------------")
-end
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -145,18 +133,6 @@ waitForPromise(loadingPromise)
 print("Loading completo! Agora executando o resto do script...")
 -- ... resto do seu código ...
 
--- Variáveis Iniciais
-local lp = game.Players.LocalPlayer
-
--- Registro de quem abriu o Hub (Aparece no F9 do Roblox)
-local UsuariosDoHub = {}
-if lp then 
-    UsuariosDoHub[lp.Name] = true 
-    print("------------------------------------------")
-    print("DARK Hub Carregado por: " .. lp.Name)
-    print("ID do Usuário: " .. lp.UserId)
-    print("------------------------------------------")
-end
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 -- 1. SERVIÇOS E VARIÁVEIS
