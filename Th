@@ -3417,7 +3417,7 @@ TabCar:AddToggle({
     end
 })
 
-local Section = Tab5:AddSection({"functions dos carro"})
+local Section = TabCar:AddSection({"functions dos carro"})
 
 -- Criar o dropdown
 local Dropdown = TabCar:AddDropdown({
@@ -3489,7 +3489,7 @@ TeleportCarro.Workspace:WaitForChild("Vehicles").ChildRemoved:Connect(function()
     Dropdown:Set(TeleportCarro:AtualizarListaCarros())
 end)
 
-local Section = Tab5:AddSection({"functions kill e trazer"})
+local Section = TabCar:AddSection({"functions kill e trazer"})
 
 -- BotÃ£o para destruir carro selecionado
 TabCar:AddButton({
