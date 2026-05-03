@@ -385,34 +385,6 @@ Window:AddMinimizeButton({
     Button = { Image = "rbxassetid://131153193945220", BackgroundTransparency = 0 },
     Corner = { CornerRadius = UDim.new(0, 8) },
 }) 
-Tab1:AddDiscordInvite({
-    Name = "Dark x hub",
-    Description = "Servidor oficial",
-    Logo = "rbxassetid://",
-    Invite = "",
-})
-
-local function detectExecutor()
-    if identifyexecutor then
-        return identifyexecutor()
-    elseif syn then
-        return "Synapse X"
-    elseif KRNL_LOADED then
-        return "KRNL"
-    elseif is_sirhurt_closure then
-        return "SirHurt"
-    elseif pebc_execute then
-        return "ProtoSmasher"
-    elseif getexecutorname then
-        return getexecutorname()
-    else
-        return "Executor Desconhecido"
-    end
-end
-
-local executorName = detectExecutor()
-Tab1:AddParagraph({"Executor", executorName})
-Tab1:AddSection({"VersÃ£o do Hub 3.7"})
 
 
 -- --- ABA: TROLL ---
