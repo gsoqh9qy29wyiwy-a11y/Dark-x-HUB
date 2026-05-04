@@ -4107,7 +4107,7 @@ Tabscript:AddButton({
     end
 })
 
-local Section = Tab11:AddSection({"esse system broochk e voidProtection"})
+local Section = Tabscript:AddSection({"esse system broochk e voidProtection"})
 
 Tabscript:AddButton({
     Name = "System Broochk",
