@@ -394,7 +394,7 @@ local Tab3  = Window:MakeTab({"Avatar", "shirt"})
 local TabAntis = Window:MakeTab({"Antis", "shield"})
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
-local Tabscript = Window:MakeTab({"Scripts", "scroll"})
+local Tab11 = Window:MakeTab({"Scripts", "scroll"})
 local Tab7 = Window:MakeTab({"Music All", "radio"})    
 local Tab8 = Window:MakeTab({"Music", "music"}) 
 local Tab6 = Window:MakeTab({"RGB", "brush"})
@@ -4081,7 +4081,7 @@ Tab5:AddButton({
                                                -- === Tab script fe: Scripts === --
 ----------------------------------------------------------------------------------------------------------------------------------------------
 
-Tabscript:AddButton({
+Tab11:AddButton({
     Name = "FE Jerk Off Hub Matrix",
     Description = "Universal",
     Callback = function()
@@ -4089,7 +4089,7 @@ Tabscript:AddButton({
     end
 })
 
-scriptTab:AddButton({
+Tab11:AddButton({
     Name = "FE HUGG",
     Description = "Universal",
     Callback = function()
