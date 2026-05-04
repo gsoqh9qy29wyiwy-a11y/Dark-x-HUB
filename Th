@@ -394,7 +394,7 @@ local Tab3  = Window:MakeTab({"Avatar", "shirt"})
 local TabAntis = Window:MakeTab({"Antis", "shield"})
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
-local Tab11 = Window:MakeTab({"Scripts", "scroll"})
+local Tabscript = Window:MakeTab({"Scripts", "scroll"})
 local Tab7 = Window:MakeTab({"Music All", "radio"})    
 local Tab8 = Window:MakeTab({"Music", "music"}) 
 local Tab6 = Window:MakeTab({"RGB", "brush"})
@@ -4078,10 +4078,10 @@ Tab5:AddButton({
     end
 })
 ----------------------------------------------------------------------------------------------------------------------------------------------
-                                               -- === Tab 11: Scripts === --
+                                               -- === Tab script fe: Scripts === --
 ----------------------------------------------------------------------------------------------------------------------------------------------
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "FE Jerk Off Hub Matrix",
     Description = "Universal",
     Callback = function()
@@ -4089,7 +4089,7 @@ Tab11:AddButton({
     end
 })
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "FE HUGG",
     Description = "Universal",
     Callback = function()
@@ -4099,7 +4099,7 @@ Tab11:AddButton({
 
 
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "Buraco Negro",
     Description = "Universal",
     Callback = function()
@@ -4109,7 +4109,7 @@ Tab11:AddButton({
 
 local Section = Tab11:AddSection({"esse system broochk e voidProtection"})
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "System Broochk",
     Description = "Universal",
     Callback = function()
@@ -4117,7 +4117,7 @@ Tab11:AddButton({
     end
 })
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "Roships",
     Description = "Universal",
     Callback = function()
@@ -4125,7 +4125,7 @@ Tab11:AddButton({
     end
 })
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "Sander X",
     Description = "Somente para Brookhaven",
     Callback = function()
@@ -4133,7 +4133,7 @@ Tab11:AddButton({
     end
 })
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "Reverso",
     Description = "Universal",
     Callback = function()
@@ -4141,7 +4141,7 @@ Tab11:AddButton({
     end
 })
 
-Tab11:AddButton({
+Tabscript:AddButton({
     Name = "RD4",
     Description = "Somente para Brookhaven",
     Callback = function()
