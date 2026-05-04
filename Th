@@ -4089,7 +4089,7 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddButton({
+scriptTab:AddButton({
     Name = "FE HUGG",
     Description = "Universal",
     Callback = function()
@@ -4099,7 +4099,7 @@ Tabscript:AddButton({
 
 
 
-Tabscript:AddButton({
+scriptsTab:AddButton({
     Name = "Buraco Negro",
     Description = "Universal",
     Callback = function()
@@ -4109,7 +4109,7 @@ Tabscript:AddButton({
 
 local Section = Tab11:AddSection({"esse system broochk e voidProtection"})
 
-Tabscript:AddButton({
+scriptTab:AddButton({
     Name = "System Broochk",
     Description = "Universal",
     Callback = function()
@@ -4117,7 +4117,7 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddButton({
+scriptTab:AddButton({
     Name = "Roships",
     Description = "Universal",
     Callback = function()
@@ -4125,7 +4125,7 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddButton({
+scriptTab:AddButton({
     Name = "Sander X",
     Description = "Somente para Brookhaven",
     Callback = function()
@@ -4133,7 +4133,7 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddButton({
+scriptTab:AddButton({
     Name = "Reverso",
     Description = "Universal",
     Callback = function()
@@ -4141,7 +4141,7 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddButton({
+scriptTab:AddButton({
     Name = "RD4",
     Description = "Somente para Brookhaven",
     Callback = function()
