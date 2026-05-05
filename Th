@@ -4521,7 +4521,7 @@ local function fireServer(eventName, args)
     end
 end
 
-local Section = TabRBG:AddSection({"RGB para usar em você"})
+local Section = TabRGB:AddSection({"RGB para usar em você"})
 
 -- Nome + Bio RGB  juntos
 local nameBioRGBActive = false
