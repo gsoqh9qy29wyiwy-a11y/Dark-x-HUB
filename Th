@@ -5005,6 +5005,9 @@ TabSky:AddButton({
         end)
     end
 })
+
+
+local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
 -- [[ SERVIÇOS ]] --
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -5229,9 +5232,6 @@ TextChatService.TextChannels.ChildAdded:Connect(ConectarCanal)
 --=========================================================
 -- 🛡️ Painel Admin
 --=========================================================
-
-local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
-
 Tab11:AddButton({
     Name = "Abrir Painel Admin",
     Description = "Somente autorizados",
