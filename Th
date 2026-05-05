@@ -4498,10 +4498,8 @@ TabMusic:AddButton({
 ---------------------------------------------------------------------------------------------------------------------------------
                                                    -- === Tab RGB === --
 ---------------------------------------------------------------------------------------------------------------------------------
-local TaRBG = Window:MakeTab({"RGB", "brush"})
 
-
-local Section = TabRBG:AddSection({"RBGS"})
+local Section = TabRBG:AddSection({"Personagem"})
 
 -- Velocidade controlada pelo slider (quanto maior, mais rápido)
 local rgbSpeed = 1
@@ -4600,7 +4598,7 @@ end)
 
 
 
-local Section = TabRBG:AddSection({"veiculos e casa"})
+local Section = TabRBG:AddSection({"veiculos e casa "})
 
 
 
