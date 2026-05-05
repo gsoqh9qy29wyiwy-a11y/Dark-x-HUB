@@ -4182,7 +4182,7 @@ local function fireServer(eventName, args)
 end  
 
 -- BotÃ£o para tocar som manualmente
-Tabaco:AddButton({  
+TabAudio:AddButton({  
     Name = "Tocar Som",  
     Description = "Clique para tocar a mÃºsica inserida",  
     Callback = function()  
