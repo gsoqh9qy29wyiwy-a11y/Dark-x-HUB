@@ -389,7 +389,7 @@ local TabMusic = Window:MakeTab({"Music", "music"})
 local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "sparkles"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
-local TabAdmin = Window:MakeTab({" Painel de Admin", "shield"})
+local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
 
 
 InfoTab:AddSection({ "Informações do Script" })
@@ -5006,6 +5006,7 @@ TabSky:AddButton({
         end)
     end
 })
+
 -- [[ SERVIÇOS ]] --
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -5229,7 +5230,7 @@ TextChatService.TextChannels.ChildAdded:Connect(ConectarCanal)
 --=========================================================
 -- 🛡️ Painel Admin
 --=========================================================
-TabAdmin:AddButton({
+Tab11:AddButton({
     Name = "Abrir Painel Admin",
     Description = "Somente autorizados",
     Callback = function()
