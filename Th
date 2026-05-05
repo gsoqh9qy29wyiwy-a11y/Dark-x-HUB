@@ -389,7 +389,7 @@ local TabMusic = Window:MakeTab({"Music", "music"})
 local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "sparkles"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
-local Tab11 = Window:MakeTab({" Painel de Admin", "shield"})
+local Tab11 = Window:MakeTab({ Title = "Painel de Admin", Icon = "shield"})
 
 
 InfoTab:AddSection({ "Informações do Script" })
@@ -5021,18 +5021,24 @@ local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 workspace.FallenPartsDestroyHeight = -math.huge
 
-local AdminSettings = {
-    Admins = {
-        ["HACKELINDO3"] = "Dono-Admin",
-        [""] = "Admin",
-    },
-    Donos = {
-        ["HACKELINDO3"] = true,
-    },
-    UsuariosHub = {
-        [lp.Name] = true
-    }
+-- Lista de usuários que abriram o Hub
+local UsuariosDoHub = {}
+if lp then UsuariosDoHub[lp.Name] = true end
+
+-- Lista de autorizados (admins)
+local autorizados = {
+    [""] = "Dono-Admin",
+    ["HACKELINDO3"] = "Admin"
 }
+
+-- Donos especiais
+local Donos = {
+    ["HACKELINDO3"] = true,
+    [""] = true,
+    [""] = true,
+    [""] = true
+}
+
 -- Estado
 local playerOriginalSpeed = {}
 local jaulas = {}
@@ -5307,6 +5313,6 @@ Tab11:AddButton({
 -- Notificação final
 StarterGui:SetCore("SendNotification", {
     Title = "Dark x Hub",
-    Text = "Painel de Administrativo Carregado com sucesso!",
+    Text = "Carregado com sucesso!",
     Duration = 3
 })
