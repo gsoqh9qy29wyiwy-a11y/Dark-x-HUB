@@ -395,7 +395,7 @@ local TabAntis = Window:MakeTab({"Antis", "shield"})
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
 local Tabscript = Window:MakeTab({"Scripts", "scroll"})
-local TabAudio = Window:MakeTab({"Music All", "radio"})    
+local TabAudio = Window:MakeTab({"Audio All", "radio"})    
 local TabMusic = Window:MakeTab({"Music", "music"}) 
 local TabRBG = Window:MakeTab({"RGB", "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "sparkles"})
@@ -4151,7 +4151,7 @@ Tabscript:AddButton({
 
 
 ---------------------------------------------------------------------------------------------------------------------------
--- === Tab Audio: Sons/Memes/Efeitos === --
+-- === Tab Audio === --
 ---------------------------------------------------------------------------------------------------------------------------
 
 
@@ -4345,7 +4345,7 @@ createSoundDropdown("Selecione um terror ou efeito", {
 }, "jumpscar")
 
 ------------------------------------------------------------------------------------------------------------------------------
--- === Tab Music: Troll MÃºsica === --
+-- === Tab Music === --
 ------------------------------------------------------------------------------------------------------------------------------
 
 
