@@ -4488,12 +4488,12 @@ TabMusic:AddButton({
                                                    -- === Tab RGB === --
 ---------------------------------------------------------------------------------------------------------------------------------
 
-local Section = TabRBG:AddSection({"Personagem"})
+local Section = TabRGB:AddSection({"Personagem"})
 
 -- Velocidade controlada pelo slider (quanto maior, mais rápido)
 local rgbSpeed = 1
 
-TabRBG:AddSlider({
+TabRGB:AddSlider({
     Name = "Velocidade RGB",
     Description = "Aumenta a velocidade do efeito RGB",
     Min = 1,
@@ -4525,7 +4525,7 @@ local Section = TabRBG:AddSection({"RGB para usar em você"})
 
 -- Nome + Bio RGB  juntos
 local nameBioRGBActive = false
-TabRBG:AddToggle({
+TabRGB:AddToggle({
     Name = "Nome + Bio RGB ",
     Default = false,
     Callback = function(state)
@@ -4543,7 +4543,7 @@ TabRBG:AddToggle({
     end
 })
 
-local ToggleCorpo = TabRBG:AddToggle({
+local ToggleCorpo = TabRGB:AddToggle({
     Name = "RGB Corpo",
     Description = "RGB  no corpo",
     Default = false
@@ -4587,11 +4587,11 @@ end)
 
 
 
-local Section = TabRBG:AddSection({"veiculos e casa "})
+local Section = TabRGB:AddSection({"veiculos e casa "})
 
 
 
-local ToggleCasa = TabRBG:AddToggle({
+local ToggleCasa = TabRGB:AddToggle({
     Name = "RGB Casa",
     Description = "RGB  na casa",
     Default = false
@@ -4612,7 +4612,7 @@ end)
 
 -- Carro RGB 
 local carRGBActive = false
-TabRBG:AddToggle({
+TabRGB:AddToggle({
     Name = "Carro RGB  (Premium)",
     Description = "Altera a cor do carro com RGB contínuo. Pode causar kick se não for premium!",
     Default = false,
@@ -4631,7 +4631,7 @@ TabRBG:AddToggle({
 })
 
 
-local ToggleBicicleta = TabRBG:AddToggle({
+local ToggleBicicleta = TabRGB:AddToggle({
     Name = "RGB Bicicleta",
     Description = "RGB na bicicleta",
     Default = false
@@ -4651,12 +4651,12 @@ end)
 
 
 
-local Section = TabRBG:AddSection({"itens/tool"})
+local Section = TabRGB:AddSection({"itens/tool"})
 
 
 -- NOVO TOGGLE: Rádio RGB
 local radioRGBActive = false
-TabRBG:AddToggle({
+TabRGB:AddToggle({
     Name = "Rádio RGB  ",
     Description = "Altera a cor do rádio com RGB contínuo",
     Default = false,
@@ -4681,7 +4681,7 @@ TabRBG:AddToggle({
     end
 })
 
-local ToggleMegafone = TabRBG:AddToggle({
+local ToggleMegafone = TabRGB:AddToggle({
     Name = "RGB Megafone",
     Description = "RGB  no megafone",
     Default = false
@@ -4711,7 +4711,7 @@ ToggleMegafone:Callback(function(Value)
     end)
 end)
 
-local ToggleRosquinha = TabRBG:AddToggle({
+local ToggleRosquinha = TabRGB:AddToggle({
     Name = "RGB Rosquinha",
     Description = "RGB  na rosquinha",
     Default = false
