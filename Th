@@ -4567,7 +4567,7 @@ end)
 
 
 
-local ToggleCabelo = TabRBG:AddToggle({
+local ToggleCabelo = TabRGB:AddToggle({
     Name = "RGB Cabelo",
     Description = "RGB  no cabelo",
     Default = false
