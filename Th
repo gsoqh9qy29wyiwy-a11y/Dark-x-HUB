@@ -5020,10 +5020,6 @@ local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 workspace.FallenPartsDestroyHeight = -math.huge
 
--- Lista de usuários que abriram o Hub
-local UsuariosDoHub = {}
-if lp then UsuariosDoHub[lp.Name] = true end
-
 local AdminSettings = {
     Admins = {
         ["HACKELINDO3"] = "Dono-Admin",
