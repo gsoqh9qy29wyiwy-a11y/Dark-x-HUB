@@ -5311,11 +5311,6 @@ TabSky:AddButton({
 
 local Section = Tab2:AddSection({"Player Character"})
 
-
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
-
-
 Tab2:AddSlider({
     Name = "Speed Player",
     Increase = 1,
