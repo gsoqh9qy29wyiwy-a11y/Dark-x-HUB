@@ -389,7 +389,7 @@ local TabMusic = Window:MakeTab({"Music", "music"})
 local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "sparkles"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
-local Tab2 = Window:MakeTab({"Fun", "fun"})
+local Tab2 = Window:MakeTab({"Player", "home"})
 
 
 InfoTab:AddSection({ "Informações do Script" })
@@ -1288,6 +1288,7 @@ TabTroll:AddButton({Name = "Bring (Trazer)", Callback = function()
         end
     end)
 end})
+-- Substitua o bloco do "Fling (Forte)" e "Fling (Fraco)" por este:
 
 TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
     _G.FlingToggle = v
@@ -1295,15 +1296,15 @@ TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
         task.spawn(function()
             local PosOrig = vu7.Character.HumanoidRootPart.CFrame
             vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-            local angle = 10000000000000
+            local angle = 0
             while _G.FlingToggle do
                 vu10.Heartbeat:Wait()
                 local T = vu6:FindFirstChild(_G.SelectedPlayer)
                 if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Couch")
                     if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
-                    angle = angle + 1000000000
-                    vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -2, math.sin(angle)*10.100)
+                    angle = angle + 50
+                    vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -2, math.sin(angle)*2)
                     vu7.Character.HumanoidRootPart.Velocity = Vector3.new(900, 900, 900)
                     for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
                 else break end
@@ -1315,31 +1316,71 @@ TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
     else FinalReset() end
 end})
 
-TabTroll:AddToggle({Name = "Fling (Forte)", Callback = function(v)
+TabTroll:AddToggle({Name = "Fling (Forte) - Couch V2", Callback = function(v)
     _G.FlingToggle = v
     if v then
         task.spawn(function()
-            local PosOrig = vu7.Character.HumanoidRootPart.CFrame
+            local char = vu7.Character
+            local root = char:FindFirstChild("HumanoidRootPart")
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local PosOrig = root.CFrame
+            
+            -- Bypass para não morrer com a velocidade
+            workspace.FallenPartsDestroyHeight = 0/0
+            
+            -- Pega o Sofá
             vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-            local angle = 10000000000000000000000000
+            task.wait(0.2)
+            
+            local forca = Instance.new("BodyVelocity")
+            forca.Name = "FlingForce"
+            forca.Velocity = Vector3.new(9e8, 9e8, 9e8)
+            forca.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            forca.Parent = root
+
+            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+            
+            local angulo = 0
             while _G.FlingToggle do
                 vu10.Heartbeat:Wait()
                 local T = vu6:FindFirstChild(_G.SelectedPlayer)
                 if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
-                    if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
-                    angle = angle + 1000000000000
-                    vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -4, math.sin(angle)*20.100)
-                    vu7.Character.HumanoidRootPart.Velocity = Vector3.new(9000000, 9000000, 9000000)
-                    for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
-                else break end
+                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Couch")
+                    if Tool then hum:EquipTool(Tool) end
+                    
+                    angulo = angulo + 100
+                    local targetRoot = T.Character.HumanoidRootPart
+                    local targetPos = targetRoot.Position + (targetRoot.Velocity / 1.5)
+                    
+                    -- Lógica de Fling Couch: Rotação extrema e Velocidade
+                    root.CFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(angulo), math.rad(angulo), 0)
+                    root.Velocity = Vector3.new(9e8, 9e8, 9e8)
+                    root.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+                    
+                    for _, p in pairs(char:GetChildren()) do 
+                        if p:IsA("BasePart") then p.CanCollide = false end 
+                    end
+                else 
+                    break 
+                end
             end
-            vu7.Character.Humanoid:UnequipTools()
-            vu7.Character.HumanoidRootPart.CFrame = PosOrig
+            
+            -- Resetar ao desligar
+            if forca then forca:Destroy() end
+            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+            hum:UnequipTools()
+            root.Velocity = Vector3.new(0,0,0)
+            root.RotVelocity = Vector3.new(0,0,0)
+            root.CFrame = PosOrig
+            workspace.FallenPartsDestroyHeight = -500 -- Padrão do Roblox
             FinalReset()
         end)
-    else FinalReset() end
+    else 
+        _G.FlingToggle = false
+        FinalReset() 
+    end
 end})
+
 TabTroll:AddSection({"Teleportar o alvo para..."}) 
 TabTroll:AddButton({Name = "Spawn", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
