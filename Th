@@ -2494,21 +2494,19 @@ Tab3:AddParagraph({
     Content = ""
 })
 
-local LocalPlayer = game:GetService("Players").LocalPlayer
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 
 local backupTables = {
-    Vehicles = {},
-    Canoes = {},
-    Jets = {},
-    Helis = {},
-    Balls = {}
+    Vehicles = {}, Canoes = {}, Jets = {}, Helis = {}, Balls = {}
 }
-
+-- Funções Auxiliares de Proteção
 local TeleportCarro = {}
 function TeleportCarro:MostrarNotificacao(msg)
-    print("ðŸ”” "..msg)
+    print("🔔 " .. msg)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Proteção",
+        Text = msg,
+        Duration = 3
+    })
 end
 
 local function AntiFlingLoop(name, getFolderFunc)
@@ -2540,12 +2538,12 @@ local function AntiFlingLoop(name, getFolderFunc)
                     end
                 end
             end
-            task.wait(0.03)
+            task.wait(0.3)
         end
     end)
     return function(state)
         active = state
-        TeleportCarro:MostrarNotificacao(name.." "..(state and "ativado!" or "desativado!"))
+        TeleportCarro:MostrarNotificacao(name .. " " .. (state and "ativado!" or "desativado!"))
         if not state then
             for _, item in ipairs(backupTables[name]) do
                 local parentFolder = getFolderFunc()
@@ -2556,6 +2554,7 @@ local function AntiFlingLoop(name, getFolderFunc)
     end
 end
 
+    
 Tab14:AddToggle({
     Name = "Anti Bug",
     Description = ("Bug players/Bug Weapon/Protection rapidez"),
