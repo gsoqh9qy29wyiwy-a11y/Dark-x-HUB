@@ -1,3 +1,5 @@
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
+local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
 -- 1. SERVIÇOS E VARIÁVEIS
 local vu6 = game:GetService("Players")
@@ -359,9 +361,6 @@ local function getPlayerNames()
     for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
     return pNames
 end
-
-local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
-local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
 -- 3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
