@@ -1,13 +1,12 @@
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
--- 1. SERVIÇOS E VARIÁVEIS
-local vu6 = game:GetService("Players")
-local vu7 = vu6.LocalPlayer
-local vu8 = game:GetService("ReplicatedStorage")
-local vu9 = game:GetService("Workspace")
-local vu10 = game:GetService("RunService")
-local vuCam = vu9.CurrentCamera
+-- 1. SERVIÇOS E VARIÁVEIS INICIAIS
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local vuCam = Workspace.CurrentCamera
 
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
@@ -27,71 +26,6 @@ local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
 local InputID = ""
-
--- Tabelas de Backup para Anti-Fling
-local backupTables = {
-    Vehicles = {},
-    Canoes = {},
-    Jets = {},
-    Helis = {},
-    Balls = {}
-}
-
--- Funções Auxiliares de Proteção
-local TeleportCarro = {}
-function TeleportCarro:MostrarNotificacao(msg)
-    print("🔔 " .. msg)
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Proteção",
-        Text = msg,
-        Duration = 3
-    })
-end
-
-local function AntiFlingLoop(name, getFolderFunc)
-    local active = false
-    task.spawn(function()
-        while true do
-            if active and LocalPlayer.Character then
-                local folder = getFolderFunc()
-                if folder then
-                    for _, item in ipairs(folder:GetChildren()) do
-                        local isMine = false
-                        if name == "Vehicles" then
-                            for _, seat in ipairs(item:GetDescendants()) do
-                                if (seat:IsA("VehicleSeat") or seat:IsA("Seat")) and seat.Occupant and seat.Occupant.Parent == LocalPlayer.Character then
-                                    isMine = true
-                                    break
-                                end
-                            end
-                        elseif name == "Canoes" then
-                            local owner = item:FindFirstChild("Owner")
-                            isMine = owner and owner.Value == LocalPlayer
-                        elseif name == "Jets" or name == "Helis" then
-                            isMine = item.Name == LocalPlayer.Name
-                        end
-                        if not isMine then
-                            table.insert(backupTables[name], item:Clone())
-                            item:Destroy()
-                        end
-                    end
-                end
-            end
-            task.wait(0.3)
-        end
-    end)
-    return function(state)
-        active = state
-        TeleportCarro:MostrarNotificacao(name .. " " .. (state and "ativado!" or "desativado!"))
-        if not state then
-            for _, item in ipairs(backupTables[name]) do
-                local parentFolder = getFolderFunc()
-                if parentFolder then item.Parent = parentFolder end
-            end
-            backupTables[name] = {}
-        end
-    end
-end
 
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
@@ -2556,6 +2490,71 @@ Tab3:AddParagraph({
 })
 
 Tab14:AddSection({"Configurações de Antis"})
+
+-- Tabelas de Backup para Anti-Fling
+local backupTables = {
+    Vehicles = {},
+    Canoes = {},
+    Jets = {},
+    Helis = {},
+    Balls = {}
+}
+
+-- Funções Auxiliares de Proteção
+local TeleportCarro = {}
+function TeleportCarro:MostrarNotificacao(msg)
+    print("🔔 " .. msg)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Proteção",
+        Text = msg,
+        Duration = 3
+    })
+end
+
+local function AntiFlingLoop(name, getFolderFunc)
+    local active = false
+    task.spawn(function()
+        while true do
+            if active and LocalPlayer.Character then
+                local folder = getFolderFunc()
+                if folder then
+                    for _, item in ipairs(folder:GetChildren()) do
+                        local isMine = false
+                        if name == "Vehicles" then
+                            for _, seat in ipairs(item:GetDescendants()) do
+                                if (seat:IsA("VehicleSeat") or seat:IsA("Seat")) and seat.Occupant and seat.Occupant.Parent == LocalPlayer.Character then
+                                    isMine = true
+                                    break
+                                end
+                            end
+                        elseif name == "Canoes" then
+                            local owner = item:FindFirstChild("Owner")
+                            isMine = owner and owner.Value == LocalPlayer
+                        elseif name == "Jets" or name == "Helis" then
+                            isMine = item.Name == LocalPlayer.Name
+                        end
+                        if not isMine then
+                            table.insert(backupTables[name], item:Clone())
+                            item:Destroy()
+                        end
+                    end
+                end
+            end
+            task.wait(0.3)
+        end
+    end)
+    return function(state)
+        active = state
+        TeleportCarro:MostrarNotificacao(name .. " " .. (state and "ativado!" or "desativado!"))
+        if not state then
+            for _, item in ipairs(backupTables[name]) do
+                local parentFolder = getFolderFunc()
+                if parentFolder then item.Parent = parentFolder end
+            end
+            backupTables[name] = {}
+        end
+    end
+end
 
 local AntiWeaponConn
 Tab14:AddToggle({
