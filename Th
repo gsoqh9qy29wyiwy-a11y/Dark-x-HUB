@@ -2492,13 +2492,14 @@ Tab3:AddParagraph({
     Content = ""
 })
 
-TabAntis:AddSection({"Configurações de Antis"})
 
 local antiToolSit, antiCarSit, antiVehicleCollision = false, false, false
 local keywords = { "bomb", "soccer", "boat" }
 local carKeyword = "car"
 local wheelKeyword = "wheel"
 local AntiWeaponConn = nil
+
+TabAntis:AddSection({"Configurações de Antis"})
 
 TabAntis:AddSection({"Anti Sit"})
 
