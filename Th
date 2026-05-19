@@ -31,6 +31,13 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
+-- Variáveis da Aba Antis
+local antiToolSit, antiCarSit, antiVehicleCollision = false, false, false
+local keywords = { "bomb", "soccer", "boat" }
+local carKeyword = "car"
+local wheelKeyword = "wheel"
+local AntiWeaponConn = nil
+
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
 local function updateCamera()
