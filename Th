@@ -16,7 +16,7 @@ _G.SelectedPlayer = ""
 _G.AntiSit = false
 _G.AntiVoid = false
 _G.AntiFling = false
-_G.AntiLag = false
+_G.AntiLag = false 
 _G.RGBName = false
 _G.RainbowBio = false
 
@@ -30,13 +30,6 @@ local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
 local InputID = ""
-
--- Variáveis da Aba Antis
-local antiToolSit, antiCarSit, antiVehicleCollision = false, false, false
-local keywords = { "bomb", "soccer", "boat" }
-local carKeyword = "car"
-local wheelKeyword = "wheel"
-local AntiWeaponConn = nil
 
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
@@ -2500,84 +2493,7 @@ Tab3:AddParagraph({
     Content = ""
 })
 
-TabAntis:AddSection({"Configurações de Antis"})
 
-local antiToolSit, antiCarSit, antiVehicleCollision = false, false, false
-local keywords = { "bomb", "soccer", "boat" }
-local carKeyword = "car"
-local wheelKeyword = "wheel"
-local AntiWeaponConn = nil
-
-TabAntis:AddSection({"Anti Sit"})
-
-TabAntis:AddToggle({
-    Name = "Anti Tool Sit",
-    Default = false,
-    Callback = function(state)
-        antiToolSit = state
-        local function updateSitState()
-            local hum = vu7.Character and vu7.Character:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum:SetStateEnabled(Enum.HumanoidStateType.Seated, not (antiToolSit or antiCarSit))
-                if (antiToolSit or antiCarSit) and hum.Sit then hum.Sit = false end
-            end
-        end
-        
-        if state then
-            local connection
-            connection = vu10.Heartbeat:Connect(function()
-                if not antiToolSit then connection:Disconnect() return end
-                updateSitState()
-            end)
-        else
-            updateSitState()
-        end
-    end
-})
-
-TabAntis:AddToggle({
-    Name = "Anti Sit",
-    Default = false,
-    Callback = function(state)
-        antiCarSit = state
-        local function applyCollisionLogic(obj)
-            if not obj:IsA("BasePart") then return end
-            local name = obj.Name:lower()
-            local isCar = false
-            local parent = obj
-            while parent do
-                if parent.Name:lower():find(carKeyword) then isCar = true break end
-                parent = parent.Parent
-            end
-            if isCar then obj.CanCollide = not antiCarSit end
-        end
-        
-        if state then
-            local connection
-            connection = vu9.DescendantAdded:Connect(function(obj)
-                if antiCarSit then applyCollisionLogic(obj) end
-            end)
-            
-            for _, obj in ipairs(vu9:GetDescendants()) do
-                applyCollisionLogic(obj)
-            end
-            
-            local function updateSitState()
-                local hum = vu7.Character and vu7.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, not (antiToolSit or antiCarSit))
-                    if (antiToolSit or antiCarSit) and hum.Sit then hum.Sit = false end
-                end
-            end
-            
-            local heartbeat
-            heartbeat = vu10.Heartbeat:Connect(function()
-                if not antiCarSit then heartbeat:Disconnect() return end
-                updateSitState()
-            end)
-        end
-    end
-})
 
 TabAntis:AddSection({"Anti Void"})
 TabAntis:AddToggle({ Name = "Anti-Void", Callback = function(s) _G.AntiVoid = s end })
