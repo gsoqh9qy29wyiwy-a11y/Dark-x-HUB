@@ -363,7 +363,7 @@ end
 
 -- 3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
-    Title = "DARK x HUB",
+    Title = "Dark x Hub",
     SubTitle = "Brookhaven RP | by Carlolx777",
     SaveFolder = "UnifiedHubConfig"
 })
@@ -437,6 +437,268 @@ TabTroll:AddButton({Name = "Go To", Callback = function()
     if T and T.Character then vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,0) end
 end})
  
+
+TabTroll:AddToggle({ Name = "Headsit", Callback = function() 
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if T then if not headsitActive then headsitOnPlayer(T) headsitActive = true else removeHeadsit() headsitActive = false end end 
+end })
+
+TabTroll:AddSection({ "Black Hole" })
+-- Black Hole Fixo com Rotação XYZ
+TabTroll:AddToggle({
+    Name = "Black Hole",
+    Default = false,
+    Callback = function(state)
+        _G.BlackHoleActive = state
+        if state then
+            _G.BH_Orbit_Active = false
+            SetupBlackHole()
+            BH_Connection = vu9.DescendantAdded:Connect(function(v)
+                if _G.BlackHoleActive then ForcePart(v) end
+            end)
+            for _, v in ipairs(vu9:GetDescendants()) do ForcePart(v) end
+
+            task.spawn(function()
+                while _G.BlackHoleActive do
+                    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                    if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                        -- Rotação em todos os ângulos no próprio eixo do alvo
+                        local t = tick() * 2
+                        local rotation = CFrame.Angles(t, t/2, t/3) 
+                        BH_Part.CFrame = T.Character.HumanoidRootPart.CFrame * rotation
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+                if BH_Connection then BH_Connection:Disconnect() end
+            end)
+        end
+    end
+})
+
+TabTroll:AddToggle({
+    Name = "Black Hole Orbit",
+    Default = false,
+    Callback = function(state)
+        _G.BH_Orbit_Active = state
+        if state then
+            _G.BlackHoleActive = false
+            SetupBlackHole()
+            BH_Connection = vu9.DescendantAdded:Connect(function(v)
+                if _G.BH_Orbit_Active then ForcePart(v) end
+            end)
+            for _, v in ipairs(vu9:GetDescendants()) do ForcePart(v) end
+
+            task.spawn(function()
+                local angle = 0
+                while _G.BH_Orbit_Active do
+                    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                    if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                        angle = angle + 10000000
+                        local t = tick() * 1
+                        -- Órbita combinada com rotação caótica XYZ
+                        local radius = 7
+                        local orbit = CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(radius, math.sin(t)*2, 3)
+                        local sphereRotation = CFrame.Angles(t, t/2, t/3)
+                        
+                        BH_Part.CFrame = T.Character.HumanoidRootPart.CFrame * orbit * sphereRotation
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+                if BH_Connection then BH_Connection:Disconnect() end
+            end)
+        end
+    end
+})
+
+TabTroll:AddSection({"Couch "})
+TabTroll:AddButton({Name = "Kill", Callback = function()
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if not T or not T.Character then return end
+    _G.IsTrapping = true
+    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
+    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+    local angle = 1000000000000000
+    local connection
+    connection = vu10.Heartbeat:Connect(function()
+        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
+        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
+        local THum = T.Character:FindFirstChild("Humanoid")
+        if THRP and THum then
+            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+            angle = angle + 1000000000
+            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3, 1.8, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
+            if THum.Sit then
+                connection:Disconnect()
+                vu7.Character.HumanoidRootPart.CFrame = CFrame.new(-21, -410, -42)
+                task.wait(0.3)
+                vu7.Character.Humanoid:UnequipTools() -- Desequipa automaticamente
+                task.wait(0.2)
+                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
+                task.wait(0.1)
+                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "ClearAllTools")
+                task.wait(0.2)
+        FinalReset()
+            end
+        end
+    end)
+end})
+TabTroll:AddButton({Name = "Bring (Trazer)", Callback = function()
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if not T or not T.Character then return end
+    _G.IsTrapping = true
+    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
+    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+    local angle = 100000000000000
+    local connection
+    connection = vu10.Heartbeat:Connect(function()
+        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
+        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
+        local THum = T.Character:FindFirstChild("Humanoid")
+        if THRP and THum then
+            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+            angle = angle + 10000000000
+            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3,-2, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
+            if THum.Sit then
+                connection:Disconnect()
+                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
+                task.wait(0.3)
+                vu7.Character.Humanoid:UnequipTools() -- Desequipa automaticamente
+                task.wait(0.4)
+                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "Couch")
+                FinalReset()
+            end
+        end
+    end)
+end})
+-- Substitua o bloco do "Fling (Forte)" e "Fling (Fraco)" por este:
+
+TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
+    _G.FlingToggle = v
+    if v then
+        task.spawn(function()
+            local PosOrig = vu7.Character.HumanoidRootPart.CFrame
+            vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+            local angle = 0
+            while _G.FlingToggle do
+                vu10.Heartbeat:Wait()
+                local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+                    if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+                    angle = angle + 50
+                    vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -2, math.sin(angle)*2)
+                    vu7.Character.HumanoidRootPart.Velocity = Vector3.new(900, 900, 900)
+                    for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
+                else break end
+            end
+            vu7.Character.Humanoid:UnequipTools()
+            vu7.Character.HumanoidRootPart.CFrame = PosOrig
+            FinalReset()
+        end)
+    else FinalReset() end
+end})
+
+TabTroll:AddToggle({Name = "Fling (Forte) - Couch V2", Callback = function(v)
+    _G.FlingToggle = v
+    if v then
+        task.spawn(function()
+            local char = vu7.Character
+            local root = char:FindFirstChild("HumanoidRootPart")
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local PosOrig = root.CFrame
+            
+            -- Bypass para não morrer com a velocidade
+            workspace.FallenPartsDestroyHeight = 0/0
+            
+            -- Pega o Sofá
+            vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+            task.wait(0.2)
+            
+            local forca = Instance.new("BodyVelocity")
+            forca.Name = "FlingForce"
+            forca.Velocity = Vector3.new(9e8, 9e8, 9e8)
+            forca.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            forca.Parent = root
+
+            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+            
+            local angulo = 0
+            while _G.FlingToggle do
+                vu10.Heartbeat:Wait()
+                local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+                    if Tool then hum:EquipTool(Tool) end
+                    
+                    angulo = angulo + 100
+                    local targetRoot = T.Character.HumanoidRootPart
+                    local targetPos = targetRoot.Position + (targetRoot.Velocity / 1.5)
+                    
+                    -- Lógica de Fling Couch: Rotação extrema e Velocidade
+                    root.CFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(angulo), math.rad(angulo), 0)
+                    root.Velocity = Vector3.new(9e8, 9e8, 9e8)
+                    root.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+                    
+                    for _, p in pairs(char:GetChildren()) do 
+                        if p:IsA("BasePart") then p.CanCollide = false end 
+                    end
+                else 
+                    break 
+                end
+            end
+            
+            -- Resetar ao desligar
+            if forca then forca:Destroy() end
+            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+            hum:UnequipTools()
+            root.Velocity = Vector3.new(0,0,0)
+            root.RotVelocity = Vector3.new(0,0,0)
+            root.CFrame = PosOrig
+            workspace.FallenPartsDestroyHeight = -500 -- Padrão do Roblox
+            FinalReset()
+        end)
+    else 
+        _G.FlingToggle = false
+        FinalReset() 
+    end
+end})
+
+TabTroll:AddSection({"Teleportar o alvo para..."}) 
+TabTroll:AddButton({Name = "Spawn", Callback = function()
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if not T or not T.Character then return end
+    _G.IsTrapping = true
+    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
+    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+    local angle = 1000000000000000000
+    local connection
+    connection = vu10.Heartbeat:Connect(function()
+        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
+        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
+        local THum = T.Character:FindFirstChild("Humanoid")
+        if THRP and THum then
+            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+            angle = angle + 1000000000000
+            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3, 1.8, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
+            if THum.Sit then
+                connection:Disconnect()
+                vu7.Character.HumanoidRootPart.CFrame = CFrame.new(-26, 52, 16)
+                task.wait(0.3)
+                vu7.Character.Humanoid:UnequipTools() -- Desequipa automaticamente
+                task.wait(0.2)
+                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
+                task.wait(0.1)
+                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "ClearAllTools")
+                task.wait(0.2)
+        FinalReset()
+            end
+        end
+    end)
+end})
+
 local sectionFlingBoat = TabTroll:AddSection({Name = "Fling Boat"})
 TabTroll:AddButton({
     Name = "Fling - Boat",
@@ -1165,268 +1427,6 @@ end)
 end
 })
 
-TabTroll:AddToggle({ Name = "Headsit", Callback = function() 
-    local T = vu6:FindFirstChild(_G.SelectedPlayer)
-    if T then if not headsitActive then headsitOnPlayer(T) headsitActive = true else removeHeadsit() headsitActive = false end end 
-end })
-
-TabTroll:AddSection({ "Black Hole" })
--- Black Hole Fixo com Rotação XYZ
-TabTroll:AddToggle({
-    Name = "Black Hole",
-    Default = false,
-    Callback = function(state)
-        _G.BlackHoleActive = state
-        if state then
-            _G.BH_Orbit_Active = false
-            SetupBlackHole()
-            BH_Connection = vu9.DescendantAdded:Connect(function(v)
-                if _G.BlackHoleActive then ForcePart(v) end
-            end)
-            for _, v in ipairs(vu9:GetDescendants()) do ForcePart(v) end
-
-            task.spawn(function()
-                while _G.BlackHoleActive do
-                    local T = vu6:FindFirstChild(_G.SelectedPlayer)
-                    if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                        -- Rotação em todos os ângulos no próprio eixo do alvo
-                        local t = tick() * 2
-                        local rotation = CFrame.Angles(t, t/2, t/3) 
-                        BH_Part.CFrame = T.Character.HumanoidRootPart.CFrame * rotation
-                    end
-                    vu10.Heartbeat:Wait()
-                end
-                if BH_Connection then BH_Connection:Disconnect() end
-            end)
-        end
-    end
-})
-
-TabTroll:AddToggle({
-    Name = "Black Hole Orbit",
-    Default = false,
-    Callback = function(state)
-        _G.BH_Orbit_Active = state
-        if state then
-            _G.BlackHoleActive = false
-            SetupBlackHole()
-            BH_Connection = vu9.DescendantAdded:Connect(function(v)
-                if _G.BH_Orbit_Active then ForcePart(v) end
-            end)
-            for _, v in ipairs(vu9:GetDescendants()) do ForcePart(v) end
-
-            task.spawn(function()
-                local angle = 0
-                while _G.BH_Orbit_Active do
-                    local T = vu6:FindFirstChild(_G.SelectedPlayer)
-                    if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                        angle = angle + 10000000
-                        local t = tick() * 1
-                        -- Órbita combinada com rotação caótica XYZ
-                        local radius = 7
-                        local orbit = CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(radius, math.sin(t)*2, 3)
-                        local sphereRotation = CFrame.Angles(t, t/2, t/3)
-                        
-                        BH_Part.CFrame = T.Character.HumanoidRootPart.CFrame * orbit * sphereRotation
-                    end
-                    vu10.Heartbeat:Wait()
-                end
-                if BH_Connection then BH_Connection:Disconnect() end
-            end)
-        end
-    end
-})
-
-TabTroll:AddSection({"Couch "})
-TabTroll:AddButton({Name = "Kill", Callback = function()
-    local T = vu6:FindFirstChild(_G.SelectedPlayer)
-    if not T or not T.Character then return end
-    _G.IsTrapping = true
-    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
-    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-    local angle = 1000000000000000
-    local connection
-    connection = vu10.Heartbeat:Connect(function()
-        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
-        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
-        local THum = T.Character:FindFirstChild("Humanoid")
-        if THRP and THum then
-            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
-            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
-            angle = angle + 1000000000
-            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3, 1.8, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
-            if THum.Sit then
-                connection:Disconnect()
-                vu7.Character.HumanoidRootPart.CFrame = CFrame.new(-21, -410, -42)
-                task.wait(0.3)
-                vu7.Character.Humanoid:UnequipTools() -- Desequipa automaticamente
-                task.wait(0.2)
-                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
-                task.wait(0.1)
-                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "ClearAllTools")
-                task.wait(0.2)
-        FinalReset()
-            end
-        end
-    end)
-end})
-TabTroll:AddButton({Name = "Bring (Trazer)", Callback = function()
-    local T = vu6:FindFirstChild(_G.SelectedPlayer)
-    if not T or not T.Character then return end
-    _G.IsTrapping = true
-    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
-    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-    local angle = 100000000000000
-    local connection
-    connection = vu10.Heartbeat:Connect(function()
-        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
-        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
-        local THum = T.Character:FindFirstChild("Humanoid")
-        if THRP and THum then
-            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
-            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
-            angle = angle + 10000000000
-            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3,-2, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
-            if THum.Sit then
-                connection:Disconnect()
-                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
-                task.wait(0.3)
-                vu7.Character.Humanoid:UnequipTools() -- Desequipa automaticamente
-                task.wait(0.4)
-                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "Couch")
-                FinalReset()
-            end
-        end
-    end)
-end})
--- Substitua o bloco do "Fling (Forte)" e "Fling (Fraco)" por este:
-
-TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
-    _G.FlingToggle = v
-    if v then
-        task.spawn(function()
-            local PosOrig = vu7.Character.HumanoidRootPart.CFrame
-            vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-            local angle = 0
-            while _G.FlingToggle do
-                vu10.Heartbeat:Wait()
-                local T = vu6:FindFirstChild(_G.SelectedPlayer)
-                if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Couch")
-                    if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
-                    angle = angle + 50
-                    vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -2, math.sin(angle)*2)
-                    vu7.Character.HumanoidRootPart.Velocity = Vector3.new(900, 900, 900)
-                    for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
-                else break end
-            end
-            vu7.Character.Humanoid:UnequipTools()
-            vu7.Character.HumanoidRootPart.CFrame = PosOrig
-            FinalReset()
-        end)
-    else FinalReset() end
-end})
-
-TabTroll:AddToggle({Name = "Fling (Forte) - Couch V2", Callback = function(v)
-    _G.FlingToggle = v
-    if v then
-        task.spawn(function()
-            local char = vu7.Character
-            local root = char:FindFirstChild("HumanoidRootPart")
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            local PosOrig = root.CFrame
-            
-            -- Bypass para não morrer com a velocidade
-            workspace.FallenPartsDestroyHeight = 0/0
-            
-            -- Pega o Sofá
-            vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-            task.wait(0.2)
-            
-            local forca = Instance.new("BodyVelocity")
-            forca.Name = "FlingForce"
-            forca.Velocity = Vector3.new(9e8, 9e8, 9e8)
-            forca.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            forca.Parent = root
-
-            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-            
-            local angulo = 0
-            while _G.FlingToggle do
-                vu10.Heartbeat:Wait()
-                local T = vu6:FindFirstChild(_G.SelectedPlayer)
-                if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Couch")
-                    if Tool then hum:EquipTool(Tool) end
-                    
-                    angulo = angulo + 100
-                    local targetRoot = T.Character.HumanoidRootPart
-                    local targetPos = targetRoot.Position + (targetRoot.Velocity / 1.5)
-                    
-                    -- Lógica de Fling Couch: Rotação extrema e Velocidade
-                    root.CFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(angulo), math.rad(angulo), 0)
-                    root.Velocity = Vector3.new(9e8, 9e8, 9e8)
-                    root.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
-                    
-                    for _, p in pairs(char:GetChildren()) do 
-                        if p:IsA("BasePart") then p.CanCollide = false end 
-                    end
-                else 
-                    break 
-                end
-            end
-            
-            -- Resetar ao desligar
-            if forca then forca:Destroy() end
-            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-            hum:UnequipTools()
-            root.Velocity = Vector3.new(0,0,0)
-            root.RotVelocity = Vector3.new(0,0,0)
-            root.CFrame = PosOrig
-            workspace.FallenPartsDestroyHeight = -500 -- Padrão do Roblox
-            FinalReset()
-        end)
-    else 
-        _G.FlingToggle = false
-        FinalReset() 
-    end
-end})
-
-TabTroll:AddSection({"Teleportar o alvo para..."}) 
-TabTroll:AddButton({Name = "Spawn", Callback = function()
-    local T = vu6:FindFirstChild(_G.SelectedPlayer)
-    if not T or not T.Character then return end
-    _G.IsTrapping = true
-    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
-    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-    local angle = 1000000000000000000
-    local connection
-    connection = vu10.Heartbeat:Connect(function()
-        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
-        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
-        local THum = T.Character:FindFirstChild("Humanoid")
-        if THRP and THum then
-            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
-            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
-            angle = angle + 1000000000000
-            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3, 1.8, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
-            if THum.Sit then
-                connection:Disconnect()
-                vu7.Character.HumanoidRootPart.CFrame = CFrame.new(-26, 52, 16)
-                task.wait(0.3)
-                vu7.Character.Humanoid:UnequipTools() -- Desequipa automaticamente
-                task.wait(0.2)
-                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
-                task.wait(0.1)
-                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "ClearAllTools")
-                task.wait(0.2)
-        FinalReset()
-            end
-        end
-    end)
-end})
-
-
 
 
 local SelectHouse = nil
@@ -1472,21 +1472,6 @@ pcall(function()
         end
     })
 end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Teleportar para Casa",
-        Callback = function()
-            local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-            if House and game.Players.LocalPlayer.Character then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
-            else
-                print("Casa nao encontrada: " .. tostring(SelectHouse))
-            end
-        end
-    })
-end)
-
 
 -- Teleportar para casa
 pcall(function()
@@ -2493,7 +2478,49 @@ Tab3:AddParagraph({
     Content = ""
 })
 
-
+TabAntis:AddToggle({
+    Name = "Anti Sit",
+    Default = false,
+    Callback = function(state)
+        antiCarSit = state
+        local function applyCollisionLogic(obj)
+            if not obj:IsA("BasePart") then return end
+            local name = obj.Name:lower()
+            local isCar = false
+            local parent = obj
+            while parent do
+                if parent.Name:lower():find(carKeyword) then isCar = true break end
+                parent = parent.Parent
+            end
+            if isCar then obj.CanCollide = not antiCarSit end
+        end
+        
+        if state then
+            local connection
+            connection = vu9.DescendantAdded:Connect(function(obj)
+                if antiCarSit then applyCollisionLogic(obj) end
+            end)
+            
+            for _, obj in ipairs(vu9:GetDescendants()) do
+                applyCollisionLogic(obj)
+            end
+            
+            local function updateSitState()
+                local hum = vu7.Character and vu7.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, not (antiToolSit or antiCarSit))
+                    if (antiToolSit or antiCarSit) and hum.Sit then hum.Sit = false end
+                end
+            end
+            
+            local heartbeat
+            heartbeat = vu10.Heartbeat:Connect(function()
+                if not antiCarSit then heartbeat:Disconnect() return end
+                updateSitState()
+            end)
+        end
+    end
+})
 
 TabAntis:AddSection({"Anti Void"})
 TabAntis:AddToggle({ Name = "Anti-Void", Callback = function(s) _G.AntiVoid = s end })
@@ -2503,6 +2530,55 @@ TabAntis:AddSection({"Anti Fling"})
     
     TabAntis:AddSection({"Anti Lag"})
 TabAntis:AddToggle({ Name = "Anti-Lag", Callback = function(s) _G.AntiLag = s ApplyAntiLag(s) end })
+
+TabAntis:AddSection({"Use Isso Quando vc For Lançado pra Fora Do Mapa"})
+TabAntis:AddButton({
+    Name = "Anti-Map",
+    Callback = function()
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character
+        local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+        if not RootPart or not Humanoid then
+            warn("Nenhum RootPart ou Humanoid encontrado!")
+            return
+        end
+        Humanoid.PlatformStand = true
+        print("Jogador paralisado para reduzir efeitos do spin.")
+        for _, obj in pairs(RootPart:GetChildren()) do
+            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then
+                obj:Destroy()
+            end
+        end
+        print("Spin e forÃ§as removidas do jogador.")
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Ca1r"):FireServer("DeleteAllVehicles")
+        task.wait(0.5)
+        local PCar = Vehicles and Vehicles:FindFirstChild(Player.Name.."Car")
+        if PCar and PCar.PrimaryPart then
+            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
+                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then
+                    obj:Destroy()
+                end
+            end
+            print("Spin removido do barco.")
+        end
+        task.wait(1)
+        local safePos = Vector3.new(0, 100, 0)
+        local bp = Instance.new("BodyPosition", RootPart)
+        bp.Position = safePos
+        bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        local bg = Instance.new("BodyGyro", RootPart)
+        bg.CFrame = RootPart.CFrame
+        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        print("Jogador estÃ¡ preso na coordenada segura.")
+        task.wait(3)
+        bp:Destroy()
+        bg:Destroy()
+        Humanoid.PlatformStand = false
+        print("Jogador liberado, seguro na posiÃ§Ã£o.")
+    end
+})
 
 
 --------------------------------------------------------------------------------------------------------------------------------
