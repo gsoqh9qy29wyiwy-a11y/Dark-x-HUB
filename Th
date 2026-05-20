@@ -48,53 +48,48 @@ local function updateCamera()
     end)
 end
 
--- --- FUNÇÃO ANTI-LAG ---
-local function ApplyAntiLag(state)
-    if state then
-        game:GetService("Lighting").GlobalShadows = false
-        game:GetService("Lighting").FogEnd = 9e9
-        settings().Rendering.QualityLevel = 1
-        for _, v in pairs(vu9:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Material = Enum.Material.SmoothPlastic
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 1
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Enabled = false
+local function AntiFlingLoop(name, getFolderFunc)
+    local active = false
+    task.spawn(function()
+        while true do
+            if active and LocalPlayer.Character then
+                local folder = getFolderFunc()
+                if folder then
+                    for _, item in ipairs(folder:GetChildren()) do
+                        local isMine = false
+                        if name == "Vehicles" then
+                            for _, seat in ipairs(item:GetDescendants()) do
+                                if (seat:IsA("VehicleSeat") or seat:IsA("Seat")) and seat.Occupant and seat.Occupant.Parent == LocalPlayer.Character then
+                                    isMine = true
+                                    break
+                                end
+                            end
+                        elseif name == "Canoes" then
+                            local owner = item:FindFirstChild("Owner")
+                            isMine = owner and owner.Value == LocalPlayer
+                        elseif name == "Jets" or name == "Helis" then
+                            isMine = item.Name == LocalPlayer.Name
+                        end
+                        if not isMine then
+                            table.insert(backupTables[name], item:Clone())
+                            item:Destroy()
+                        end
+                    end
+                end
             end
+            task.wait(0.03)
         end
-    else
-        game:GetService("Lighting").GlobalShadows = true
-        for _, v in pairs(vu9:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Material = Enum.Material.Plastic
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 0
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Enabled = true
+    end)
+    return function(state)
+        active = state
+        TeleportCarro:MostrarNotificacao(name.." "..(state and "ativado!" or "desativado!"))
+        if not state then
+            for _, item in ipairs(backupTables[name]) do
+                local parentFolder = getFolderFunc()
+                if parentFolder then item.Parent = parentFolder end
             end
+            backupTables[name] = {}
         end
-    end
-end
-
--- --- FUNÇÕES DE SUPORTE ---
-local function applyCollisionLogic(obj)
-    if not obj:IsA("BasePart") then return end
-    local name = obj.Name:lower()
-    local isCar = false
-    local parent = obj
-    while parent do
-        if parent.Name:lower():find(carKeyword) then isCar = true break end
-        parent = parent.Parent
-    end
-    if isCar then obj.CanCollide = not antiCarSit end
-end
-
-local function updateSitState()
-    local hum = vu7.Character and vu7.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum:SetStateEnabled(Enum.HumanoidStateType.Seated, not (antiToolSit or antiCarSit))
-        if (antiToolSit or antiCarSit) and hum.Sit then hum.Sit = false end
     end
 end
 
