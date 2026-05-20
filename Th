@@ -1043,113 +1043,148 @@ TabTroll:AddButton({
 })
 
 TabTroll:AddButton({
-    Name = "Click Fling Portas [Beta]",
-    Description = "Cria uma Tool. Equipe-a e clique em um player para as portas o atacarem.",
-    Callback = function()
-        local jogadores = game:GetService("Players")
-        local rep = game:GetService("ReplicatedStorage")
-        local mundo = game:GetService("Workspace")
-        local entrada = game:GetService("UserInputService")
-        local rodar = game:GetService("RunService")
-        local cam = mundo.CurrentCamera
-        local eu = jogadores.LocalPlayer
+  Name = "Click Fling Doors [Beta]",
+Description = "To use, it's recommended to get close to other doors. After they come to you, click on the player you want to fling",
+  Callback = function()
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
-        -- --- CONFIGURAÃ‡ÃƒO DO ALVO (BLACK HOLE) ---
-        local alvoPart = Instance.new("Part")
-        alvoPart.Name = "PortaTarget"        
-        alvoPart.Anchored = true
-        alvoPart.CanCollide = false
-        alvoPart.Parent = mundo
-        local attTarget = Instance.new("Attachment", alvoPart)
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HRP = Character:WaitForChild("HumanoidRootPart")
 
-        local playerAlvo = nil
+-- Invisible target (BlackHole)
+local BlackHole = Instance.new("Part")
+BlackHole.Size = Vector3.new(100000, 100000, 100000)
+BlackHole.Transparency = 1
+BlackHole.Anchored = true
+BlackHole.CanCollide = false
+BlackHole.Name = "BlackHoleTarget"
+BlackHole.Parent = Workspace
 
-        -- Atualiza a posiÃ§Ã£o da Part para seguir o player clicado
-        rodar.Heartbeat:Connect(function()
-            if playerAlvo and playerAlvo.Character and playerAlvo.Character:FindFirstChild("HumanoidRootPart") then
-                alvoPart.CFrame = playerAlvo.Character.HumanoidRootPart.CFrame
-            elseif eu.Character and eu.Character:FindFirstChild("HumanoidRootPart") then
-                -- Se nÃ£o houver alvo, as portas ficam perto de vocÃª (esperando)
-                alvoPart.CFrame = eu.Character.HumanoidRootPart.CFrame * CFrame.new(0, -15, 0)
-            end
-        end)
+-- Base attachment on the BlackHole
+local baseAttachment = Instance.new("Attachment")
+baseAttachment.Name = "Luscaa_BlackHoleAttachment"
+baseAttachment.Parent = BlackHole
 
-        -- --- LOGICA DE CAPTURAR PORTAS ---
-        local function SetupPorta(part)
-            if not part:IsA("BasePart") or part.Anchored or not string.find(part.Name:lower(), "door") then return end
-            if part:FindFirstChild("PortaFling_Ativada") then return end
-            
-            part.CanCollide = false
-            local marker = Instance.new("BoolValue", part)
-            marker.Name = "PortaFling_Ativada"
-            
-            local a0 = Instance.new("Attachment", part)
-            local align = Instance.new("AlignPosition", part)
-            align.Attachment0 = a0
-            align.Attachment1 = attTarget
-            align.MaxForce = 1e20
-            align.MaxVelocity = math.huge
-            align.Responsiveness = 200
-            
-            local torque = Instance.new("Torque", part)
-            torque.Attachment0 = a0
-            torque.RelativeTo = Enum.ActuatorRelativeTo.World
-            torque.Torque = Vector3.new(math.random(-1e7, 1e7), math.random(-1e7, 1e7), math.random(-1e7, 1e7))
-        end
+-- Update BlackHole position
+RunService.Heartbeat:Connect(function()
+	BlackHole.CFrame = HRP.CFrame
+end)
 
-        -- Captura portas existentes e futuras
-        for _, v in pairs(mundo:GetDescendants()) do SetupPorta(v) end
-        mundo.DescendantAdded:Connect(SetupPorta)
+-- List of controlled doors
+local ControlledDoors = {}
 
-        -- --- CRIAÃ‡ÃƒO DA TOOL ---
-        local NOME_FERRAMENTA = "Porta Fling"
-        local ferramentaEquipada = false
-        local mochila = eu:WaitForChild("Backpack")
+-- Prepare a door to be controlled
+local function SetupPart(part)
+	if not part:IsA("BasePart") or part.Anchored or not string.find(part.Name, "Door") then return end
+	if part:FindFirstChild("Luscaa_Attached") then return end
 
-        -- Remove ferramentas antigas de porta para nÃ£o duplicar
-        for _, item in pairs(mochila:GetChildren()) do
-            if item.Name == NOME_FERRAMENTA then item:Destroy() end
-        end
+	part.CanCollide = false
 
-        local ferramenta = Instance.new("Tool")
-        ferramenta.Name = NOME_FERRAMENTA
-        ferramenta.RequiresHandle = true
-        ferramenta.CanBeDropped = false
+	for _, obj in ipairs(part:GetChildren()) do
+		if obj:IsA("AlignPosition") or obj:IsA("Torque") or obj:IsA("Attachment") then
+			obj:Destroy()
+		end
+	end
 
-        local handle = Instance.new("Part")
-        handle.Name = "Handle"
-        handle.Size = Vector3.new(10, 15, 18)
-        handle.Transparency = 1
-        handle.Parent = ferramenta
+	local marker = Instance.new("BoolValue", part)
+	marker.Name = "Luscaa_Attached"
 
-        ferramenta.Equipped:Connect(function() ferramentaEquipada = true end)
-        ferramenta.Unequipped:Connect(function() ferramentaEquipada = false end)
-        ferramenta.Parent = mochila
+	local a1 = Instance.new("Attachment", part)
 
-        -- --- DETECÃ‡ÃƒO DE CLIQUE ---
-        entrada.InputEnded:Connect(function(input, processed)
-            if ferramentaEquipada and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1) then
-                local pos = input.Position
-                local raio = cam:ScreenPointToRay(pos.X, pos.Y)
-                local hit = mundo:Raycast(raio.Origin, raio.Direction * 1000)
-                
-                if hit and hit.Instance then
-                    local modelo = hit.Instance:FindFirstAncestorOfClass("Model")
-                    local jogador = jogadores:GetPlayerFromCharacter(modelo)
-                    
-                    if jogador and jogador ~= eu then
-                        playerAlvo = jogador
-                        game:GetService("StarterGui"):SetCore("SendNotification", {
-                            Title = "Portas Atacando!",
-                            Text = "Alvo: " .. jogador.Name,
-                            Duration = 3
-                        })
-                    end
-                end
-            end
-        end)
-    end
+	local align = Instance.new("AlignPosition", part)
+	align.Attachment0 = a1
+	align.Attachment1 = baseAttachment
+	align.MaxForce = 1e20
+	align.MaxVelocity = math.huge
+	align.Responsiveness = 99999
+
+	local torque = Instance.new("Torque", part)
+	torque.Attachment0 = a1
+	torque.RelativeTo = Enum.ActuatorRelativeTo.World
+	torque.Torque = Vector3.new(
+		math.random(-10e5, 10e5) * 10000,
+		math.random(-10e5, 10e5) * 10000,
+		math.random(-10e5, 10e5) * 10000
+	)
+
+	table.insert(ControlledDoors, {Part = part, Align = align})
+end
+
+-- Detect and prepare existing doors
+for _, obj in ipairs(Workspace:GetDescendants()) do
+	if obj:IsA("BasePart") and string.find(obj.Name, "Door") then
+		SetupPart(obj)
+	end
+end
+
+-- New doors in the future
+Workspace.DescendantAdded:Connect(function(obj)
+	if obj:IsA("BasePart") and string.find(obj.Name, "Door") then
+		SetupPart(obj)
+	end
+end)
+
+-- Fling player with timeout and return
+local function FlingPlayer(player)
+	local char = player.Character
+	if not char then return end
+	local targetHRP = char:FindFirstChild("HumanoidRootPart")
+	if not targetHRP then return end
+
+	local targetAttachment = targetHRP:FindFirstChild("SHNMAX_TargetAttachment")
+	if not targetAttachment then
+		targetAttachment = Instance.new("Attachment", targetHRP)
+		targetAttachment.Name = "SHNMAX_TargetAttachment"
+	end
+
+	for _, data in ipairs(ControlledDoors) do
+		if data.Align then
+			data.Align.Attachment1 = targetAttachment
+		end
+	end
+
+	local start = tick()
+	local flingDetected = false
+
+	while tick() - start < 5 do
+		if targetHRP.Velocity.Magnitude >= 20 then
+			flingDetected = true
+			break
+		end
+		RunService.Heartbeat:Wait()
+	end
+
+	-- Always return the doors
+	for _, data in ipairs(ControlledDoors) do
+		if data.Align then
+			data.Align.Attachment1 = baseAttachment
+		end
+	end
+end
+
+-- Click (works on mobile)
+UserInputService.TouchTap:Connect(function(touchPositions, processed)
+	if processed then return end
+	local pos = touchPositions[1]
+	local camera = Workspace.CurrentCamera
+	local unitRay = camera:ScreenPointToRay(pos.X, pos.Y)
+	local raycast = Workspace:Raycast(unitRay.Origin, unitRay.Direction * 1000)
+
+	if raycast and raycast.Instance then
+		local hit = raycast.Instance
+		local player = Players:GetPlayerFromCharacter(hit:FindFirstAncestorOfClass("Model"))
+		if player and player ~= LocalPlayer then
+			FlingPlayer(player)
+		end
+	end
+end)
+  end
 })
+
 TabTroll:AddButton({
  Name = "Click Kill Couch (Tool)",
  Callback = function()
