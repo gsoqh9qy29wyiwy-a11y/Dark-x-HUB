@@ -5186,35 +5186,6 @@ ToggleRosquinha:Callback(function(Value)
     end)
 end)
 
-local SectionNames = TabRGB:AddSection({
-    Name = "Adicionar Nomes no Jogador"
-})
-
-local names = {
-    {"Anonymus", " Anonymus "},
-    {"PRO", " PRO "},
-    {"ERR0R_666", " ERR0R_666 "},
-    {"CARLOLX777", " CARLOLX777 "},
-    {"GHOST", " GHOST "},
-    {"JOKER", " JOKER "},
-    {"ADMIN", " ADMIN "},
-    {"TUBERS93", " TUBERS 93 "},
-    {"CO0LKID", " CO0 LKID "},
-    {"GAME ATTACKED BY MAFIA", " GAME ATTACKED BY MAFIA "},
-    {"INC0MUN", " INC0MUN"},
-    {"BAD BOY", " BAD BOY "}
-    {"DARK Client", " DARK Client"}
-}
-
-for _, name in ipairs(names) do
-    TabRGB:AddButton({
-        Name = "Name: " .. name[1],
-        Callback = function()
-            game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer("RolePlayName", name[2])
-        end
-    })
-end
-
 TabRGB:AddButton({
     Name = "Shaders",
     Description = "ativa shader so que e inreversivel So para quando sair",
