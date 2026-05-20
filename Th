@@ -2509,51 +2509,7 @@ Tab3:AddParagraph({
 })
 
 TabAntis:AddToggle({
-    Name = "AntiCarSit",
-    Default = false,
-    Callback = function(state)
-        antiCarSit = state
-        local function applyCollisionLogic(obj)
-            if not obj:IsA("BasePart") then return end
-            local name = obj.Name:lower()
-            local isCar = false
-            local parent = obj
-            while parent do
-                if parent.Name:lower():find(carKeyword) then isCar = true break end
-                parent = parent.Parent
-            end
-            if isCar then obj.CanCollide = not antiCarSit end
-        end
-        
-        if state then
-            local connection
-            connection = vu9.DescendantAdded:Connect(function(obj)
-                if antiCarSit then applyCollisionLogic(obj) end
-            end)
-            
-            for _, obj in ipairs(vu9:GetDescendants()) do
-                applyCollisionLogic(obj)
-            end
-            
-            local function updateSitState()
-                local hum = vu7.Character and vu7.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, not (antiToolSit or antiCarSit))
-                    if (antiToolSit or antiCarSit) and hum.Sit then hum.Sit = false end
-                end
-            end
-            
-            local heartbeat
-            heartbeat = vu10.Heartbeat:Connect(function()
-                if not antiCarSit then heartbeat:Disconnect() return end
-                updateSitState()
-            end)
-        end
-    end
-})
-
-TabAntis:AddToggle({
-    Name = "Anti v2 proteção fling couch",
+    Name = "Anti Sit",
     Default = false,
     Callback = function(state)
         antiToolSit = state
@@ -2575,6 +2531,65 @@ TabAntis:AddToggle({
             updateSitState()
         end
     end
+})
+
+TabAntis:AddToggle({
+    Name = "Anti Fling Ball",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Balls", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        return folder and folder:FindFirstChild("001_SoccerBalls")
+    end)
+})
+TabAntis:AddToggle({
+    Name = "Anti Fling Helicópteros",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Helis", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        return folder and folder:FindFirstChild("001_HeliStorage") and folder["001_HeliStorage"]:FindFirstChild("PoliceStationHeli")
+    end)
+})
+TabAntis:AddButton({
+    Name = "Anti Som",
+    Description = "",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/antsom/refs/heads/main/Main.txt"))()
+    end
+})
+
+-- TOGGLES DE ANTI-FLING / SIT
+TabAntis:AddToggle({
+    Name = "Anti fling Carros",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Vehicles", function()
+        return Workspace:FindFirstChild("Vehicles")
+    end)
+})
+
+TabAntis:AddToggle({
+    Name = "Anti Canoe Fling",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Canoes", function()
+        local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
+        return workspaceCom and workspaceCom:FindFirstChild("001_CanoeStorage")
+    end)
+})
+
+TabAntis:AddToggle({
+    Name = "Anti Fling Jets",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Jets", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        if folder and folder:FindFirstChild("001_Airport") then
+            local storage = folder["001_Airport"]:FindFirstChild("AirportHanger")
+            if storage then return storage:FindFirstChild("001_JetStorage") and storage["001_JetStorage"]:FindFirstChild("JetAirport") end
+        end
+    end)
 })
 
 TabAntis:AddSection({"Anti-Void"})
