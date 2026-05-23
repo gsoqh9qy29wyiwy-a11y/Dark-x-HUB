@@ -386,6 +386,7 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 
+
 Tab1:AddSection({"Créditos do Hub"})
 
 local function detectExecutor()
@@ -4562,20 +4563,10 @@ Tabscript:AddButton({ Name = "Telekines Tool",
 end 
 })
 
--- Botão para ShiftLock
 Tabscript:AddButton({
  Name = "ShiftLock",
  Callback = function()
  loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
- end
-})
-
--- Botão para Fly Gui
-Tabscript:AddButton({
- Name = "Fly Gui",
- Callback = function()
- loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-
-v3-7412"))()
  end
 })
 ---------------------------------------------------------------------------------------------------------------------------
