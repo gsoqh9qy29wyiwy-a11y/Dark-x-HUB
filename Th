@@ -403,125 +403,6 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 
--- ==========================================
--- ABA CRIANÇA (INTEGRADA)
--- ==========================================
-local SectionChild = ChildTab:AddSection({ Name = "Controle da Criança FE" })
-
-local playerChildDropdown = ChildTab:AddDropdown({
-    Name = "Selecione um player para perseguir",
-    Options = updatePlayerList(),
-    Default = "",
-    Callback = function(selected)
-        if game.Players:FindFirstChild(selected) then 
-            chasingplayer = selected
-        else
-            chasingplayer = nil
-        end
-    end
-})
-
-ChildTab:AddButton({
-    Name = "Atualizar Player List",
-    Callback = function()
-        local updated = updatePlayerList()
-        pcall(function()
-            playerChildDropdown:Refresh(updated)
-        end)
-    end
-})
-
-ChildTab:AddButton({
-    Name = "Enviar criança",
-    Callback = function()
-        if not chasingplayer then
-            warn("Nenhum jogador selecionado!")
-            return 
-        end
-        
-        -- Spawn da Criança
-        local args = { [1] = "CharacterFollowSpawnPlayer", [2] = "BabyBoy" }
-        pcall(function()
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(unpack(args))
-        end)
-
-        task.wait(0.3)
-
-        local target = chasingplayer
-        local targetPlr = game.Players:FindFirstChild(target)
-        
-        if targetPlr and targetPlr.Character and vu7.Character and vu7.Character:FindFirstChild("FollowCharacter") then
-            local followChar = vu7.Character.FollowCharacter
-            followChar.Parent = targetPlr.Character
-            
-            -- Loop de Movimento FE
-            if getgenv().FollowLoop then getgenv().FollowLoop:Disconnect() end
-            getgenv().FollowLoop = vu10.Heartbeat:Connect(function()
-                if followChar and followChar:FindFirstChild("Torso") and targetPlr.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = targetPlr.Character.HumanoidRootPart
-                    followChar.Torso.BodyPosition.Position = hrp.Position - (hrp.CFrame.LookVector * 3)
-                    followChar.Torso.BodyGyro.CFrame = hrp.CFrame
-                else
-                    getgenv().FollowLoop:Disconnect()
-                end
-            end)
-        end
-    end
-})
-
-ChildTab:AddButton({
-    Name = "Retornar criança",
-    Callback = function() 
-        if getgenv().FollowLoop then
-            getgenv().FollowLoop:Disconnect()
-            getgenv().FollowLoop = nil
-        end
-        pcall(function()
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("DeleteFollowCharacter")
-            task.wait(0.1)
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("CharacterFollowSpawnPlayer", "BabyBoy")
-        end)
-    end
-})
-
-ChildTab:AddToggle({
-    Name = "Spectar Player",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            if not chasingplayer then return end
-            getgenv().ChildSpectate = vu10.Heartbeat:Connect(function()
-                local target = game.Players:FindFirstChild(chasingplayer)
-                if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-                    vuCam.CameraSubject = target.Character.Humanoid
-                end
-            end)
-        else
-            if getgenv().ChildSpectate then getgenv().ChildSpectate:Disconnect() end
-            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = vu7.Character.Humanoid
-            end
-        end
-    end
-})
-
-ChildTab:AddParagraph({ Title = "FE", Content = "As funções de criança são visíveis para todos (FE)." })
-
--- Eventos de atualização automática da lista
-game.Players.PlayerAdded:Connect(function()
-    task.wait(1)
-    playerChildDropdown:Refresh(updatePlayerList())
-end)
-game.Players.PlayerRemoving:Connect(function()
-    task.wait(1)
-    playerChildDropdown:Refresh(updatePlayerList())
-end)
-
--- ==========================================
--- RESTANTE DOS SEUS SCRIPTS (CONTINUAÇÃO)
--- ==========================================
-
--- Exemplo da Aba Info (Tab1) que estava no seu script:
 Tab1:AddSection({"Créditos do Hub"})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
 Tab1:AddParagraph({"Executor", executorName})
@@ -5640,3 +5521,116 @@ Tab2:AddSlider({
         InfiniteJumpEnabled = false
     end
 })
+-- ==========================================
+-- ABA CRIANÇA (INTEGRADA)
+-- ==========================================
+local SectionChild = ChildTab:AddSection({ Name = "Controle da Criança FE" })
+
+local playerChildDropdown = ChildTab:AddDropdown({
+    Name = "Selecione um player para perseguir",
+    Options = updatePlayerList(),
+    Default = "",
+    Callback = function(selected)
+        if game.Players:FindFirstChild(selected) then 
+            chasingplayer = selected
+        else
+            chasingplayer = nil
+        end
+    end
+})
+
+ChildTab:AddButton({
+    Name = "Atualizar Player List",
+    Callback = function()
+        local updated = updatePlayerList()
+        pcall(function()
+            playerChildDropdown:Refresh(updated)
+        end)
+    end
+})
+
+ChildTab:AddButton({
+    Name = "Enviar criança",
+    Callback = function()
+        if not chasingplayer then
+            warn("Nenhum jogador selecionado!")
+            return 
+        end
+        
+        -- Spawn da Criança
+        local args = { [1] = "CharacterFollowSpawnPlayer", [2] = "BabyBoy" }
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(unpack(args))
+        end)
+
+        task.wait(0.3)
+
+        local target = chasingplayer
+        local targetPlr = game.Players:FindFirstChild(target)
+        
+        if targetPlr and targetPlr.Character and vu7.Character and vu7.Character:FindFirstChild("FollowCharacter") then
+            local followChar = vu7.Character.FollowCharacter
+            followChar.Parent = targetPlr.Character
+            
+            -- Loop de Movimento FE
+            if getgenv().FollowLoop then getgenv().FollowLoop:Disconnect() end
+            getgenv().FollowLoop = vu10.Heartbeat:Connect(function()
+                if followChar and followChar:FindFirstChild("Torso") and targetPlr.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = targetPlr.Character.HumanoidRootPart
+                    followChar.Torso.BodyPosition.Position = hrp.Position - (hrp.CFrame.LookVector * 3)
+                    followChar.Torso.BodyGyro.CFrame = hrp.CFrame
+                else
+                    getgenv().FollowLoop:Disconnect()
+                end
+            end)
+        end
+    end
+})
+
+ChildTab:AddButton({
+    Name = "Retornar criança",
+    Callback = function() 
+        if getgenv().FollowLoop then
+            getgenv().FollowLoop:Disconnect()
+            getgenv().FollowLoop = nil
+        end
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("DeleteFollowCharacter")
+            task.wait(0.1)
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("CharacterFollowSpawnPlayer", "BabyBoy")
+        end)
+    end
+})
+
+ChildTab:AddToggle({
+    Name = "Spectar Player",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            if not chasingplayer then return end
+            getgenv().ChildSpectate = vu10.Heartbeat:Connect(function()
+                local target = game.Players:FindFirstChild(chasingplayer)
+                if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                    vuCam.CameraSubject = target.Character.Humanoid
+                end
+            end)
+        else
+            if getgenv().ChildSpectate then getgenv().ChildSpectate:Disconnect() end
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end
+})
+
+ChildTab:AddParagraph({ Title = "FE", Content = "As funções de criança são visíveis para todos (FE)." })
+
+-- Eventos de atualização automática da lista
+game.Players.PlayerAdded:Connect(function()
+    task.wait(1)
+    playerChildDropdown:Refresh(updatePlayerList())
+end)
+game.Players.PlayerRemoving:Connect(function()
+    task.wait(1)
+    playerChildDropdown:Refresh(updatePlayerList())
+end)
