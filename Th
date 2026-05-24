@@ -365,6 +365,7 @@ local function TeleportTo(cframe)
     end
 end
 
+-- 2. FUNÇÕES DE SUPORTE
 local function getPlayerNames()
     local pNames = {}
     for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
@@ -383,6 +384,7 @@ Window:AddMinimizeButton({
     Corner = { CornerRadius = UDim.new(0, 8) },
 }) 
 
+-- Definição das Abas
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
 local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
@@ -401,33 +403,131 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 
 
-Tab1:AddSection({"Créditos do Hub"})
+-- ==========================================
+-- ABA CRIANÇA (INTEGRADA)
+-- ==========================================
+local SectionChild = ChildTab:AddSection({ Name = "Controle da Criança FE" })
 
-local function detectExecutor()
-    if identifyexecutor then
-        return identifyexecutor()
-    elseif syn then
-        return "Synapse X"
-    elseif KRNL_LOADED then
-        return "KRNL"
-    elseif is_sirhurt_closure then
-        return "SirHurt"
-    elseif pebc_execute then
-        return "ProtoSmasher"
-    elseif getexecutorname then
-        return getexecutorname()
-    else
-        return "Executor Desconhecido"
+local playerChildDropdown = ChildTab:AddDropdown({
+    Name = "Selecione um player para perseguir",
+    Options = updatePlayerList(),
+    Default = "",
+    Callback = function(selected)
+        if game.Players:FindFirstChild(selected) then 
+            chasingplayer = selected
+        else
+            chasingplayer = nil
+        end
     end
-end
+})
 
-local executorName = detectExecutor()
+ChildTab:AddButton({
+    Name = "Atualizar Player List",
+    Callback = function()
+        local updated = updatePlayerList()
+        pcall(function()
+            playerChildDropdown:Refresh(updated)
+        end)
+    end
+})
 
-local Paragraph = Tab1:AddParagraph({"Execultor", executorName})
+ChildTab:AddButton({
+    Name = "Enviar criança",
+    Callback = function()
+        if not chasingplayer then
+            warn("Nenhum jogador selecionado!")
+            return 
+        end
+        
+        -- Spawn da Criança
+        local args = { [1] = "CharacterFollowSpawnPlayer", [2] = "BabyBoy" }
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(unpack(args))
+        end)
 
-local Section = Tab1:AddSection({"versao do Hub 5.1"})
+        task.wait(0.3)
 
-local Paragraph = Tab1:AddParagraph({"Criadores", "Carlolx777"})
+        local target = chasingplayer
+        local targetPlr = game.Players:FindFirstChild(target)
+        
+        if targetPlr and targetPlr.Character and vu7.Character and vu7.Character:FindFirstChild("FollowCharacter") then
+            local followChar = vu7.Character.FollowCharacter
+            followChar.Parent = targetPlr.Character
+            
+            -- Loop de Movimento FE
+            if getgenv().FollowLoop then getgenv().FollowLoop:Disconnect() end
+            getgenv().FollowLoop = vu10.Heartbeat:Connect(function()
+                if followChar and followChar:FindFirstChild("Torso") and targetPlr.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = targetPlr.Character.HumanoidRootPart
+                    followChar.Torso.BodyPosition.Position = hrp.Position - (hrp.CFrame.LookVector * 3)
+                    followChar.Torso.BodyGyro.CFrame = hrp.CFrame
+                else
+                    getgenv().FollowLoop:Disconnect()
+                end
+            end)
+        end
+    end
+})
+
+ChildTab:AddButton({
+    Name = "Retornar criança",
+    Callback = function() 
+        if getgenv().FollowLoop then
+            getgenv().FollowLoop:Disconnect()
+            getgenv().FollowLoop = nil
+        end
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("DeleteFollowCharacter")
+            task.wait(0.1)
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("CharacterFollowSpawnPlayer", "BabyBoy")
+        end)
+    end
+})
+
+ChildTab:AddToggle({
+    Name = "Spectar Player",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            if not chasingplayer then return end
+            getgenv().ChildSpectate = vu10.Heartbeat:Connect(function()
+                local target = game.Players:FindFirstChild(chasingplayer)
+                if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                    vuCam.CameraSubject = target.Character.Humanoid
+                end
+            end)
+        else
+            if getgenv().ChildSpectate then getgenv().ChildSpectate:Disconnect() end
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end
+})
+
+ChildTab:AddParagraph({ Title = "FE", Content = "As funções de criança são visíveis para todos (FE)." })
+
+-- Eventos de atualização automática da lista
+game.Players.PlayerAdded:Connect(function()
+    task.wait(1)
+    playerChildDropdown:Refresh(updatePlayerList())
+end)
+game.Players.PlayerRemoving:Connect(function()
+    task.wait(1)
+    playerChildDropdown:Refresh(updatePlayerList())
+end)
+
+-- ==========================================
+-- RESTANTE DOS SEUS SCRIPTS (CONTINUAÇÃO)
+-- ==========================================
+
+-- Exemplo da Aba Info (Tab1) que estava no seu script:
+Tab1:AddSection({"Créditos do Hub"})
+local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
+Tab1:AddParagraph({"Executor", executorName})
+Tab1:AddSection({"Versão do Hub 5.1"})
+Tab1:AddParagraph({"Criadores", "Carlolx777"})
+
 
 -- --- ABA: TROLL ---
 
@@ -3574,6 +3674,8 @@ TabLag:AddParagraph({ "Informação", "O lag começa após cerca de 35 segundos.
                                           -- === Tab 5: Car === --
 ---------------------------------------------------------------------------------------------------------------------------------
 
+local Section = Tab5:AddSection({"all car functions"})
+
 -- VariÃ¡veis
 local carSpeed = 25
 local turboValue = "25"
@@ -4569,19 +4671,24 @@ Tabscript:AddButton({ Name = "Rael Hub Brook",
  end
 })
 
-Tabscript:AddButton({
- Name = "Telekines Tool",
+Tabscript:AddButton({ Name = "Telekines Tool",
  Callback = function()
   loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
 end 
 })
 
 Tabscript:AddButton({
+
  Name = "ShiftLock",
+
  Callback = function()
+
  loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
+
  end
+
 })
+
 ---------------------------------------------------------------------------------------------------------------------------
 -- === Tab Audio === --
 ---------------------------------------------------------------------------------------------------------------------------
@@ -5533,207 +5640,3 @@ Tab2:AddSlider({
         InfiniteJumpEnabled = false
     end
 })
-
-
--- Variáveis globais
-local pl = game.Players.LocalPlayer
-local players = {}
--- Função para atualizar a lista de players
-local function updatePlayerList()
- players = {}
- for _, player in pairs(game.Players:GetPlayers()) do
- table.insert(players, player.Name)
- end
- return players
-end
--- Inicializa a lista de players
-updatePlayerList()
--- Aba Child
-local ChildTab = Window:MakeTab({"Criança", "baby"})
-local Section = ChildTab:AddSection({
- Name = "Child"
-})
-local chasingplayer = nil
-local playerChild = ChildTab:AddDropdown({
- Name = "Selecione um player para perseguir",
- Options = players,
- Default = "",
- Callback = function(selected)
- if game.Players:FindFirstChild(selected) then chasingplayer = selected
- else
- chasingplayer = nil
- end
- end
-})
-ChildTab:AddButton({
- Name = "Atualizar Player List",
- Callback = function()
- local updatedPlayers = updatePlayerList()
- if playerChild and updatedPlayers then
- pcall(function()
- playerChild:Refresh(updatedPlayers)
- end)
- if chasingplayer and not game.Players:FindFirstChild(chasingplayer) 
-then
- chasingplayer = nil
- pcall(function()
- playerChild:Set("")
- end)
- end
- end
- end
-})
--- Eventos de entrada/saída de players
-game.Players.PlayerAdded:Connect(function()
- task.wait(0.1)
- local updatedPlayers = updatePlayerList()
- if playerChild and updatedPlayers then
- pcall(function()
- playerChild:Refresh(updatedPlayers)
- end)
- end
-end)
-game.Players.PlayerRemoving:Connect(function(player)
- task.wait(0.1)
- local updatedPlayers = updatePlayerList()
- if playerChild and updatedPlayers then
- pcall(function()
- playerChild:Refresh(updatedPlayers)
- end)
- if chasingplayer == player.Name then
- chasingplayer = nil
- pcall(function()
- playerChild:Set("")
- end)
- end
- end
-end)
-ChildTab:AddButton({
- Name = "Enviar criança",
- Callback = function()
- if not chasingplayer then
- warn("Nenhum jogador selecionado!")
- return end
- if not workspace:FindFirstChild(pl.Name) or not 
-workspace[pl.Name]:FindFirstChild("FollowCharacter") then
- local args = {
- [1] = "CharacterFollowSpawnPlayer",
- [2] = "BabyBoy"
- }
- local success, err = pcall(function()
- 
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(
-unpack(args))
- end)
- if not success then
- warn("Erro ao enviar criança: " .. err)
- end
- end
- 
- task.wait(0.2)
- 
- if workspace:FindFirstChild(pl.Name) then
- for _, v in pairs(workspace[pl.Name]:GetChildren()) do
- if v:IsA("BasePart") then
- v.CanCollide = true
- end
- end
- end
- local target = chasingplayer
- if workspace:FindFirstChild(target) and workspace:FindFirstChild(pl.Name) 
-and workspace[pl.Name]:FindFirstChild("FollowCharacter") then
- workspace[pl.Name].FollowCharacter.Parent = workspace[target]
- if rawget(getgenv(), "RunService") then
- return
- end
- getgenv().RunService = 
-game:GetService("RunService").Heartbeat:Connect(function()
- local followCharacter = 
-workspace[target]:FindFirstChild("FollowCharacter")
- if followCharacter and followCharacter:FindFirstChild("Torso") and 
-followCharacter.Torso:FindFirstChild("BodyPosition") then
- local humanoidRootPart = 
-workspace[target]:FindFirstChild("HumanoidRootPart")
- if humanoidRootPart then
- followCharacter.Torso.BodyPosition.Position = 
-humanoidRootPart.Position - (humanoidRootPart.CFrame.LookVector * 3)
- followCharacter.Torso.BodyGyro.CFrame = 
-humanoidRootPart.CFrame
- end
- end
- end)
- end
- end
-})
-ChildTab:AddButton({
- Name = "Retornar criança",
- Callback = function() if rawget(getgenv(), "RunService") then
- getgenv().RunService:Disconnect()
- getgenv().RunService = nil
- end
- local args = { [1] = "DeleteFollowCharacter" }
- local success, err = pcall(function()
- 
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(
-unpack(args))
- end)
- if not success then
- warn("Erro ao retornar criança: " .. err)
- end
- local args1 = { [1] = "CharacterFollowSpawnPlayer", [2] = "BabyBoy" }
- success, err = pcall(function()
- 
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(
-unpack(args1))
- end)
- if not success then
- warn("Erro ao spawnar criança: " .. err)
- end
- end
-})
-ChildTab:AddToggle({
- Name = "Spectar Player",
- Default = false,
- Callback = function(Value)
- local Players = game:GetService("Players")
- local RunService = game:GetService("RunService")
- local LocalPlayer = Players.LocalPlayer
- local Camera = workspace.CurrentCamera
- if Value then
- if not chasingplayer then
- warn("Nenhum jogador selecionado para spectar!")
- return false
- end
- if not rawget(getgenv(), "CameraConnection") then
- getgenv().CameraConnection = 
-RunService.Heartbeat:Connect(function()
- local targetPlayer = Players:FindFirstChild(chasingplayer)
- if targetPlayer and targetPlayer.Character and 
-targetPlayer.Character:FindFirstChild("Humanoid") then
- Camera.CameraSubject = targetPlayer.Character.Humanoid
- else
- if rawget(getgenv(), "CameraConnection") then
- getgenv().CameraConnection:Disconnect()
- getgenv().CameraConnection = nil
- end
- Camera.CameraSubject = LocalPlayer.Character and 
-LocalPlayer.Character:FindFirstChild("Humanoid") or nil
- end
- end)
- end else
- if rawget(getgenv(), "CameraConnection") then
- getgenv().CameraConnection:Disconnect()
- getgenv().CameraConnection = nil
- end
- if LocalPlayer.Character and 
-LocalPlayer.Character:FindFirstChild("Humanoid") then
- Camera.CameraSubject = LocalPlayer.Character.Humanoid
- end
- end
- end
-})
-ChildTab:AddParagraph({
- Title = "FE",
- Content = "Funcionalidades FE"
-})
-                
