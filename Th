@@ -3575,8 +3575,6 @@ TabLag:AddParagraph({ "Informação", "O lag começa após cerca de 35 segundos.
                                           -- === Tab 5: Car === --
 ---------------------------------------------------------------------------------------------------------------------------------
 
-local Section = Tab5:AddSection({"all car functions"})
-
 -- VariÃ¡veis
 local carSpeed = 25
 local turboValue = "25"
@@ -4572,7 +4570,8 @@ Tabscript:AddButton({ Name = "Rael Hub Brook",
  end
 })
 
-Tabscript:AddButton({ Name = "Telekines Tool",
+Tabscript:AddButton({
+ Name = "Telekines Tool",
  Callback = function()
   loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
 end 
@@ -5537,113 +5536,3 @@ Tab2:AddSlider({
 })
 
 
-local SectionChild = TabChild:AddSection({ Name = "Controle da Criança FE" })
-
-local playerChildDropdown = TabChild:AddDropdown({
-    Name = "Selecione um player para perseguir",
-    Options = updatePlayerList(),
-    Default = "",
-    Callback = function(selected)
-        if game.Players:FindFirstChild(selected) then 
-            chasingplayer = selected
-        else
-            chasingplayer = nil
-        end
-    end
-})
-
-TabChild:AddButton({
-    Name = "Atualizar Player List",
-    Callback = function()
-        local updated = updatePlayerList()
-        pcall(function()
-            playerChildDropdown:Refresh(updated)
-        end)
-    end
-})
-
-TabChild:AddButton({
-    Name = "Enviar criança",
-    Callback = function()
-        if not chasingplayer then
-            warn("Nenhum jogador selecionado!")
-            return 
-        end
-        
-        -- Spawn da Criança
-        local args = { [1] = "CharacterFollowSpawnPlayer", [2] = "BabyBoy" }
-        pcall(function()
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(unpack(args))
-        end)
-
-        task.wait(0.3)
-
-        local target = chasingplayer
-        local targetPlr = game.Players:FindFirstChild(target)
-        
-        if targetPlr and targetPlr.Character and vu7.Character and vu7.Character:FindFirstChild("FollowCharacter") then
-            local followChar = vu7.Character.FollowCharacter
-            followChar.Parent = targetPlr.Character
-            
-            -- Loop de Movimento FE
-            if getgenv().FollowLoop then getgenv().FollowLoop:Disconnect() end
-            getgenv().FollowLoop = vu10.Heartbeat:Connect(function()
-                if followChar and followChar:FindFirstChild("Torso") and targetPlr.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = targetPlr.Character.HumanoidRootPart
-                    followChar.Torso.BodyPosition.Position = hrp.Position - (hrp.CFrame.LookVector * 3)
-                    followChar.Torso.BodyGyro.CFrame = hrp.CFrame
-                else
-                    getgenv().FollowLoop:Disconnect()
-                end
-            end)
-        end
-    end
-})
-
-TabChild:AddButton({
-    Name = "Retornar criança",
-    Callback = function() 
-        if getgenv().FollowLoop then
-            getgenv().FollowLoop:Disconnect()
-            getgenv().FollowLoop = nil
-        end
-        pcall(function()
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("DeleteFollowCharacter")
-            task.wait(0.1)
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("CharacterFollowSpawnPlayer", "BabyBoy")
-        end)
-    end
-})
-
-TabChild:AddToggle({
-    Name = "Spectar Player",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            if not chasingplayer then return end
-            getgenv().ChildSpectate = vu10.Heartbeat:Connect(function()
-                local target = game.Players:FindFirstChild(chasingplayer)
-                if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-                    vuCam.CameraSubject = target.Character.Humanoid
-                end
-            end)
-        else
-            if getgenv().ChildSpectate then getgenv().ChildSpectate:Disconnect() end
-            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = vu7.Character.Humanoid
-            end
-        end
-    end
-})
-
-TabChild:AddParagraph({ Title = "FE", Content = "As funções de criança são visíveis para todos (FE)." })
-
--- Eventos de atualização automática da lista
-game.Players.PlayerAdded:Connect(function()
-    task.wait(1)
-    playerChildDropdown:Refresh(updatePlayerList())
-end)
-game.Players.PlayerRemoving:Connect(function()
-    task.wait(1)
-    playerChildDropdown:Refresh(updatePlayerList())
-end)
