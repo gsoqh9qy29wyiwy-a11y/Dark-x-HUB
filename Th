@@ -402,7 +402,7 @@ local TabExpansao = Window:MakeTab({"Expansão", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
-local TabVisual = Window:MakeTab({"Visual", "star"})
+local TabVisual = Window:MakeTab({"Visual", "Star"})
 
 
 Tab1:AddSection({"Créditos do Hub"})
@@ -5636,18 +5636,4 @@ game.Players.PlayerRemoving:Connect(function()
     task.wait(1)
     playerChildDropdown:Refresh(updatePlayerList())
 end)
-
--- ==========================================
--- ABA VISUAL (OP)
--- ==========================================
-
-TabVisual:AddSection({"Só vc poderá ver"})
-
-TabVisual:AddButton({
-    Name = "C00lkidd Gui ",
-    Description = "Aviso so o cliente Poderá ver",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
-    end
-})
 
