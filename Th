@@ -20,22 +20,6 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
--- Variáveis da Criança (Chasing/Child)
-local playersList = {}
-local chasingplayer = nil
-
--- Função para atualizar a lista de players (Usada na aba Criança)
-local function updatePlayerList()
-    playersList = {}
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= vu7 then
-            table.insert(playersList, player.Name)
-        end
-    end
-    return playersList
-end
-
-
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
 _G.BH_Strength = 200
