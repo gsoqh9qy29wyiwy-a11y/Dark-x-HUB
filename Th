@@ -399,7 +399,6 @@ local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
-local TabChild = Window:MakeTab({"Criança", "baby"})
 
 
 Tab1:AddSection({"Créditos do Hub"})
