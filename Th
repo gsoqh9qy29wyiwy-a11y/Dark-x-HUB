@@ -402,7 +402,6 @@ local TabExpansao = Window:MakeTab({"Expansão", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
-local TabVisual = Window:MakeTab({"Visual", "star"})
 
 
 Tab1:AddSection({"Créditos do Hub"})
@@ -4572,6 +4571,16 @@ Tabscript:AddButton({
 
 })
 
+Tabscript:AddSection({"Só vc poderá ver"})
+
+Tabscript:AddButton({
+    Name = "C00lkidd Gui ",
+    Description = "Aviso so o cliente Poderá ver",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
+    end
+})
+
 ---------------------------------------------------------------------------------------------------------------------------
 -- === Tab Audio === --
 ---------------------------------------------------------------------------------------------------------------------------
@@ -5638,15 +5647,6 @@ game.Players.PlayerRemoving:Connect(function()
 end)
 
 
-TabVisual:AddSection({"Só vc poderá ver"})
-
-TabVisual:AddButton({
-    Name = "C00lkidd Gui ",
-    Description = "Aviso so o cliente Poderá ver",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
-    end
-})
 
 
 
