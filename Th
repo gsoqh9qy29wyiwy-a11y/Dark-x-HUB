@@ -401,7 +401,7 @@ local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
-
+local ChildTab = Window:MakeTab({"Criança", "baby"})
 
 -- ==========================================
 -- ABA CRIANÇA (INTEGRADA)
