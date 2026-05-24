@@ -399,7 +399,7 @@ local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
-
+local Tab67 = Window:MakeTab({"Criança", "baby"})
 
 Tab1:AddSection({"Créditos do Hub"})
 
@@ -5534,5 +5534,4 @@ Tab2:AddSlider({
     end
 })
 
-local TabChild = Window:MakeTab({"Criança", "baby"})
-local Section = TabChild:AddSection({ Name = "Controle da Criança FE" })
+local Section = Tab67AddSection({ Name = "Controle da Criança FE" })
