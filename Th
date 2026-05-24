@@ -5536,4 +5536,4 @@ Tab2:AddSlider({
 
 local TabChild = Window:MakeTab({"Criança", "baby"})
 
-local Section = TabChild:AddSection({"Player Character"})
+local SectionChild = TabChild:AddSection({ Name = "Controle da Criança FE" })
