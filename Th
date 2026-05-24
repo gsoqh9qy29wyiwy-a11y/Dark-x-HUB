@@ -35,7 +35,6 @@ local function updatePlayerList()
     return playersList
 end
 
-
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
 _G.BH_Strength = 200
@@ -400,7 +399,7 @@ local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Expansão", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
-local ChildTab = Window:MakeTab({"Criança", "baby"})
+local TabChild = Window:MakeTab({"Criança", "baby"})
 
 
 Tab1:AddSection({"Créditos do Hub"})
@@ -5537,12 +5536,10 @@ Tab2:AddSlider({
     end
 })
 
--- ==========================================
--- ABA CRIANÇA (INTEGRADA)
--- ==========================================
-local SectionChild = ChildTab:AddSection({ Name = "Controle da Criança FE" })
 
-local playerChildDropdown = ChildTab:AddDropdown({
+local SectionChild = TabChild:AddSection({ Name = "Controle da Criança FE" })
+
+local playerChildDropdown = TabChild:AddDropdown({
     Name = "Selecione um player para perseguir",
     Options = updatePlayerList(),
     Default = "",
@@ -5555,7 +5552,7 @@ local playerChildDropdown = ChildTab:AddDropdown({
     end
 })
 
-ChildTab:AddButton({
+TabChild:AddButton({
     Name = "Atualizar Player List",
     Callback = function()
         local updated = updatePlayerList()
@@ -5565,7 +5562,7 @@ ChildTab:AddButton({
     end
 })
 
-ChildTab:AddButton({
+TabChild:AddButton({
     Name = "Enviar criança",
     Callback = function()
         if not chasingplayer then
@@ -5603,7 +5600,7 @@ ChildTab:AddButton({
     end
 })
 
-ChildTab:AddButton({
+TabChild:AddButton({
     Name = "Retornar criança",
     Callback = function() 
         if getgenv().FollowLoop then
@@ -5618,7 +5615,7 @@ ChildTab:AddButton({
     end
 })
 
-ChildTab:AddToggle({
+TabChild:AddToggle({
     Name = "Spectar Player",
     Default = false,
     Callback = function(Value)
@@ -5639,7 +5636,7 @@ ChildTab:AddToggle({
     end
 })
 
-ChildTab:AddParagraph({ Title = "FE", Content = "As funções de criança são visíveis para todos (FE)." })
+TabChild:AddParagraph({ Title = "FE", Content = "As funções de criança são visíveis para todos (FE)." })
 
 -- Eventos de atualização automática da lista
 game.Players.PlayerAdded:Connect(function()
