@@ -5535,4 +5535,4 @@ Tab2:AddSlider({
     end
 })
 
-local Section = ChildTab:AddSection({"Player Character"})
+local Section = TabChild:AddSection({"Player Character"})
