@@ -5535,4 +5535,4 @@ Tab2:AddSlider({
     end
 })
 
-local SectionChild = TabChild:AddSection({ Name = "Controle da Criança FE" })
+local Section = TabChild:AddSection({ Name = "Controle da Criança FE" })
