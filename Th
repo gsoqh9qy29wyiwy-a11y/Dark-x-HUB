@@ -398,7 +398,7 @@ local Tabscript = Window:MakeTab({"Scripts", "scroll"})
 local TabAudio = Window:MakeTab({"Audio All", "radio"})    
 local TabMusic = Window:MakeTab({"Music", "music"}) 
 local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
-local TabExpansao = Window:MakeTab({"Expansão", "home"})
+local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
@@ -3556,7 +3556,6 @@ TabLag:AddParagraph({ "Informação", "O lag começa após cerca de 35 segundos.
                                           -- === Tab 5: Car === --
 ---------------------------------------------------------------------------------------------------------------------------------
 
-local Section = Tab5:AddSection({"all car functions"})
 
 -- VariÃ¡veis
 local carSpeed = 25
@@ -5185,8 +5184,8 @@ end)
 
 
 TabExpansao:AddButton({
-    Name = "ExpansÃ£o de DomÃ­nio🌌”®",
-    Description = "Ativa a expansÃ£o de domÃ­nio permanente",
+    Name = "Skybox HACKELINDO3 ”®",
+    Description = "Ativa a Skybox permanente Avisoa Skyboxe visual",
     Callback = function()
         
         -- ServiÃ§os
@@ -5195,13 +5194,6 @@ TabExpansao:AddButton({
         local Players = game:GetService("Players")
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local Player = Players.LocalPlayer
-
-        -- Aviso no chat
-        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then 
-            TextChatService.TextChannels.RBXGeneral:SendAsync(
-                "hi\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r[ðŸŒŒðŸš€] ..."
-            )
-        end
 
         -- FunÃ§Ã£o principal
         local function ativarDominio()
@@ -5250,12 +5242,12 @@ TabExpansao:AddButton({
             end
 
             local newSky = Instance.new("Sky", Lighting)
-            newSky.SkyboxBk = "rbxassetid://159454299"
-            newSky.SkyboxDn = "rbxassetid://159454296"
-            newSky.SkyboxFt = "rbxassetid://159454293"
-            newSky.SkyboxLf = "rbxassetid://159454286"
-            newSky.SkyboxRt = "rbxassetid://159454300"
-            newSky.SkyboxUp = "rbxassetid://159454288"
+            newSky.SkyboxBk = "rbxassetid://96102280701722"
+            newSky.SkyboxDn = "rbxassetid://96102280701722"
+            newSky.SkyboxFt = "rbxassetid://96102280701722"
+            newSky.SkyboxLf = "rbxassetid://96102280701722"
+            newSky.SkyboxRt = "rbxassetid://96102280701722"
+            newSky.SkyboxUp = "rbxassetid://96102280701722"
         end
 
         ativarDominio()
@@ -5288,7 +5280,103 @@ TabExpansao:AddButton({
         end)
     end
 })
+TabExpansao:AddButton({
+    Name = "Skybox Dev”®",
+    Description = "Ativa a Skybox permanente Avisoa Skyboxe visual",
+    Callback = function()
+        
+        -- ServiÃ§os
+        local TextChatService = game:GetService("TextChatService")
+        local Lighting = game:GetService("Lighting")
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Player = Players.LocalPlayer
 
+        -- FunÃ§Ã£o principal
+        local function ativarDominio()
+            local char = Player.Character or Player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+
+            local dominio = Instance.new("Model", workspace)
+            dominio.Name = "InfiniteVoid"
+
+            local esfera = Instance.new("Part")
+            esfera.Shape = Enum.PartType.Ball
+            esfera.Size = Vector3.new(300, 300, 300)
+            esfera.Position = hrp.Position
+            esfera.Anchored = true
+            esfera.CanCollide = false
+            esfera.Material = Enum.Material.ForceField
+            esfera.Transparency = 0.3
+            esfera.Color = Color3.fromRGB(0, 0, 0)
+            esfera.Parent = dominio
+
+            local luz = Instance.new("PointLight", esfera)
+            luz.Color = Color3.fromRGB(0, 153, 255)
+            luz.Brightness = 10
+            luz.Range = 300
+
+            local ps = Instance.new("ParticleEmitter", esfera)
+            ps.Texture = "rbxassetid://243660364"
+            ps.Color = ColorSequence.new(Color3.fromRGB(0, 153, 255))
+            ps.LightEmission = 1
+            ps.Size = NumberSequence.new(3)
+            ps.Transparency = NumberSequence.new(0.2)
+            ps.Rate = 1000
+            ps.Lifetime = NumberRange.new(2)
+            ps.Speed = NumberRange.new(0)
+            ps.VelocitySpread = 180
+
+            local som = Instance.new("Sound", esfera)
+            som.SoundId = "rbxassetid://1843527678"
+            som.Volume = 2
+            som.Looped = true
+            som:Play()
+
+            local skyOld = Lighting:FindFirstChildOfClass("Sky")
+            if skyOld then
+                skyOld.Parent = nil
+            end
+
+            local newSky = Instance.new("Sky", Lighting)
+            newSky.SkyboxBk = "rbxassetid://116165302507661"
+            newSky.SkyboxDn = "rbxassetid://116165302507661"
+            newSky.SkyboxFt = "rbxassetid://116165302507661"
+            newSky.SkyboxLf = "rbxassetid://116165302507661"
+            newSky.SkyboxRt = "rbxassetid://116165302507661"
+            newSky.SkyboxUp = "rbxassetid://116165302507661"
+        end
+
+        ativarDominio()
+
+        -- Ãudio infinito
+        local selectedAudioID = 140031333626044
+
+        task.spawn(function()
+            while true do
+                local remote = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1nSound1s")
+                if remote then
+                    remote:FireServer(workspace, selectedAudioID, 1)
+                end
+
+                local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local sound = Instance.new("Sound")
+                    sound.SoundId = "rbxassetid://" .. selectedAudioID
+                    sound.Volume = 1
+                    sound.Looped = false
+                    sound.Parent = root
+                    sound:Play()
+                    sound.Ended:Connect(function() sound:Destroy() end)
+                    task.wait(sound.TimeLength + 0.1)
+                else
+                    warn("HumanoidRootPart nÃ£o encontrado")
+                    break
+                end
+            end
+        end)
+    end
+})
 TabExpansao:AddButton({
     Name = "Shaders",
     Description = "ativa shader so que e inreversivel So para quando sair",
