@@ -9,6 +9,25 @@ local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
 local vuCam = vu9.CurrentCamera
 
+local orbitando = false
+local orbitConn = nil
+local soccerBall = nil
+local originalProperties = nil
+
+-- Função necessária para o botão funcionar
+local function equipBola()
+    if not vu7.Backpack:FindFirstChild("SoccerBall") and not vu7.Character:FindFirstChild("SoccerBall") then
+        vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
+    end
+    task.wait(0.2)
+    local ball = vu7.Backpack:FindFirstChild("SoccerBall") or vu7.Character:FindFirstChild("SoccerBall")
+    if ball then
+        vu7.Character.Humanoid:EquipTool(ball)
+        return true
+    end
+    return false
+end
+
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
