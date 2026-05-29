@@ -109,19 +109,6 @@ local function AntiFlingLoop(name, getFolderFunc)
     end
 end
 
--- Função necessária para o botão funcionar
-local function equipBola()
-    if not vu7.Backpack:FindFirstChild("SoccerBall") and not vu7.Character:FindFirstChild("SoccerBall") then
-        vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
-    end
-    task.wait(0.2)
-    local ball = vu7.Backpack:FindFirstChild("SoccerBall") or vu7.Character:FindFirstChild("SoccerBall")
-    if ball then
-        vu7.Character.Humanoid:EquipTool(ball)
-        return true
-    end
-    return false
-end
 -- --- FUNÇÕES HEADSIT ---
 local function headsitOnPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
