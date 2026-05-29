@@ -20,25 +20,6 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
-local orbitando = false
-local orbitConn = nil
-local soccerBall = nil
-local originalProperties = nil
-
--- Função necessária para o botão funcionar
-local function equipBola()
-    if not vu7.Backpack:FindFirstChild("SoccerBall") and not vu7.Character:FindFirstChild("SoccerBall") then
-        vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
-    end
-    task.wait(0.2)
-    local ball = vu7.Backpack:FindFirstChild("SoccerBall") or vu7.Character:FindFirstChild("SoccerBall")
-    if ball then
-        vu7.Character.Humanoid:EquipTool(ball)
-        return true
-    end
-    return false
-end
-
 -- Variáveis da Criança (Chasing/Child)
 local playersList = {}
 local chasingplayer = nil
@@ -59,6 +40,11 @@ _G.BlackHoleActive = false
 _G.BH_Strength = 200
 local BH_Attachment = nil
 local BH_Part = nil
+
+local orbitando = false
+local orbitConn = nil
+local soccerBall = nil
+local originalProperties = nil
 
 local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
@@ -128,6 +114,19 @@ local function AntiFlingLoop(name, getFolderFunc)
     end
 end
 
+-- Função necessária para o botão funcionar
+local function equipBola()
+    if not vu7.Backpack:FindFirstChild("SoccerBall") and not vu7.Character:FindFirstChild("SoccerBall") then
+        vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
+    end
+    task.wait(0.2)
+    local ball = vu7.Backpack:FindFirstChild("SoccerBall") or vu7.Character:FindFirstChild("SoccerBall")
+    if ball then
+        vu7.Character.Humanoid:EquipTool(ball)
+        return true
+    end
+    return false
+end
 -- --- FUNÇÕES HEADSIT ---
 local function headsitOnPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
@@ -939,7 +938,7 @@ local function updateCamera()
         end
     end)
 end
-   
+
 -- Bola Fling Orbitando
 TabTroll:AddButton({
     Name = "Bola Fling Orbitando",
@@ -1004,7 +1003,7 @@ TabTroll:AddButton({
             soccerBall.AssemblyAngularVelocity = Vector3.new(10000, 10000, 10000)
         end)
     end
-})         
+})
 
 TabTroll:AddSection({Name = "Clicks"})
 TabTroll:AddButton({
