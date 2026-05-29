@@ -14,23 +14,20 @@ local orbitConn = nil
 local soccerBall = nil
 local originalProperties = nil
 
+-- Função necessária para o botão funcionar
 local function equipBola()
-    local toolName = "SoccerBall"
-    -- Se não tiver a bola, pega no servidor
-    if not vu7.Backpack:FindFirstChild(toolName) and not vu7.Character:FindFirstChild(toolName) then
-        vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", toolName)
-        task.wait(0.5)
+    if not vu7.Backpack:FindFirstChild("SoccerBall") and not vu7.Character:FindFirstChild("SoccerBall") then
+        vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
     end
-    
-    local tool = vu7.Backpack:FindFirstChild(toolName) or vu7.Character:FindFirstChild(toolName)
-    if tool then
-        if tool.Parent ~= vu7.Character then
-            vu7.Character.Humanoid:EquipTool(tool)
-        end
+    task.wait(0.2)
+    local ball = vu7.Backpack:FindFirstChild("SoccerBall") or vu7.Character:FindFirstChild("SoccerBall")
+    if ball then
+        vu7.Character.Humanoid:EquipTool(ball)
         return true
     end
     return false
 end
+
 
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
@@ -928,69 +925,73 @@ local function FlingBall(targetName)
         end
     end
 end
+
+
+-- Bola Fling Orbitando
 TabTroll:AddButton({
     Name = "Bola Fling Orbitando",
     Callback = function()
+        -- Se já estiver orbitando, ele desliga ao clicar de novo
         if orbitando then 
             orbitando = false
             if orbitConn then orbitConn:Disconnect() orbitConn = nil end
             return 
         end
 
-        if not equipBola() then 
-            print("Não foi possível equipar a bola")
-            return 
-        end
-        
-        task.wait(0.3)
+        if not equipBola() then return end
+        task.wait(0.5)
 
-        local char = vu7.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
+        local character = vu7.Character or vu7.CharacterAdded:Wait()
+        local myHRP = character:FindFirstChild("HumanoidRootPart")
+        if not myHRP then return end
 
-        -- Localiza a bola física no Brookhaven
-        local ballPath = vu9:FindFirstChild("WorkspaceCom") and vu9.WorkspaceCom:FindFirstChild("001_SoccerBalls")
-        soccerBall = ballPath and ballPath:FindFirstChild("Soccer" .. vu7.Name)
+        -- Localiza a bola no Workspace usando suas variáveis
+        local workspaceCom = vu9:FindFirstChild("WorkspaceCom")
+        local soccerBalls = workspaceCom and workspaceCom:FindFirstChild("001_SoccerBalls")
+        soccerBall = soccerBalls and soccerBalls:FindFirstChild("Soccer" .. vu7.Name)
 
-        if not soccerBall then
-            print("Bola física não encontrada no Workspace")
-            return
-        end
+        if not soccerBall then return end
 
-        -- Configurações de Fling (Aumenta a força)
+        -- Salva propriedades originais para resetar depois
+        originalProperties = {
+            Anchored = soccerBall.Anchored,
+            CanCollide = soccerBall.CanCollide,
+            CanTouch = soccerBall.CanTouch
+        }
+
+        soccerBall.Anchored = false
         soccerBall.CanCollide = true
-        soccerBall.Massless = true
-        
-        -- Tenta ganhar controle da rede (Network Ownership)
-        pcall(function()
-            if sethiddenproperty then
-                sethiddenproperty(vu7, "SimulationRadius", math.huge)
-            end
-        end)
+        soccerBall.CanTouch = true
+
+        -- Bypassar a rede para ter controle físico da bola
+        pcall(function() sethiddenproperty(vu7, "SimulationRadius", math.huge) end)
 
         orbitando = true
-        local angle = 0
-        
-        orbitConn = vu10.Heartbeat:Connect(function(dt)
-            if not orbitando or not soccerBall or not soccerBall.Parent or not hrp.Parent then
-                if orbitConn then orbitConn:Disconnect() end
+        orbitConn = vu10.Heartbeat:Connect(function()
+            if not orbitando or not soccerBall or not soccerBall.Parent or not myHRP or not myHRP.Parent then
+                if orbitConn then orbitConn:Disconnect() orbitConn = nil end
                 orbitando = false
+                if soccerBall and originalProperties then
+                    soccerBall.Anchored = originalProperties.Anchored
+                    soccerBall.CanCollide = originalProperties.CanCollide
+                    soccerBall.CanTouch = originalProperties.CanTouch
+                end
                 return
             end
 
-            -- Movimento de Órbita
-            angle = angle + (dt * 30) -- Velocidade da órbita
-            local radius = 6
-            local offset = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+            -- Lógica matemática da Órbita
+            local t = tick() * 99999 -- Velocidade
+            local radius = 6      -- Distância do seu corpo
+            local offset = Vector3.new(math.cos(t) * radius, -1, math.sin(t) * radius)
+
+            soccerBall.CFrame = CFrame.new(myHRP.Position + offset)
             
-            -- Posiciona a bola e aplica velocidade extrema (Fling)
-            soccerBall.CFrame = CFrame.new(hrp.Position + offset)
-            soccerBall.Velocity = Vector3.new(0, 500, 0) -- Velocidade vertical constante para bugar quem toca
-            soccerBall.RotVelocity = Vector3.new(1000, 1000, 1000) -- Rotação louca
+            -- Aplica velocidade extrema para dar o efeito de "Fling" em quem tocar
+            soccerBall.AssemblyLinearVelocity = Vector3.new(10000, 10000, 10000)
+            soccerBall.AssemblyAngularVelocity = Vector3.new(10000, 10000, 10000)
         end)
     end
 })
-
 
 
 TabTroll:AddSection({Name = "Clicks"})
