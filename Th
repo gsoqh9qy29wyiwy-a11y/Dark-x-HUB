@@ -827,7 +827,7 @@ TabTroll:AddButton({
     end
 })
 
-TabTroll:AddSection({ "Fling Ball" })
+TabTroll:AddSection({ "Fling Balls" })
 TabTroll:AddToggle({
     Name = "Fling Ball",
     Callback = function()
@@ -919,6 +919,51 @@ local function updateCamera()
         end
     end)
 end
+-- Bola Fling Orbitando
+TabTroll:AddButton({"Bola Fling Orbitando", function()
+    if orbitando then return end
+    if not equipBola() then return end
+    task.wait(0.5)
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local myHRP = character:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return end
+    local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
+    local soccerBalls = workspaceCom and workspaceCom:FindFirstChild("001_SoccerBalls")
+    soccerBall = soccerBalls and soccerBalls:FindFirstChild("Soccer" .. LocalPlayer.Name)
+    if not soccerBall then return end
+    originalProperties = {
+        Anchored = soccerBall.Anchored,
+        CanCollide = soccerBall.CanCollide,
+        CanTouch = soccerBall.CanTouch
+    }
+    soccerBall.Anchored = false
+    soccerBall.CanCollide = true
+    soccerBall.CanTouch = true
+    pcall(function() soccerBall:SetNetworkOwner(nil) end)
+    orbitando = true
+    orbitConn = RunService.Heartbeat:Connect(function()
+        if not orbitando or not soccerBall or not soccerBall.Parent or not myHRP or not myHRP.Parent or not character or not character.Parent then
+            if orbitConn then
+                orbitConn:Disconnect()
+                orbitConn = nil
+            end
+            orbitando = false
+            if soccerBall and originalProperties then
+                soccerBall.Anchored = originalProperties.Anchored
+                soccerBall.CanCollide = originalProperties.CanCollide
+                soccerBall.CanTouch = originalProperties.CanTouch
+            end
+            soccerBall = nil
+            originalProperties = nil
+            return
+        end
+        local t = tick() * 100
+        local radius = 5
+        local offset = Vector3.new(math.cos(t) * radius, -1, math.sin(t) * radius)
+        soccerBall.CFrame = CFrame.new(myHRP.Position + offset)
+        soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+    end)
+end})
 
 TabTroll:AddSection({Name = "Clicks"})
 TabTroll:AddButton({
