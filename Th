@@ -41,11 +41,6 @@ _G.BH_Strength = 200
 local BH_Attachment = nil
 local BH_Part = nil
 
-local orbitando = false
-local orbitConn = nil
-local soccerBall = nil
-local originalProperties = nil
-
 local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
