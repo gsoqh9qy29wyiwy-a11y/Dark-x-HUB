@@ -46,11 +46,6 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
-local orbitando = false
-local orbitConn = nil
-local soccerBall = nil
-local originalProperties = nil
-
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
 local function updateCamera()
