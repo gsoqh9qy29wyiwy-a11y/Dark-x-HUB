@@ -20,6 +20,9 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
+orbitando = false
+orbitConn = nil
+
 -- Variáveis da Criança (Chasing/Child)
 local playersList = {}
 local chasingplayer = nil
@@ -45,7 +48,7 @@ local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
 local InputID = ""
-local soccerBall = nil
+
 
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
@@ -6166,7 +6169,6 @@ game.Players.PlayerRemoving:Connect(function()
     task.wait(1)
     playerChildDropdown:Refresh(updatePlayerList())
 end)
-
 
 
 
