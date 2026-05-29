@@ -20,20 +20,25 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
+-- Variáveis da Bola Fling
 local orbitando = false
 local orbitConn = nil
 local soccerBall = nil
 local originalProperties = nil
 
--- Função necessária para o botão funcionar
+-- Função para equipar a bola automaticamente
 local function equipBola()
-    if not vu7.Backpack:FindFirstChild("SoccerBall") and not vu7.Character:FindFirstChild("SoccerBall") then
+    -- Verifica se já tem a bola no inventário ou na mão
+    if not vu7.Backpack:FindFirstChild("SoccerBall") and not (vu7.Character and vu7.Character:FindFirstChild("SoccerBall")) then
+        -- Usa o controle vu8 (ReplicatedStorage) para pegar a ferramenta
         vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
     end
-    task.wait(0.2)
-    local ball = vu7.Backpack:FindFirstChild("SoccerBall") or vu7.Character:FindFirstChild("SoccerBall")
+    task.wait(0.3)
+    local ball = vu7.Backpack:FindFirstChild("SoccerBall") or (vu7.Character and vu7.Character:FindFirstChild("SoccerBall"))
     if ball then
-        vu7.Character.Humanoid:EquipTool(ball)
+        if ball.Parent == vu7.Backpack then
+            vu7.Character.Humanoid:EquipTool(ball)
+        end
         return true
     end
     return false
