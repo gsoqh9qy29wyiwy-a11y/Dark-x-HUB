@@ -9,6 +9,27 @@ local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
 local vuCam = vu9.CurrentCamera
 
+-- Função Anti-Lag que estava faltando
+local function ApplyAntiLag(state)
+    if state then
+        settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Default
+        settings().Physics.AllowSleep = true
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("BasePart") then
+                v.Material = Enum.Material.SmoothPlastic
+                v.Reflectance = 0
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = false
+            end
+        end
+        print("Anti-Lag Ativado")
+    else
+        print("Anti-Lag Desativado (Requer re-entrar para resetar texturas)")
+    end
+end
+
 local orbitando = false
 local orbitConn = nil
 local soccerBall = nil
