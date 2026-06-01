@@ -403,7 +403,7 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
-local opTab = Window:MakeTab({"OP", "home"}
+local opTab = Window:MakeTab({"OP", "home"})
 
 Tab1:AddSection({"Créditos do Hub"})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
@@ -6246,4 +6246,3 @@ opTab:AddButton({
         end
     end
 })
-
