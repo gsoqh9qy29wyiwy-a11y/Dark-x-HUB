@@ -1,3 +1,23 @@
+game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+    [1] = "RolePlayBio",
+    [2] = "In Execution",
+}))
+
+game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+    [1] = "RolePlayName",
+    [2] = "Dark x Hub",
+}))
+
+game:GetService("ReplicatedStorage").RE["1RPNam1eColo1r"]:FireServer(table.unpack({
+    [1] = "PickingRPBioColor",
+    [2] = Color3.new(0, 0, 0),
+}))
+
+game:GetService("ReplicatedStorage").RE["1RPNam1eColo1r"]:FireServer(table.unpack({
+    [1] = "PickingRPNameColor",
+    [2] = Color3.new(255, 255, 255),
+}))
+
 local redzlib = loadstring(game:HttpGet("https://pastebin.com/raw/XqZsnzRQ",true))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
@@ -404,6 +424,9 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local opTab = Window:MakeTab({"OP", "home"})
+local TrollTab = Window:MakeTab({ "Trolling Map", "map" })
+
+
 
 Tab1:AddSection({"Créditos do Hub"})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
@@ -6244,5 +6267,91 @@ opTab:AddButton({
         if not success then
         else
         end
+    end
+})
+
+ ---------------------------------------------------------------------------------------------------------------------------------
+                                                   -- === TrollTab === --
+-----------------------------------------------------------------------------------------------------------------------------------
+
+TrollTab:AddSection({ "Trolling Map" })
+--[[
+TrollTab:AddSection({ "Landmark" })
+local Facs = {
+    [1] = {Name = "House #1", Position = Vector3.new(260.29, 4.37, 209.32)},
+    [2] = {Name = "House #2", Position = Vector3.new(234.49, 4.37, 228.00)},
+    [3] = {Name = "House #3", Position = Vector3.new(262.79, 21.37, 210.84)},
+    [4] = {Name = "House #4", Position = Vector3.new(229.60, 21.37, 225.40)},
+    [5] = {Name = "House #5", Position = Vector3.new(173.44, 21.37, 228.11)},
+    [6] = {Name = "House #6", Position = Vector3.new(-43, 21, -137)},
+    [7] = {Name = "House #7", Position = Vector3.new(-40, 36, -137)},
+    [11] = {Name = "House #11", Position = Vector3.new(-21, 40, 436)},
+    [12] = {Name = "House #12", Position = Vector3.new(155, 37, 433)},
+    [13] = {Name = "House #13", Position = Vector3.new(255, 35, 431)},
+    [14] = {Name = "House #14", Position = Vector3.new(254, 38, 394)},
+    [15] = {Name = "House #15", Position = Vector3.new(148, 39, 387)},
+    [16] = {Name = "House #16", Position = Vector3.new(-17, 42, 395)},
+    [17] = {Name = "House #17", Position = Vector3.new(-189, 37, -247)},
+    [18] = {Name = "House #18", Position = Vector3.new(-354, 37, -244)},
+    [19] = {Name = "House #19", Position = Vector3.new(-456, 36, -245)},
+    [20] = {Name = "House #20", Position = Vector3.new(-453, 38, -295)},
+    [21] = {Name = "House #21", Position = Vector3.new(-356, 38, -294)},
+    [22] = {Name = "House #22", Position = Vector3.new(-187, 37, -295)},
+    [23] = {Name = "House #23", Position = Vector3.new(-410, 68, -447)},
+    [24] = {Name = "House #24", Position = Vector3.new(-348, 69, -496)},
+    [28] = {Name = "House #28", Position = Vector3.new(-103, 12, 1087)},
+    [29] = {Name = "House #29", Position = Vector3.new(-730, 6, 808)},
+    [30] = {Name = "House #30", Position = Vector3.new(-245, 7, 822)},
+    [31] = {Name = "House #31", Position = Vector3.new(639, 76, -361)},
+    [32] = {Name = "House #32", Position = Vector3.new(-908, 6, -361)},
+    [33] = {Name = "House #33", Position = Vector3.new(-111, 70, -417)},
+    [34] = {Name = "House #34", Position = Vector3.new(230, 38, 569)},
+    [35] = {Name = "House #35", Position = Vector3.new(-30, 13, 2209)}
+}
+
+local FacOP = {}
+for id, data in pairs(Facs) do
+    table.insert(FacOP, {ID = id, Name = data.Name})
+end
+
+table.sort(FacOP, function(a, b)
+    local numA = tonumber(a.Name:match("%d+")) or 0
+    local numB = tonumber(b.Name:match("%d+")) or 0
+    return numA < numB
+end)
+
+TrollTab:AddDropdown({
+        Name = "Select a House",
+        Options = (function()
+        local t = {}
+        for _, v in ipairs(FacOP) do
+            table.insert(t, v.Name)
+        end
+        return t
+    end)(),
+        Callback = function(selectedName)
+local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
+        local FacID, FacPos
+        for _, data in ipairs(FacOP) do
+            if data.Name == selectedName then
+                FacID = data.ID
+                FacPos = Facs[FacID].Position
+                break
+            end
+        end
+        if not FacID or not FacPos then return end
+
+        hrp.CFrame = CFrame.new(FacPos)
+        
+        task.wait(0.5)
+
+        local args1 = {FacID}
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Lot:Claim"):InvokeServer(unpack(args1))
+
+        local args2 = {FacID, "001_Landmark"}
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Lot:BuildProperty"):FireServer(unpack(args2))
     end
 })
