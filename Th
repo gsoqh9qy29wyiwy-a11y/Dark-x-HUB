@@ -411,25 +411,6 @@ Tab1:AddParagraph({"Executor", executorName})
 Tab1:AddSection({"Versão do Hub 5.1"})
 Tab1:AddParagraph({"Criadores", "Carlolx777"})
 
-game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
-    [1] = "RolePlayBio",
-    [2] = "Dono-Admin",
-}))
-
-game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
-    [1] = "RolePlayName",
-    [2] = "《 Dark x Hub 》",
-}))
-
-game:GetService("ReplicatedStorage").RE["1RPNam1eColo1r"]:FireServer(table.unpack({
-    [1] = "PickingRPBioColor",
-    [2] = Color3.new(0, 0, 0),
-}))
-
-game:GetService("ReplicatedStorage").RE["1RPNam1eColo1r"]:FireServer(table.unpack({
-    [1] = "PickingRPNameColor",
-    [2] = Color3.new(170, 0, 0),
-}))
 
 -- --- ABA: TROLL ---
 
