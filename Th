@@ -424,7 +424,7 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local opTab = Window:MakeTab({"OP", "home"})
-local TrollTab = Window:MakeTab({ "Trolling Map", "map" })
+local TabMap = Window:MakeTab({ "Trolling Map", "map" })
 
 
 
@@ -6274,9 +6274,7 @@ opTab:AddButton({
                                                    -- === TrollTab === --
 -----------------------------------------------------------------------------------------------------------------------------------
 
-TrollTab:AddSection({ "Trolling Map" })
---[[
-TrollTab:AddSection({ "Landmark" })
+TabMap:AddSection({ "Landmark" })
 local Facs = {
     [1] = {Name = "House #1", Position = Vector3.new(260.29, 4.37, 209.32)},
     [2] = {Name = "House #2", Position = Vector3.new(234.49, 4.37, 228.00)},
@@ -6320,7 +6318,7 @@ table.sort(FacOP, function(a, b)
     return numA < numB
 end)
 
-TrollTab:AddDropdown({
+TabMap:AddDropdown({
         Name = "Select a House",
         Options = (function()
         local t = {}
