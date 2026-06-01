@@ -365,6 +365,29 @@ local function TeleportTo(cframe)
         char:PivotTo(cframe)
     end
 end
+-- Configuração Automática de Nome e Bio ao abrir o Hub
+local function SetDarkHubIdentity()
+    pcall(function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local remoteText = ReplicatedStorage.RE["1RPNam1eTex1t"]
+        local remoteColor = ReplicatedStorage.RE["1RPNam1eColo1r"]
+
+        -- Define a Bio
+        remoteText:FireServer("RolePlayBio", "Dono-Admin")
+        
+        -- Define o Nome
+        remoteText:FireServer("RolePlayName", "《 Dark x Hub 》")
+        
+        -- Define a Cor da Bio (Preto)
+        remoteColor:FireServer("PickingRPBioColor", Color3.new(0, 0, 0))
+        
+        -- Define a Cor do Nome (Vermelho Escuro)
+        remoteColor:FireServer("PickingRPNameColor", Color3.fromRGB(170, 0, 0))
+    end)
+end
+
+-- Executa a função
+SetDarkHubIdentity()
 
 -- 2. FUNÇÕES DE SUPORTE
 local function getPlayerNames()
