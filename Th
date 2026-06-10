@@ -7,6 +7,7 @@ local vu7 = vu6.LocalPlayer
 local vu8 = game:GetService("ReplicatedStorage")
 local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local vuCam = vu9.CurrentCamera
 
 -- Variáveis de Controle
@@ -19,6 +20,36 @@ _G.AntiFling = false
 _G.AntiLag = false 
 _G.RGBName = false
 _G.RainbowBio = false
+
+local OrbitEnabled = false
+local WingsEnabled = false
+local RingEnabled = false
+local RainbowEnabled = false
+local KillEnabled = false
+local FlingEnabled = false
+local CachedProps = {}
+local TargetCFrame = CFrame.new(244, -1165, 263) -- O CFrame solicitado
+
+-- 2. FUNÇÕES BASE
+local function UpdateProps()
+    table.clear(CachedProps)
+    local Folder = workspace:FindFirstChild("WorkspaceCom") and workspace.WorkspaceCom:FindFirstChild("001_TrafficCones")
+    if not Folder then return end
+    for _, prop in ipairs(Folder:GetChildren()) do
+        if prop.Name:find("Prop" .. vu7.Name) then
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then table.insert(CachedProps, { Model = prop, Remote = remote }) end
+        end
+    end
+end
+
+local function DisableAllProps()
+    OrbitEnabled = false
+    WingsEnabled = false
+    RingEnabled = false
+    KillEnabled = false
+    FlingEnabled = false
+end
 
 -- Variáveis da Criança (Chasing/Child)
 local playersList = {}
@@ -413,11 +444,13 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local opTab = Window:MakeTab({"OP", "home"})
+local Tab10 = Window:MakeTab({ Skybox FE,"home"})
+
 
 Tab1:AddSection({"Créditos do Hub"})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
 Tab1:AddParagraph({"Executor", executorName})
-Tab1:AddSection({"Versão do Hub 5.1"})
+Tab1:AddSection({"Versão do Hub 2.2"})
 Tab1:AddParagraph({"Criadores", "Carlolx777"})
 
 
@@ -511,6 +544,85 @@ TabTroll:AddToggle({
         end
     end
 })
+
+TabTroll:AddSection({ "Fling Ball" })
+TabTroll:AddToggle({
+    Name = "Fling Ball",
+    Callback = function()
+        if _G.SelectedPlayer ~= "" then
+            FlingBall(_G.SelectedPlayer)
+        end
+    end
+})
+local function FlingBall(targetName)
+    local target = game:GetService("Players"):FindFirstChild(targetName)
+    if not target then return end
+    local players = game:GetService("Players")
+    local player = players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local backpack = player:WaitForChild("Backpack")
+    local ServerBalls = workspace.WorkspaceCom:WaitForChild("001_SoccerBalls")
+    local function GetBall()
+        if not backpack:FindFirstChild("SoccerBall") then
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
+        end
+        repeat task.wait() until backpack:FindFirstChild("SoccerBall")
+        backpack.SoccerBall.Parent = character
+        repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
+        character.SoccerBall.Parent = backpack
+        return ServerBalls:FindFirstChild("Soccer" .. player.Name)
+    end
+
+    local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
+    Ball.CanCollide = false
+    Ball.Massless = true
+    Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
+
+    if target ~= player then
+        local tchar = target.Character
+        if tchar and tchar:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("Humanoid") then
+            local troot = tchar.HumanoidRootPart
+            local thum = tchar.Humanoid
+            
+            if Ball:FindFirstChildWhichIsA("BodyVelocity") then
+                Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
+            end
+            
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "FlingPower"
+            bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.P = 9e900
+            bv.Parent = Ball
+            
+            workspace.CurrentCamera.CameraSubject = thum
+            
+            local connection
+            connection = vu10.Heartbeat:Connect(function()
+                if not tchar or not tchar:IsDescendantOf(workspace) or thum.Health <= 0 or target.Parent ~= players or troot.Velocity.Magnitude > 1000 then
+                    workspace.CurrentCamera.CameraSubject = humanoid
+                    connection:Disconnect()
+                    return
+                end
+                
+                if troot.Velocity.Magnitude > 0 then
+                    local pos_x = troot.Position.X + (troot.Velocity.X / 1.5)
+                    local pos_y = troot.Position.Y + (troot.Velocity.Y / 1.5)
+                    local pos_z = troot.Position.Z + (troot.Velocity.Z / 1.5)
+                    Ball.CFrame = CFrame.new(Vector3.new(pos_x, pos_y, pos_z))
+                    Ball.Orientation += Vector3.new(45, 60, 30)
+                else
+                    for _, v in pairs(tchar:GetChildren()) do
+                        if v:IsA("BasePart") and v.CanCollide and not v.Anchored then
+                            Ball.CFrame = v.CFrame
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end
 
 TabTroll:AddSection({"Couch "})
 TabTroll:AddButton({Name = "Kill", Callback = function()
@@ -836,85 +948,6 @@ TabTroll:AddButton({
         print("Jogador liberado, seguro na posiÃ§Ã£o.")
     end
 })
-
-TabTroll:AddSection({ "Fling Balls" })
-TabTroll:AddToggle({
-    Name = "Fling Ball",
-    Callback = function()
-        if _G.SelectedPlayer ~= "" then
-            FlingBall(_G.SelectedPlayer)
-        end
-    end
-})
-local function FlingBall(targetName)
-    local target = game:GetService("Players"):FindFirstChild(targetName)
-    if not target then return end
-    local players = game:GetService("Players")
-    local player = players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    local backpack = player:WaitForChild("Backpack")
-    local ServerBalls = workspace.WorkspaceCom:WaitForChild("001_SoccerBalls")
-    local function GetBall()
-        if not backpack:FindFirstChild("SoccerBall") then
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
-        end
-        repeat task.wait() until backpack:FindFirstChild("SoccerBall")
-        backpack.SoccerBall.Parent = character
-        repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
-        character.SoccerBall.Parent = backpack
-        return ServerBalls:FindFirstChild("Soccer" .. player.Name)
-    end
-
-    local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
-    Ball.CanCollide = false
-    Ball.Massless = true
-    Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
-
-    if target ~= player then
-        local tchar = target.Character
-        if tchar and tchar:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("Humanoid") then
-            local troot = tchar.HumanoidRootPart
-            local thum = tchar.Humanoid
-            
-            if Ball:FindFirstChildWhichIsA("BodyVelocity") then
-                Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
-            end
-            
-            local bv = Instance.new("BodyVelocity")
-            bv.Name = "FlingPower"
-            bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
-            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.P = 9e900
-            bv.Parent = Ball
-            
-            workspace.CurrentCamera.CameraSubject = thum
-            
-            local connection
-            connection = vu10.Heartbeat:Connect(function()
-                if not tchar or not tchar:IsDescendantOf(workspace) or thum.Health <= 0 or target.Parent ~= players or troot.Velocity.Magnitude > 1000 then
-                    workspace.CurrentCamera.CameraSubject = humanoid
-                    connection:Disconnect()
-                    return
-                end
-                
-                if troot.Velocity.Magnitude > 0 then
-                    local pos_x = troot.Position.X + (troot.Velocity.X / 1.5)
-                    local pos_y = troot.Position.Y + (troot.Velocity.Y / 1.5)
-                    local pos_z = troot.Position.Z + (troot.Velocity.Z / 1.5)
-                    Ball.CFrame = CFrame.new(Vector3.new(pos_x, pos_y, pos_z))
-                    Ball.Orientation += Vector3.new(45, 60, 30)
-                else
-                    for _, v in pairs(tchar:GetChildren()) do
-                        if v:IsA("BasePart") and v.CanCollide and not v.Anchored then
-                            Ball.CFrame = v.CFrame
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end
 
 TabTroll:AddSection({Name = "Clicks"})
 TabTroll:AddButton({
@@ -1450,7 +1483,112 @@ end)
 end
 })
 
+TabTroll:AddSection({ "Props" })
 
+TabTroll:AddButton({Name = "Bring Props (Trazer Cones)", Callback = function()
+    local target = vu6:FindFirstChild(_G.SelectedPlayer)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPos = target.Character.HumanoidRootPart.CFrame
+        for _, data in ipairs(CachedProps) do
+            pcall(function() data.Remote:InvokeServer(targetPos) end)
+        end
+    end
+end})
+
+-- FUNÇÃO KILL (Usa o CFrame solicitado para puxar o player)
+TabTroll:AddToggle({Name = "Kill Props (Matar)", Callback = function(s) 
+    DisableAllProps()
+    KillEnabled = s 
+end})
+
+-- FUNÇÃO FLING (Usa o CFrame com rotação para arremessar)
+TabTroll:AddToggle({Name = "Fling Props (Arremessar)", Callback = function(s) 
+    DisableAllProps()
+    FlingEnabled = s 
+end})
+
+TabTroll:AddSection({ "Animações" })
+
+TabTroll:AddToggle({Name = "Wings (Asas)", Callback = function(s) DisableAllProps() WingsEnabled = s end})
+TabTroll:AddToggle({Name = "Orbit (Orbitar)", Callback = function(s) DisableAllProps() OrbitEnabled = s end})
+TabTroll:AddToggle({Name = "Rainbow", Callback = function(s) RainbowEnabled = s end})
+
+TabTroll:AddButton({Name = "Reset Props", Callback = function()
+    DisableAllProps()
+    for _, data in ipairs(CachedProps) do
+        pcall(function() data.Remote:InvokeServer(CFrame.new(0, -999, 0)) end)
+    end
+end})
+
+-- 4. LOOP DE FÍSICA (RENDERSTEPPED)
+vu10.RenderStepped:Connect(function()
+    local targetPlayer = vu6:FindFirstChild(_G.SelectedPlayer)
+    if not targetPlayer or not targetPlayer.Character then return end
+    local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not targetHRP then return end
+
+    local count = #CachedProps
+    if count <= 0 then return end
+    
+    local time = tick()
+
+    for i, data in ipairs(CachedProps) do
+        local finalCF
+
+        if KillEnabled then
+            -- Alterna entre o player e o CFrame alvo para bugar a física e matá-lo
+            data.Remote:InvokeServer(targetHRP.CFrame)
+            data.Remote:InvokeServer(TargetCFrame)
+            continue -- Pula o invoke final para evitar lentidão
+
+        elseif FlingEnabled then
+            -- Gira violentamente e envia para o CFrame alvo
+            local rotation = CFrame.Angles(math.random() * math.pi, math.random() * math.pi, math.random() * math.pi)
+            data.Remote:InvokeServer(targetHRP.CFrame * rotation)
+            data.Remote:InvokeServer(TargetCFrame)
+            continue
+
+        elseif OrbitEnabled then
+            local radius = 15
+            local angle = ((i - 1) / count) * math.pi * 2 + (time * 2)
+            local offset = Vector3.new(math.cos(angle) * radius, -2, math.sin(angle) * radius)
+            finalCF = targetHRP.CFrame * CFrame.new(offset)
+
+        elseif WingsEnabled then
+            local side = i - ((count + 1) / 2)
+            local flap = math.sin(time * 5)
+            local offset = Vector3.new(side * 4, (math.abs(side) * 2) + flap, 2)
+            local rotation = CFrame.Angles(0, 0, -math.rad(side * 15))
+            finalCF = targetHRP.CFrame * CFrame.new(offset) * rotation
+        end
+
+        if finalCF then
+            pcall(function() data.Remote:InvokeServer(finalCF) end)
+        end
+    end
+end)
+
+-- LOOP RAINBOW
+task.spawn(function()
+    while true do
+        if RainbowEnabled then
+            local folder = workspace:FindFirstChild("WorkspaceCom") and workspace.WorkspaceCom:FindFirstChild("001_TrafficCones")
+            if folder then
+                for _, prop in ipairs(folder:GetChildren()) do
+                    if prop.Name:find("Prop" .. vu7.Name) then
+                        local remote = prop:FindFirstChild("ChangePropColor")
+                        if remote then remote:InvokeServer(Color3.fromHSV((tick()*0.2)%1, 1, 1)) end
+                    end
+                end
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+
+UpdateProps()
+workspace.DescendantAdded:Connect(function() task.wait(0.5) UpdateProps() end)
 
 local SelectHouse = nil
 local HouseDropdown = nil
@@ -1610,7 +1748,7 @@ pcall(function()
         end
     })
 end)
-CasasTab:AddToggle({Name = "Auto Remover Ban", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
+CasasTab:AddToggle({Name = "Auto Remover Ban",Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
 
 
 
@@ -2430,7 +2568,7 @@ function AvatarManager:EquiparAvatar(avatarName)
 end
 
 local AvatarDropdown = Tab3:AddDropdown({
-    Name = "AcessÃ³rios 3D",
+    Name = "Acessórios 3D",
     Description = "Selecione para equipar",
     Default = nil,
     Options = AvatarManager:GetAvatarNames(),
@@ -3565,7 +3703,7 @@ Tab5:AddSection({"Velocidade Sem <GamePass>"})
 
 Tab5:AddTextBox({
     Name = "Definir Velocidade",
-    PlaceholderText = "Velocidade: 200",
+    PlaceholderText = "Velocidade: 9999",
     Callback = function(v)
         carSpeed = tonumber(v) or carSpeed
     end
@@ -3573,7 +3711,7 @@ Tab5:AddTextBox({
 
 Tab5:AddTextBox({
     Name = "Definir Turbo",
-    PlaceholderText = "Turbo: 200",
+    PlaceholderText = "Turbo: 9999",
     Callback = function(v)
         turboValue = tostring(v)
     end
@@ -3611,13 +3749,13 @@ Tab5:AddButton({
 })
 
 -- ==================== MÃšSICA NO CARRO ====================
-Tab5:AddSection({"MÃºsica No Carro <GamePass>"})
+Tab5:AddSection({"Música Carro <GamePass>"})
 
 local MusicsList = {
     { Name = "Pac Man Phonk", Id = 120889371113999 },
     { Name = "Batalla de bombas", Id = 71995582569283 },
     { Name = "Mtg uh uh ha ha", Id = 122697381252723 },
-    { Name = "fa3 renitch", Id = 128934903242385 },
+    { Name = "fã renitch", Id = 128934903242385 },
     { Name = "Kawaii", Id = 13067828528278 },
     { Name = "Feeling", Id = 120764084521465 },
     { Name = "Aura + Egp", Id = 97841988407875 },
@@ -3656,11 +3794,11 @@ local MusicsList = {
     { Name = "Bensley - All Night", Id = 5410082273 },
     { Name = "favela venceu", Id = 97097857368633 },
     { Name = "Backrooms", Id = 120817494107898 },
-    { Name = "MÃºsicas de Piano acÃºstico", Id = 1838457617 },
+    { Name = "Músicas de Piano acÃºstico", Id = 1838457617 },
     { Name = "Sushi Don't lie", Id = 134713831368801 },
     { Name = "Kerosene Cyristal Castels", Id = 17647322226 },
     { Name = "montagem sombra girl", Id = 11164818809 },
-    { Name = "NÃ£o Estou louco", Id = 74366765967475 },
+    { Name = "Não Estou louco", Id = 74366765967475 },
     { Name = "Manda Meu Passinho", Id = 77741294709660 },
     { Name = "CenÃ¡rio Selvagem", Id = 117562011395992 },
     { Name = "Want To Love", Id = 104846670980072 },
@@ -3677,14 +3815,14 @@ local MusicsList = {
     { Name = "Oruan - Sou Teu fÃ£", Id = 85342086082111 },
     { Name = "Soldado Guerreiro", Id = 71590664026646 },
     { Name = "Fuga Na Viatura", Id = 131891110268352 },
-    { Name = "forrÃ³ ja cansou", Id = 74812784884330 },
+    { Name = "forró cansou", Id = 74812784884330 },
     { Name = "gol contra", Id = 122114766584918 },
     { Name = "Eligebete", Id = 129370559491985 },
     { Name = "Forsaken", Id = 136274352281439 },
     { Name = "Anxiety", Id = 101483901475189 },
-    { Name = "Grelo So fÃ©", Id = 72200166265935 },
+    { Name = "Grelo So fé", Id = 72200166265935 },
     { Name = "Phonk sexoagressivo", Id = 111995323199676 },
-    { Name = "forrÃ³ da resenha", Id = 120973520531216 },
+    { Name = "forro da resenha", Id = 120973520531216 },
     { Name = "escolha certa", Id = 107088620814881 },
     { Name = "lembro ate hoje", Id = 71531533552899 },
     { Name = "chinese phonk", Id = 134713831368801 },
@@ -3695,18 +3833,18 @@ local MusicsList = {
     { Name = "Flamengo funk", Id = 8080255618 },
     { Name = "Carro de Ovos", Id = 3148329638 },
     { Name = "Banka", Id = 16190784229 },
-    { Name = "Essa Ã© Antiga", Id = 90999978343771 },
-    { Name = "Essa Aqui Ã© Braba", Id = 120833520065453 },
+    { Name = "Essa e Antiga", Id = 90999978343771 },
+    { Name = "Essa Aqui e Braba", Id = 120833520065453 },
     { Name = "Help Me Phonk", Id = 72458292563094 },
     { Name = "Envolve A Tropa", Id = 88094479399489 },
     { Name = "No Pick Mulher", Id = 92893359226454 },
-    { Name = "MÃ­dia", Id = 105832154444494 },
+    { Name = "Midia", Id = 105832154444494 },
     { Name = "Phonk Version", Id = 103409297553965 },
     { Name = "Phonk louco", Id = 73140398421340 },
     { Name = "Slowed Vapo No Vapo", Id = 106317184644394 },
     { Name = "Phonk Brasil", Id = 111281710445018 },
     { Name = "No Solinho", Id = 72440232513341 },
-    { Name = "Phonk InglÃªs", Id = 14145624031 },
+    { Name = "Phonk Inglês", Id = 14145624031 },
     { Name = "Ultra Slowed", Id = 84733736048142 },
     { Name = "Ritmada", Id = 104541292443133 },
     { Name = "Ritmada Novinha", Id = 94718473830640 },
@@ -3721,7 +3859,7 @@ for _, m in pairs(MusicsList) do
 end
 
 Tab5:AddDropdown({
-    Name = "Selecionar MÃºsica",
+    Name = "Selecionar Música",
     Options = MusicNames,
     Callback = function(v)
         selectedMusic = v
@@ -3729,7 +3867,7 @@ Tab5:AddDropdown({
 })
 
 Tab5:AddButton({
-    Name = "Tocar MÃºsica",
+    Name = "Tocar Música",
     Callback = function()
         local id = MusicIds[selectedMusic]
         if id then
@@ -4322,7 +4460,7 @@ local function spawnCar(carName)
 end
 
 Tab5:AddToggle({
-    Name = "Codigo Varios Carros",
+    Name = "Invocar Varios Carros",
     Default = false,
     Callback = function(value)
         spamCarsActive = value
@@ -4610,7 +4748,7 @@ end
 -- BotÃ£o para tocar som manualmente
 TabAudio:AddButton({  
     Name = "Tocar Som",  
-    Description = "Clique para tocar a mÃºsica inserida",  
+    Description = "Clique para tocar a música inserida",  
     Callback = function()  
         if InputID then  
             fireServer("1Gu1nSound1s", {Workspace, InputID, 1})  
@@ -4689,7 +4827,7 @@ local function createSoundDropdown(title, musicOptions, defaultOption)
     TabAudio:AddDropdown({  
         Name = title,  
         Description = "Escolha um som para tocar no servidor",  
-        Default = defaultOption,  
+        Default = defaultoption,  
         Multi = false,  
         Options = musicNames,  
         Callback = function(selectedSound)  
@@ -4797,7 +4935,7 @@ end
 
 -- Caixa de texto para ID da mÃºsica
 TabMusic:AddTextBox({
-    Name = "ID da mÃºsica",
+    Name = "ID da música",
     PlaceholderText = "Digite o ID e pressione Enter",
     Callback = function(value)
         if value and value ~= "" then
@@ -5762,7 +5900,7 @@ end})
 
 TabSky:AddButton({
     Name = "Ativar Tubers93 (Shelby)",
-    Description = "TransformaÃ§Ã£o completa Tubers93 by Shelby",
+    Description = "TransformaÃTransformaÃ§Ã£o completa Tubers93 by Shelby",
     Callback = function()
 
         -- by shelby 
@@ -6255,4 +6393,5 @@ opTab:AddButton({
         end
     end
 })
+
 
