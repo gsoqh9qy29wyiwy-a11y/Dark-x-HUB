@@ -1,3 +1,4 @@
+
 local redzlib = loadstring(game:HttpGet("https://pastebin.com/raw/XqZsnzRQ",true))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
@@ -7,6 +8,7 @@ local vu7 = vu6.LocalPlayer
 local vu8 = game:GetService("ReplicatedStorage")
 local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local vuCam = vu9.CurrentCamera
 
 -- Variáveis de Controle
@@ -207,20 +209,6 @@ local function FlingBall(targetName)
         end
     end
 end
-local function updateCamera()
-    pcall(function()
-        if viewEnabled then
-            local target = vu6:FindFirstChild(_G.SelectedPlayer)
-            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = target.Character.Humanoid
-            end
-        else
-            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = vu7.Character.Humanoid
-            end
-        end
-    end)
-end
 
 -- Configuração do Black Hole
 local function SetupBlackHole()
@@ -371,7 +359,6 @@ local function getPlayerNames()
     for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
     return pNames
 end
-
 -- Configuração Automática de Nome e Bio ao abrir o Hub
 local function SetDarkHubIdentity()
     pcall(function()
@@ -392,9 +379,6 @@ local function SetDarkHubIdentity()
         remoteColor:FireServer("PickingRPNameColor", Color3.fromRGB(170, 0, 0))
     end)
 end
-
--- Executa a função
-SetDarkHubIdentity()
 
 -- 3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
