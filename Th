@@ -7,7 +7,6 @@ local vu7 = vu6.LocalPlayer
 local vu8 = game:GetService("ReplicatedStorage")
 local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local vuCam = vu9.CurrentCamera
 
 -- Variáveis de Controle
