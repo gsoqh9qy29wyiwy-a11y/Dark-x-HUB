@@ -1,4 +1,3 @@
-
 local redzlib = loadstring(game:HttpGet("https://pastebin.com/raw/XqZsnzRQ",true))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
@@ -8,7 +7,6 @@ local vu7 = vu6.LocalPlayer
 local vu8 = game:GetService("ReplicatedStorage")
 local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local vuCam = vu9.CurrentCamera
 
 -- Variáveis de Controle
@@ -21,21 +19,6 @@ _G.AntiFling = false
 _G.AntiLag = false 
 _G.RGBName = false
 _G.RainbowBio = false
-
--- Variáveis da Criança (Chasing/Child)
-local playersList = {}
-local chasingplayer = nil
-
--- Função para atualizar a lista de players (Usada na aba Criança)
-local function updatePlayerList()
-    playersList = {}
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= vu7 then
-            table.insert(playersList, player.Name)
-        end
-    end
-    return playersList
-end
 
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
@@ -209,6 +192,20 @@ local function FlingBall(targetName)
         end
     end
 end
+local function updateCamera()
+    pcall(function()
+        if viewEnabled then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = target.Character.Humanoid
+            end
+        else
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end)
+end
 
 -- Configuração do Black Hole
 local function SetupBlackHole()
@@ -353,31 +350,10 @@ local function TeleportTo(cframe)
     end
 end
 
--- 2. FUNÇÕES DE SUPORTE
 local function getPlayerNames()
     local pNames = {}
     for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
     return pNames
-end
--- Configuração Automática de Nome e Bio ao abrir o Hub
-local function SetDarkHubIdentity()
-    pcall(function()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local remoteText = ReplicatedStorage.RE["1RPNam1eTex1t"]
-        local remoteColor = ReplicatedStorage.RE["1RPNam1eColo1r"]
-
-        -- Define a Bio
-        remoteText:FireServer("RolePlayBio", "Dono-Admin")
-        
-        -- Define o Nome
-        remoteText:FireServer("RolePlayName", "《 Dark x Hub 》")
-        
-        -- Define a Cor da Bio (Preto)
-        remoteColor:FireServer("PickingRPBioColor", Color3.new(0, 0, 0))
-        
-        -- Define a Cor do Nome (Vermelho Escuro)
-        remoteColor:FireServer("PickingRPNameColor", Color3.fromRGB(170, 0, 0))
-    end)
 end
 
 -- 3. JANELA PRINCIPAL
