@@ -10,16 +10,6 @@ local vu10 = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local vuCam = vu9.CurrentCamera
 
--- 2. SUAS VARIÁVEIS DE CONTROLE (INCLUÍDAS)
-local OrbitEnabled = false
-local WingsEnabled = false
-local RingEnabled = false
-local RainbowEnabled = false
-local KillEnabled = false
-local FlingEnabled = false
-local CachedProps = {}
-local TargetCFrame = CFrame.new(244, -1165, 263) -- O CFrame solicitado
-
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
@@ -56,27 +46,6 @@ local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
 local InputID = ""
-
--- 2. FUNÇÕES BASE
-local function UpdateProps()
-    table.clear(CachedProps)
-    local Folder = workspace:FindFirstChild("WorkspaceCom") and workspace.WorkspaceCom:FindFirstChild("001_TrafficCones")
-    if not Folder then return end
-    for _, prop in ipairs(Folder:GetChildren()) do
-        if prop.Name:find("Prop" .. vu7.Name) then
-            local remote = prop:FindFirstChild("SetCurrentCFrame")
-            if remote then table.insert(CachedProps, { Model = prop, Remote = remote }) end
-        end
-    end
-end
-
-local function DisableAllProps()
-    OrbitEnabled = false
-    WingsEnabled = false
-    RingEnabled = false
-    KillEnabled = false
-    FlingEnabled = false
-end
 
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
@@ -6394,3 +6363,5 @@ opTab:AddButton({
         end
     end
 })
+
+
