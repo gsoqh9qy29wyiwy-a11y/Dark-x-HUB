@@ -20,15 +20,6 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
--- Variáveis que o seu trecho de código utiliza:
-local CachedProps = {}
-local TargetCFrame = CFrame.new(0, 50, 0) -- Local para onde os itens vão no Kill/Fling
-local KillEnabled = false
-local FlingEnabled = false
-local OrbitEnabled = false
-local WingsEnabled = false
-local RainbowEnabled = false
-
 -- Variáveis da Criança (Chasing/Child)
 local playersList = {}
 local chasingplayer = nil
@@ -43,6 +34,15 @@ local function updatePlayerList()
     end
     return playersList
 end
+
+-- Variáveis que o seu trecho de código utiliza:
+local CachedProps = {}
+local TargetCFrame = CFrame.new(0, 50, 0) -- Local para onde os itens vão no Kill/Fling
+local KillEnabled = false
+local FlingEnabled = false
+local OrbitEnabled = false
+local WingsEnabled = false
+local RainbowEnabled = false
 
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
