@@ -1555,74 +1555,6 @@ TabTroll:AddButton({Name = "Reset Props", Callback = function()
         pcall(function() data.Remote:InvokeServer(CFrame.new(0, -999, 0)) end)
     end
 end})
--- 4. LOOP DE FÍSICA (RENDERSTEPPED)
-vu10.RenderStepped:Connect(function()
-    local targetPlayer = vu6:FindFirstChild(_G.SelectedPlayer)
-    if not targetPlayer or not targetPlayer.Character then return end
-    local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not targetHRP then return end
-
-    local count = #CachedProps
-    if count <= 0 then return end
-    
-    local time = tick()
-
-    for i, data in ipairs(CachedProps) do
-        local finalCF
-
-        if KillEnabled then
-            -- Alterna entre o player e o CFrame alvo para bugar a física e matá-lo
-            data.Remote:InvokeServer(targetHRP.CFrame)
-            data.Remote:InvokeServer(TargetCFrame)
-            continue -- Pula o invoke final para evitar lentidão
-
-        elseif FlingEnabled then
-            -- Gira violentamente e envia para o CFrame alvo
-            local rotation = CFrame.Angles(math.random() * math.pi, math.random() * math.pi, math.random() * math.pi)
-            data.Remote:InvokeServer(targetHRP.CFrame * rotation)
-            data.Remote:InvokeServer(TargetCFrame)
-            continue
-
-        elseif OrbitEnabled then
-            local radius = 15
-            local angle = ((i - 1) / count) * math.pi * 2 + (time * 2)
-            local offset = Vector3.new(math.cos(angle) * radius, -2, math.sin(angle) * radius)
-            finalCF = targetHRP.CFrame * CFrame.new(offset)
-
-        elseif WingsEnabled then
-            local side = i - ((count + 1) / 2)
-            local flap = math.sin(time * 5)
-            local offset = Vector3.new(side * 4, (math.abs(side) * 2) + flap, 2)
-            local rotation = CFrame.Angles(0, 0, -math.rad(side * 15))
-            finalCF = targetHRP.CFrame * CFrame.new(offset) * rotation
-        end
-
-        if finalCF then
-            pcall(function() data.Remote:InvokeServer(finalCF) end)
-        end
-    end
-end)
-
--- LOOP RAINBOW
-task.spawn(function()
-    while true do
-        if RainbowEnabled then
-            local folder = workspace:FindFirstChild("WorkspaceCom") and workspace.WorkspaceCom:FindFirstChild("001_TrafficCones")
-            if folder then
-                for _, prop in ipairs(folder:GetChildren()) do
-                    if prop.Name:find("Prop" .. vu7.Name) then
-                        local remote = prop:FindFirstChild("ChangePropColor")
-                        if remote then remote:InvokeServer(Color3.fromHSV((tick()*0.2)%1, 1, 1)) end
-                    end
-                end
-            end
-        end
-        task.wait(0.1)
-    end
-end)
-
-UpdateProps()
-workspace.DescendantAdded:Connect(function() task.wait(0.5) UpdateProps() end)
 
 local SelectHouse = nil
 local HouseDropdown = nil
@@ -1641,6 +1573,7 @@ local function getHouseList()
     end
     return Tabela
 end
+
 pcall(function()
     HouseDropdown = CasasTab:AddDropdown({
         Name = "Selecione a Casa",
