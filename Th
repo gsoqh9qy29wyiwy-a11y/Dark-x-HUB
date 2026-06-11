@@ -1519,7 +1519,42 @@ end)
 end
 })
 
+TabTroll:AddSection({ "Ações de Props" })
 
+TabTroll:AddButton({Name = "Bring Props (Trazer Cones)", Callback = function()
+    local target = vu6:FindFirstChild(_G.SelectedPlayer)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPos = target.Character.HumanoidRootPart.CFrame
+        for _, data in ipairs(CachedProps) do
+            pcall(function() data.Remote:InvokeServer(targetPos) end)
+        end
+    end
+end})
+
+-- FUNÇÃO KILL (Usa o CFrame solicitado para puxar o player)
+TabTroll:AddToggle({Name = "Kill Props (Matar)", Callback = function(s) 
+    DisableAllProps()
+    KillEnabled = s 
+end})
+
+-- FUNÇÃO FLING (Usa o CFrame com rotação para arremessar)
+TabTroll:AddToggle({Name = "Fling Props (Arremessar)", Callback = function(s) 
+    DisableAllProps()
+    FlingEnabled = s 
+end})
+
+TabTroll:AddSection({ "Animações" })
+
+TabTroll:AddToggle({Name = "Wings (Asas)", Callback = function(s) DisableAllProps() WingsEnabled = s end})
+TabTroll:AddToggle({Name = "Orbit (Orbitar)", Callback = function(s) DisableAllProps() OrbitEnabled = s end})
+TabTroll:AddToggle({Name = "Rainbow", Callback = function(s) RainbowEnabled = s end})
+
+TabTroll:AddButton({Name = "Reset Props", Callback = function()
+    DisableAllProps()
+    for _, data in ipairs(CachedProps) do
+        pcall(function() data.Remote:InvokeServer(CFrame.new(0, -999, 0)) end)
+    end
+end})
 
 local SelectHouse = nil
 local HouseDropdown = nil
