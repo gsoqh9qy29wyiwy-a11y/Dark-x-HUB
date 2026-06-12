@@ -1,3 +1,4 @@
+
 local redzlib = loadstring(game:HttpGet("https://pastebin.com/raw/XqZsnzRQ",true))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
@@ -34,15 +35,6 @@ local function updatePlayerList()
     end
     return playersList
 end
-
--- Variáveis que o seu trecho de código utiliza:
-local CachedProps = {}
-local TargetCFrame = CFrame.new(0, 50, 0) -- Local para onde os itens vão no Kill/Fling
-local KillEnabled = false
-local FlingEnabled = false
-local OrbitEnabled = false
-local WingsEnabled = false
-local RainbowEnabled = false
 
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
@@ -411,6 +403,8 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local opTab = Window:MakeTab({"OP", "home"})
+
+
 
 Tab1:AddSection({"Créditos do Hub"})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
@@ -928,71 +922,39 @@ local function updateCamera()
     end)
 end
 
--- Bola Fling Orbitando
+TabTroll:AddSection({ "Clicks TP." })
+
 TabTroll:AddButton({
-    Name = "Bola Fling Orbitando",
+    Name = "Teleport Tool sond",
+    Description = "Teleport Goku",
     Callback = function()
-        -- Se já estiver orbitando, ele desliga ao clicar de novo
-        if orbitando then 
-            orbitando = false
-            if orbitConn then orbitConn:Disconnect() orbitConn = nil end
-            return 
-        end
-
-        if not equipBola() then return end
-        task.wait(0.5)
-
-        local character = vu7.Character or vu7.CharacterAdded:Wait()
-        local myHRP = character:FindFirstChild("HumanoidRootPart")
-        if not myHRP then return end
-
-        -- Localiza a bola no Workspace usando suas variáveis
-        local workspaceCom = vu9:FindFirstChild("WorkspaceCom")
-        local soccerBalls = workspaceCom and workspaceCom:FindFirstChild("001_SoccerBalls")
-        soccerBall = soccerBalls and soccerBalls:FindFirstChild("Soccer" .. vu7.Name)
-
-        if not soccerBall then return end
-
-        -- Salva propriedades originais para resetar depois
-        originalProperties = {
-            Anchored = soccerBall.Anchored,
-            CanCollide = soccerBall.CanCollide,
-            CanTouch = soccerBall.CanTouch
-        }
-
-        soccerBall.Anchored = false
-        soccerBall.CanCollide = true
-        soccerBall.CanTouch = true
-
-        -- Bypassar a rede para ter controle físico da bola
-        pcall(function() sethiddenproperty(vu7, "SimulationRadius", math.huge) end)
-
-        orbitando = true
-        orbitConn = vu10.Heartbeat:Connect(function()
-            if not orbitando or not soccerBall or not soccerBall.Parent or not myHRP or not myHRP.Parent then
-                if orbitConn then orbitConn:Disconnect() orbitConn = nil end
-                orbitando = false
-                if soccerBall and originalProperties then
-                    soccerBall.Anchored = originalProperties.Anchored
-                    soccerBall.CanCollide = originalProperties.CanCollide
-                    soccerBall.CanTouch = originalProperties.CanTouch
-                end
-                return
-            end
-
-            -- Lógica matemática da Órbita
-            local t = tick() * 999999999 -- Velocidade
-            local radius = 6      -- Distância do seu corpo
-            local offset = Vector3.new(math.cos(t) * radius, -1, math.sin(t) * radius)
-
-            soccerBall.CFrame = CFrame.new(myHRP.Position + offset)
-            
-            -- Aplica velocidade extrema para dar o efeito de "Fling" em quem tocar
-            soccerBall.AssemblyLinearVelocity = Vector3.new(10000, 10000, 10000)
-            soccerBall.AssemblyAngularVelocity = Vector3.new(10000, 10000, 10000)
-        end)
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
     end
 })
+
+ TabTroll:AddButton({
+    Name = "Pegar Teleport Tool",
+    Callback = function()
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        
+        local tool = Instance.new("Tool")
+        tool.RequiresHandle = false
+        tool.Name = "Tp Tool"
+        
+        tool.Activated:Connect(function()
+            local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
+            local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+            
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = targetCFrame
+            end
+        end)
+        
+        tool.Parent = game.Players.LocalPlayer.Backpack
+    end
+})
+
 
 TabTroll:AddSection({Name = "Clicks"})
 TabTroll:AddButton({
@@ -1528,42 +1490,7 @@ end)
 end
 })
 
-TabTroll:AddSection({ "Ações de Props" })
 
-TabTroll:AddButton({Name = "Bring Props (Trazer Cones)", Callback = function()
-    local target = vu6:FindFirstChild(_G.SelectedPlayer)
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        local targetPos = target.Character.HumanoidRootPart.CFrame
-        for _, data in ipairs(CachedProps) do
-            pcall(function() data.Remote:InvokeServer(targetPos) end)
-        end
-    end
-end})
-
--- FUNÇÃO KILL (Usa o CFrame solicitado para puxar o player)
-TabTroll:AddToggle({Name = "Kill Props (Matar)", Callback = function(s) 
-    DisableAllProps()
-    KillEnabled = s 
-end})
-
--- FUNÇÃO FLING (Usa o CFrame com rotação para arremessar)
-TabTroll:AddToggle({Name = "Fling Props (Arremessar)", Callback = function(s) 
-    DisableAllProps()
-    FlingEnabled = s 
-end})
-
-TabTroll:AddSection({ "Animações" })
-
-TabTroll:AddToggle({Name = "Wings (Asas)", Callback = function(s) DisableAllProps() WingsEnabled = s end})
-TabTroll:AddToggle({Name = "Orbit (Orbitar)", Callback = function(s) DisableAllProps() OrbitEnabled = s end})
-TabTroll:AddToggle({Name = "Rainbow", Callback = function(s) RainbowEnabled = s end})
-
-TabTroll:AddButton({Name = "Reset Props", Callback = function()
-    DisableAllProps()
-    for _, data in ipairs(CachedProps) do
-        pcall(function() data.Remote:InvokeServer(CFrame.new(0, -999, 0)) end)
-    end
-end})
 
 local SelectHouse = nil
 local HouseDropdown = nil
@@ -1582,7 +1509,6 @@ local function getHouseList()
     end
     return Tabela
 end
-
 pcall(function()
     HouseDropdown = CasasTab:AddDropdown({
         Name = "Selecione a Casa",
@@ -2253,40 +2179,6 @@ end
 coroutine.wrap(JUBNQKI_fake_script)()
     end
 })
- local Section = TrollTab:AddSection({"Fantasia"})
-TrollTab:AddButton({Name = "Ativar Goner", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/goner"))() end})
-TrollTab:AddButton({Name = "Ativar Flash", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Flash%20original"))() end})
-
-local Section = TrollTab:AddSection({"Click TP"})
-TrollTab:AddButton({Name = "TP Tool com som", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Teleport-Tools-34066"))() end})
-
- TrollTab:AddButton({
-    Name = "Pegar Teleport Tool",
-    Callback = function()
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        
-        local tool = Instance.new("Tool")
-        tool.RequiresHandle = false
-        tool.Name = "Tp Tool"
-        
-        tool.Activated:Connect(function()
-            local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
-            local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
-            
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = targetCFrame
-            end
-        end)
-        
-        tool.Parent = game.Players.LocalPlayer.Backpack
-    end
-})
-
-TrollTab:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
-TrollTab:AddButton({Name = "Nameless Admin", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-Universal-73082"))() end}) 
-TrollTab:AddButton({Name = "Infinite Yield", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yeild-93384"))() end})
-TrollTab:AddButton({Name = "Pegar Sofá", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/Brancos.lua", true))() end})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -2608,9 +2500,66 @@ Tab3:AddButton({Name = "Possessed-Horror", Callback = function()
     EquipBody({122800511983371,132465361516275,125155800236527,83070163355072,102906187256945,78311422507297})
 end})
 
-Tab3:AddParagraph({
-    Title = "Vai ter mais coisas aqui na prÃ³xima atualizaÃ§Ã£o",
-    Content = ""
+local Section3 = Tab3:AddSection({"FE Personagens Flash"})
+
+Tab3:AddButton({
+    Name = "Ativar personagem Black Flash",
+    Description = "Ativa o personagem Black Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Black%20Flash"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar personagem Flash",
+    Description = "Ativa o personagem Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Flash%20original"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar personagem God Flash",
+    Description = "Ativa o personagem God Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/GOD%20FLASH"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar personagem Zoom Flash",
+    Description = "Ativa o personagem Zoom Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Zoom%20Flash"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar personagem Flash Reverso",
+    Description = "Ativa o personagem Flash Reverso FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/flash%20reverso%20slk%20compen"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar personagem Flash Reverso",
+    Description = "Ativa o personagem Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Flash%20original"))()
+    end
+})
+
+local Section3 = Tab3:AddSection({"Avatar Ed
+ 
+ Tab3:AddButton({
+    Name = "Ativar personagem Goner",
+    Description = "Ativa o personagem Goner FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/goner"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar personagem 1x1x1x1",
+    Description = "Ativa o personagem 1x1x1x1 FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/1x1x1x1"))()
+    end
 })
 
 TabAntis:AddToggle({
@@ -4640,6 +4589,8 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/M1ZZ001/BrookhavenR4D/main/Brookhaven%20R4D%20Script"))()
     end
 })
+Tabscript:AddSection({"Ativa o Fly GUI"})
+
 -- Botão para Fly Gui
 Tabscript:AddButton({
  Name = "Fly Gui",
@@ -4647,6 +4598,8 @@ Tabscript:AddButton({
  loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
  end
 })
+Tabscript:AddSection({"Script do Ghost Hub"})
+
 -- Botão para Ghost Hub
 Tabscript:AddButton({
  Name = "Ghost Hub",
@@ -4654,32 +4607,67 @@ Tabscript:AddButton({
  loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GhostHub-16534"))()
  end
 })
-
--- Botão para Rael Hub Brook
-Tabscript:AddButton({ Name = "Rael Hub Brook",
- Callback = function()
- loadstring(game:HttpGet("https://rawscripts.net/raw/The-Mimic-Rael-Hub-20921"))()
- end
-})
-
-Tabscript:AddButton({ Name = "Telekines Tool",
- Callback = function()
-  loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
-end 
-})
+Tabscript:AddSection({"Scritp do Rael Hub"})
 
 Tabscript:AddButton({
+    Name = "Abrir Rael Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
+    end
+})
+Tabscript:AddSection({"Script Do Brutus"})
 
- Name = "ShiftLock",
+Tabscript:AddButton({
+    Name = "Abrir BRUTUS HUB",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/codenixstudios/brutus-hub/script/Games/brookhaven.lua"))()
+    end
+})
+Tabscript:AddSection({"Script do Coquette Hub"})
 
- Callback = function()
+Tabscript:AddButton({
+    Name = "Abrir Coquette Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Daivd977/Deivd999/refs/heads/main/pessal"))()
+    end
+})
+Tabscript:AddSection({"Script do Cartola Hub"})
 
- loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
+Tabscript:AddButton({
+    Name = "Abrir Cartola Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Davi999z/Cartola-Hub/refs/heads/main/Brookhaven", true))()()
+    end
+})
+Tabscript:AddSection({"Script do Pacote Fantasma"})
 
- end
-
+Tabscript:AddButton({
+    Name = "Abrir Pacote Fanstama",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
+    end
 })
 
+TrollTab:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
+
+Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
+
+Tabscript:AddButton({
+    Name = "Nameless Admin",
+    Description = "Abrir o Nameless Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-Universal-73082"))()
+    end
+})
+Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
+
+Tabscript:AddButton({
+    Name = "Infinite Yield",
+    Description = "Abrir o Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yeild-93384"))()
+    end
+})
 Tabscript:AddSection({"Só vc poderá ver"})
 
 Tabscript:AddButton({
@@ -4688,6 +4676,29 @@ Tabscript:AddButton({
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
     end
+})
+Tabscript:AddSection({"Tool Couch"})
+
+Tabscript:AddButton({
+    Name = "Pegar o sofá",
+    Description = "Pegar a Tool Couch",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/Brancos.lua", true))()
+    end
+})
+Tabscript:AddSection({"Tool Telekines"})
+
+Tabscript:AddButton({ Name = "Telekines Tool",
+ Callback = function()
+  loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
+end 
+})
+Tabscript:AddSection({"ShiftLock Aviso Não Da De Tira Da tela"})
+
+Tabscript:AddButton({ Name = "ShiftLock",
+ Callback = function()
+  loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
+end 
 })
 
 ---------------------------------------------------------------------------------------------------------------------------
@@ -6369,5 +6380,4 @@ opTab:AddButton({
         end
     end
 })
-
 
