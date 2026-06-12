@@ -1,4 +1,3 @@
-
 local redzlib = loadstring(game:HttpGet("https://pastebin.com/raw/XqZsnzRQ",true))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
@@ -922,7 +921,7 @@ local function updateCamera()
     end)
 end
 
-TabTroll:AddSection({ "Clicks TP." })
+TabTroll:AddSection({ "Clicks TP" })
 
 TabTroll:AddButton({
     Name = "Teleport Tool sond",
@@ -2545,7 +2544,7 @@ Tab3:AddButton({
     end
 })
 
-local Section3 = Tab3:AddSection({"Avatar Ed
+local Section3 = Tab3:AddSection({"FE Hackes"})
  
  Tab3:AddButton({
     Name = "Ativar personagem Goner",
@@ -4647,8 +4646,7 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
     end
 })
-
-TrollTab:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
+Tabscript:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
 
 Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
 
