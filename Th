@@ -108,6 +108,7 @@ local function AntiFlingLoop(name, getFolderFunc)
     end
 end
 
+-- --- FUNÇÕES HEADSIT ---
 local function headsitOnPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local char = vu7.Character
@@ -501,23 +502,7 @@ TabTroll:AddToggle({
         end
     end
 })
--- O TOGGLE SOLICITADO
-local FlingTog = TabTroll:AddToggle({
-    Name = "Fling Truck (Atacar Player)",
-    Default = false,
-    Callback = function(s)
-        if s then
-            local target = Players:FindFirstChild(_G.SelectedPlayer)
-            if target then
-                flingWithTruck(target)
-            else
-                print("Selecione um player primeiro!")
-            end
-        else
-            running = false
-        end
-    end
-})
+
 TabTroll:AddSection({"Couch "})
 TabTroll:AddButton({Name = "Kill", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
