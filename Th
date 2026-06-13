@@ -20,11 +20,6 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
--- Variáveis para o Fling Truck
-local running = false
-local savedPosition = nil
-local connection, flingConnection
-
 -- Variáveis da Criança (Chasing/Child)
 local playersList = {}
 local chasingplayer = nil
