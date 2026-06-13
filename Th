@@ -3838,7 +3838,7 @@ Tab5:AddButton({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/FlyCar.lua', true))()
     end
 })
-Tab5:AddSection({"Carro Colorido"})
+Tab5:AddSection({"Controls do carro"})
 
 Tab5:AddButton({
     Name = "Controle de Carro",
