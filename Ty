@@ -1892,4 +1892,278 @@ Tab3:AddButton({
     end
 })
          
-Window:SelectTab(TabTroll)
+local TabSpam = Window:MakeTab({"Spam", "home"})
+
+TabSpam:AddSection({("Spam Varios Jatos <BETA>")})
+
+local JetSystem = {
+    spawnActive = false,
+    spawnLoop = nil,
+    originalPosition = nil,
+    teleportPosition = CFrame.new(488.179443359375, -20.3643856048584, 234.5631866455078),
+    destinations = {
+        CFrame.new(-28.919492721557617, 2.9356155395507812, -9.202991485595703),
+        CFrame.new(14.021419525146484, 2.9356155395507812, 2.162062168121338),
+        CFrame.new(15.570757865905762, 2.935615301132202, 37.51002502441406),
+        CFrame.new(-23.0268611907959, 2.935615062713623, 60.1992073059082),
+        CFrame.new(-45.52577209472656, 2.835615634918213, 36.096221923828125)
+    }
+}
+
+local function getJetComponents()
+    local airport = workspace:FindFirstChild("WorkspaceCom")
+    if not airport then return nil, nil, nil end
+    
+    airport = airport:FindFirstChild("001_Airport")
+    if not airport then return nil, nil, nil end
+    
+    local hanger = airport:FindFirstChild("AirportHanger")
+    if not hanger then return nil, nil, nil end
+    
+    local buttonPart = hanger:FindFirstChild("001_JetCloneButton")
+    local storage = hanger:FindFirstChild("001_JetStorage")
+    
+    if not buttonPart or not storage then return nil, nil, nil end
+    
+    local button = buttonPart:FindFirstChild("Button")
+    if not button then return nil, nil, nil end
+    
+    local detector = button:FindFirstChild("ClickDetector")
+    
+    return detector, storage, button
+end
+
+local function findNewJet(usedJets, storage)
+    for _, jet in ipairs(storage:GetChildren()) do
+        if jet:IsA("Model") and jet:FindFirstChild("NoUse") and not table.find(usedJets, jet) then
+            return jet
+        end
+    end
+    return nil
+end
+
+local function startJetSpam()
+    local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+
+    local detector, storage = getJetComponents()
+    if not detector or not storage then return end
+
+    JetSystem.originalPosition = humanoidRootPart.CFrame
+    humanoidRootPart.CFrame = JetSystem.teleportPosition
+    JetSystem.spawnActive = true
+
+    task.spawn(function()
+        local destinationIndex = 1
+        local usedJets = {}
+
+        while JetSystem.spawnActive do
+            if detector then
+                fireclickdetector(detector)
+            end
+
+            task.wait(Config.jetSpawnDelay)
+
+            local newJet = findNewJet(usedJets, storage)
+            if newJet then
+                local height = (#usedJets + 1) * 6
+                local baseDestination = JetSystem.destinations[destinationIndex] or JetSystem.destinations[1]
+                local target = baseDestination + Vector3.new(0, height, 0)
+
+                local primaryPart = newJet:FindFirstChild("NoUse") or newJet:FindFirstChildWhichIsA("BasePart")
+                if primaryPart then
+                    newJet.PrimaryPart = primaryPart
+                    newJet:SetPrimaryPartCFrame(target)
+                    table.insert(usedJets, newJet)
+                end
+            end
+
+            destinationIndex = (destinationIndex % #JetSystem.destinations) + 1
+            task.wait(0.5)
+        end
+    end)
+end
+
+local function stopJetSpam()
+    JetSystem.spawnActive = false
+    if JetSystem.originalPosition then
+        local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.CFrame = JetSystem.originalPosition
+        end
+    end
+end
+
+TabSpam:AddButton({
+  Name = ("Como funciona?"),
+    function()
+        Window:Dialog({
+            Title = ("Funções Do jatos"),
+            Text = ("• Para funcionar precisa de GamePass <Premium> é versão Beta. Pode conter erros. Se demorar, recomendo ativar e desativar!"),
+            Options = {
+                {"Fechar", function() end}
+            }
+        })
+    end
+})
+TabSpam:AddButton({
+ Name = "Spamar Jatos",
+    function()
+        Window:Dialog({
+            Title = ("Como Funciona?"),
+            Text = ("O spam começa em até 20 segundos. Não é visual. Após usar, não toque em nada, apenas no script."),
+            Options = {
+                {"Começar Spam", function()
+                    if not JetSystem.spawnActive then
+                        startJetSpam()
+                    end
+                end},
+                {"Fechar", function() end}
+            }
+        })
+    end
+})
+
+TabSpam:AddButton({
+   Name = ("Parar Spam"),
+    function()
+        stopJetSpam()
+    end
+})
+
+TabSpam:AddSection({("Auto Spamar Jatos <Jogador>")})
+
+local TargetJetSystem = {
+    flingActive = false,
+    targetPlayer = nil,
+    cameraConnection = nil
+}
+
+local function getPlayerList()
+    local playerList = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(playerList, player.Name)
+        end
+    end
+    return playerList
+end
+
+local function startTargetJetSpam()
+    TargetJetSystem.flingActive = true
+
+    local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then 
+        humanoidRootPart.CFrame = JetSystem.teleportPosition 
+    end
+
+    task.spawn(function()
+        local usedJets = {}
+        local detector, storage = getJetComponents()
+
+        while TargetJetSystem.flingActive do
+            if detector then
+                fireclickdetector(detector)
+            end
+
+            task.wait(Config.jetSpawnDelay)
+
+            local jet = findNewJet(usedJets, storage)
+            local targetPlayer = Players:FindFirstChild(TargetJetSystem.targetPlayer)
+
+            if jet and targetPlayer and targetPlayer.Character then
+                local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if targetHRP then
+                    local primaryPart = jet:FindFirstChild("NoUse") or jet:FindFirstChildWhichIsA("BasePart")
+                    if primaryPart then
+                        jet.PrimaryPart = primaryPart
+                        local offset = Vector3.new(
+                            math.random(-3, 3),
+                            math.random(4, 8),
+                            math.random(-3, 3)
+                        )
+                        local destination = targetHRP.Position + offset
+                        jet:SetPrimaryPartCFrame(CFrame.new(destination))
+                        table.insert(usedJets, jet)
+                    end
+                end
+            end
+
+            task.wait(Config.jetMoveDelay)
+        end
+    end)
+end
+
+local function stopTargetJetSpam()
+    TargetJetSystem.flingActive = false
+end
+
+local function updateCameraView(enabled)
+    if enabled then
+        local targetPlayer = Players:FindFirstChild(TargetJetSystem.targetPlayer)
+        if targetPlayer and targetPlayer.Character then
+            local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                Camera.CameraSubject = humanoid
+            end
+        end
+    else
+        if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                Camera.CameraSubject = humanoid
+            end
+        end
+    end
+end
+
+local playerDropdown = TabSpam:AddDropdown({
+    Name = ("Selecionar Jogador"),
+    Description = ("Selecione uma pessoa para mandar os jatos"),
+    Options = getPlayerList(),
+    Default = "Pessoa",
+    Callback = function(value)
+        TargetJetSystem.targetPlayer = value
+    end
+})
+
+TabSpam:AddToggle({
+    Name = ("Visualizar Jogador"),
+    Description = ("Mesmo de longe você consegue ver"),
+    Default = false,
+    Callback = function(value)
+        if value then
+            if not TargetJetSystem.cameraConnection then
+                TargetJetSystem.cameraConnection = RunService.Heartbeat:Connect(function()
+                    updateCameraView(true)
+                end)
+            end
+        else
+            if TargetJetSystem.cameraConnection then
+                TargetJetSystem.cameraConnection:Disconnect()
+                TargetJetSystem.cameraConnection = nil
+            end
+            updateCameraView(false)
+        end
+    end
+})
+
+TabSpam:AddButton({
+   Name = ("Atualizar Lista"),
+    function()
+        playerDropdown:Set(getPlayerList())
+    end
+})
+
+TabSpam:AddToggle({
+    Name = ("Auto Spamer"),
+    Description = ("Spam de jets constante ao jogador selecionado"),
+    Default = false,
+    Callback = function(value)
+        if value then
+            startTargetJetSpam()
+        else
+            stopTargetJetSpam()
+        end
+    end
+})
