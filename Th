@@ -46,18 +46,6 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
--- Variáveis de Controle
-_G.SelectedPlayer = ""
-local OrbitEnabled = false
-local WingsEnabled = false
-local RingEnabled = false
-local RainbowEnabled = false
-local KillEnabled = false
-local FlingEnabled = false
-local CachedProps = {}
-local TargetCFrame = CFrame.new(-21, -410, -42) -- O CFrame solicitado
-
-
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
 local function updateCamera()
@@ -414,7 +402,6 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local opTab = Window:MakeTab({"OP", "home"})
-
 
 
 Tab1:AddSection({"Créditos do Hub"})
@@ -953,7 +940,7 @@ TabTroll:AddButton({
         tool.Name = "Tp Tool"
         
         tool.Activated:Connect(function()
-            local pos = mouse.Hit.Position + Vector3.new(0, 1.5, 0)
+            local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
             local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
             
             local character = game.Players.LocalPlayer.Character
@@ -3842,21 +3829,11 @@ Tab5:AddToggle({
         end
     end
 })
-Tab5:AddSection({"Faz o Carro Voar"})
 
 Tab5:AddButton({
-    Name = "CAR FLY ",
+    Name = "DARK CAR FLY FREE",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/FlyCar.lua', true))()
-    end
-})
-Tab5:AddSection({"Controls do carro"})
-
-Tab5:AddButton({
-    Name = "Controle de Carro",
-    Description = "Melhorar seu Controle com qualquer Veículo",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Brookhaven-RP-vehicle-controller-207541"))()
     end
 })
 
@@ -3997,6 +3974,66 @@ end
 Tab5:AddParagraph({
     Title = "use o void protection",
     Content = ""
+})
+
+-- Toggle para matar todos os carros
+Tab5:AddToggle({
+    Name = "Matar todos os carros do server",
+    Description = "Teleporta os carros para o void",
+    Default = false,
+    Callback = function(state)
+        local originalPosition
+        local teleportActive = state
+        local fallDamageDisabled = false
+
+        if state then
+            if self.LocalPlayer.Character and self.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                originalPosition = self.LocalPlayer.Character.HumanoidRootPart.Position
+            else
+                TeleportCarro:MostrarNotificacao("Personagem nÃ£o encontrado!")
+                return
+            end
+
+            fallDamageDisabled = TeleportCarro:ToggleFallDamage(true)
+
+            spawn(function()
+                local vehiclesFolder = TeleportCarro.Workspace:FindFirstChild("Vehicles")
+                if not vehiclesFolder then
+                    TeleportCarro:MostrarNotificacao("Pasta de veÃ­culos nÃ£o encontrada!")
+                    return
+                end
+
+                local cars = {}
+                for _, car in ipairs(vehiclesFolder:GetChildren()) do
+                    if car.Name:match("Car$") then
+                        table.insert(cars, car)
+                    end
+                end
+
+                for _, car in ipairs(cars) do
+                    if not teleportActive then break end
+
+                    local vehicleSeat = car:FindFirstChildWhichIsA("VehicleSeat", true)
+                    if vehicleSeat and vehicleSeat.Occupant == nil then
+                        local success = TeleportCarro:TeleportToSeat(vehicleSeat, car)
+                        if success then
+                            TeleportCarro:TeleportToVoid(car)
+                            TeleportCarro:ExitCarAndReturn(originalPosition)
+                            task.wait(1)
+                        end
+                    end
+                end
+
+                if teleportActive then
+                    teleportActive = false
+                    TeleportCarro:ToggleFallDamage(false)
+                end
+            end)
+        else
+            teleportActive = false
+            TeleportCarro:ToggleFallDamage(false)
+        end
+    end
 })
 
 local Section = Tab5:AddSection({"functions dos carro"})
