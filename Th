@@ -46,6 +46,18 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
+-- Variáveis de Controle
+_G.SelectedPlayer = ""
+local OrbitEnabled = false
+local WingsEnabled = false
+local RingEnabled = false
+local RainbowEnabled = false
+local KillEnabled = false
+local FlingEnabled = false
+local CachedProps = {}
+local TargetCFrame = CFrame.new(-21, -410, -42) -- O CFrame solicitado
+
+
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
 local function updateCamera()
