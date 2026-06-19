@@ -825,8 +825,6 @@ task.spawn(function()
     end
 end)
 
-UpdateProps()
-workspace.DescendantAdded:Connect(function() task.wait(0.5) UpdateProps() end)
 
 
 local sectionFlingBoat = TabTroll:AddSection({Name = "Fling Boat"})
