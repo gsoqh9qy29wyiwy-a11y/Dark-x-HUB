@@ -10,6 +10,18 @@ local vu10 = game:GetService("RunService")
 local vuCam = vu9.CurrentCamera
 
 -- Variáveis de Controle
+_G.SelectedPlayer = ""
+local OrbitEnabled = false
+local WingsEnabled = false
+local RingEnabled = false
+local RainbowEnabled = false
+local KillEnabled = false
+local FlingEnabled = false
+local CachedProps = {}
+local TargetCFrame = CFrame.new(-21, -410, -42) -- O CFrame solicitado
+
+
+-- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
 _G.SelectedPlayer = ""
@@ -45,17 +57,6 @@ local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
 local InputID = ""
-
--- Variáveis de Controle
-_G.SelectedPlayer = ""
-local OrbitEnabled = false
-local WingsEnabled = false
-local RingEnabled = false
-local RainbowEnabled = false
-local KillEnabled = false
-local FlingEnabled = false
-local CachedProps = {}
-local TargetCFrame = CFrame.new(-21, -410, -42) -- O CFrame solicitado
 
 
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
