@@ -9,6 +9,36 @@ local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
 local vuCam = vu9.CurrentCamera
 
+- Variáveis de Controle
+_G.SelectedPlayer = ""
+local OrbitEnabled = false
+local WingsEnabled = false
+local RingEnabled = false
+local RainbowEnabled = false
+local KillEnabled = false
+local FlingEnabled = false
+local CachedProps = {} -- 2. FUNÇÕES BASE
+local function UpdateProps()
+    table.clear(CachedProps)
+    local Folder = workspace:FindFirstChild("WorkspaceCom") and workspace.WorkspaceCom:FindFirstChild("001_TrafficCones")
+    if not Folder then return end
+    for _, prop in ipairs(Folder:GetChildren()) do
+        if prop.Name:find("Prop" .. vu7.Name) then
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then table.insert(CachedProps, { Model = prop, Remote = remote }) end
+        end
+    end
+end
+
+local function DisableAllProps()
+    OrbitEnabled = false
+    WingsEnabled = false
+    RingEnabled = false
+    KillEnabled = false
+    FlingEnabled = false
+end
+local TargetCFrame = CFrame.new(-21, -410, -42) -- O CFrame solicitado
+
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
