@@ -439,6 +439,7 @@ TabTroll:AddSection({ "Black Hole" })
 -- Black Hole Fixo com Rotação XYZ
 TabTroll:AddToggle({
     Name = "Black Hole",
+    Description = "faz as portas e qualquer veículo que tiver perto do seu personagem ir para o alvo ",
     Default = false,
     Callback = function(state)
         _G.BlackHoleActive = state
@@ -467,8 +468,10 @@ TabTroll:AddToggle({
     end
 })
 
+TabTroll:AddSection({ "Faz os objetos rodar no alvo" })
 TabTroll:AddToggle({
     Name = "Black Hole Orbit",
+    Description = "faz as portas e qualquer veículo que tiver perto do seu personagem rodar no alvo",
     Default = false,
     Callback = function(state)
         _G.BH_Orbit_Active = state
@@ -535,7 +538,7 @@ TabTroll:AddButton({Name = "Kill", Callback = function()
         end
     end)
 end})
-TabTroll:AddButton({Name = "Bring (Trazer)", Callback = function()
+TabTroll:AddButton({Name = "Bring (Puxar)", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
     if not T or not T.Character then return end
     _G.IsTrapping = true
@@ -564,7 +567,6 @@ TabTroll:AddButton({Name = "Bring (Trazer)", Callback = function()
         end
     end)
 end})
--- Substitua o bloco do "Fling (Forte)" e "Fling (Fraco)" por este:
 
 TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
     _G.FlingToggle = v
@@ -827,7 +829,7 @@ TabTroll:AddButton({
     end
 })
 
-TabTroll:AddSection({ "Fling Balls" })
+TabTroll:AddSection({ "Fling Ball" })
 TabTroll:AddToggle({
     Name = "Fling Ball",
     Callback = function()
@@ -937,7 +939,7 @@ TabTroll:AddButton({
         
         local tool = Instance.new("Tool")
         tool.RequiresHandle = false
-        tool.Name = "Tp Tool"
+        tool.Name = "TP Tool"
         
         tool.Activated:Connect(function()
             local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
@@ -2588,6 +2590,7 @@ Tab3:AddButton({
 
 TabAntis:AddToggle({
     Name = "Anti Sit",
+    Description = "Não deixa seu personagem Sentar ",
     Default = false,
     Callback = function(state)
         antiToolSit = state
@@ -3699,7 +3702,7 @@ Tab5:AddButton({
 })
 
 -- ==================== MÃšSICA NO CARRO ====================
-Tab5:AddSection({"MÃºsica No Carro <GamePass>"})
+Tab5:AddSection({"MMúsicas No Carro <GamePass>"})
 
 local MusicsList = {
     { Name = "Pac Man Phonk", Id = 120889371113999 },
@@ -3744,13 +3747,13 @@ local MusicsList = {
     { Name = "Bensley - All Night", Id = 5410082273 },
     { Name = "favela venceu", Id = 97097857368633 },
     { Name = "Backrooms", Id = 120817494107898 },
-    { Name = "MÃºsicas de Piano acÃºstico", Id = 1838457617 },
+    { Name = "Músicas de Piano acÃºstico", Id = 1838457617 },
     { Name = "Sushi Don't lie", Id = 134713831368801 },
     { Name = "Kerosene Cyristal Castels", Id = 17647322226 },
     { Name = "montagem sombra girl", Id = 11164818809 },
-    { Name = "NÃ£o Estou louco", Id = 74366765967475 },
+    { Name = "Não Estou louco", Id = 74366765967475 },
     { Name = "Manda Meu Passinho", Id = 77741294709660 },
-    { Name = "CenÃ¡rio Selvagem", Id = 117562011395992 },
+    { Name = "Cenário Selvagem", Id = 117562011395992 },
     { Name = "Want To Love", Id = 104846670980072 },
     { Name = "Melodia Virtual", Id = 139147474886402 },
     { Name = "Signora Funk", Id = 123394392737234 },
@@ -3770,9 +3773,9 @@ local MusicsList = {
     { Name = "Eligebete", Id = 129370559491985 },
     { Name = "Forsaken", Id = 136274352281439 },
     { Name = "Anxiety", Id = 101483901475189 },
-    { Name = "Grelo So fÃ©", Id = 72200166265935 },
+    { Name = "Grelo So fé", Id = 72200166265935 },
     { Name = "Phonk sexoagressivo", Id = 111995323199676 },
-    { Name = "forrÃ³ da resenha", Id = 120973520531216 },
+    { Name = "forro da resenha", Id = 120973520531216 },
     { Name = "escolha certa", Id = 107088620814881 },
     { Name = "lembro ate hoje", Id = 71531533552899 },
     { Name = "chinese phonk", Id = 134713831368801 },
@@ -3783,8 +3786,8 @@ local MusicsList = {
     { Name = "Flamengo funk", Id = 8080255618 },
     { Name = "Carro de Ovos", Id = 3148329638 },
     { Name = "Banka", Id = 16190784229 },
-    { Name = "Essa Ã© Antiga", Id = 90999978343771 },
-    { Name = "Essa Aqui Ã© Braba", Id = 120833520065453 },
+    { Name = "Essa e Antiga", Id = 90999978343771 },
+    { Name = "Essa Aqui e Braba", Id = 120833520065453 },
     { Name = "Help Me Phonk", Id = 72458292563094 },
     { Name = "Envolve A Tropa", Id = 88094479399489 },
     { Name = "No Pick Mulher", Id = 92893359226454 },
@@ -3794,7 +3797,7 @@ local MusicsList = {
     { Name = "Slowed Vapo No Vapo", Id = 106317184644394 },
     { Name = "Phonk Brasil", Id = 111281710445018 },
     { Name = "No Solinho", Id = 72440232513341 },
-    { Name = "Phonk InglÃªs", Id = 14145624031 },
+    { Name = "Phonk Inglês", Id = 14145624031 },
     { Name = "Ultra Slowed", Id = 84733736048142 },
     { Name = "Ritmada", Id = 104541292443133 },
     { Name = "Ritmada Novinha", Id = 94718473830640 },
@@ -3809,7 +3812,7 @@ for _, m in pairs(MusicsList) do
 end
 
 Tab5:AddDropdown({
-    Name = "Selecionar MÃºsica",
+    Name = "Selecionar Música",
     Options = MusicNames,
     Callback = function(v)
         selectedMusic = v
@@ -3817,7 +3820,7 @@ Tab5:AddDropdown({
 })
 
 Tab5:AddButton({
-    Name = "Tocar MÃºsica",
+    Name = "Tocar Música",
     Callback = function()
         local id = MusicIds[selectedMusic]
         if id then
@@ -3834,6 +3837,7 @@ Tab5:AddSection({"Carro Colorido"})
 
 Tab5:AddToggle({
     Name = "Carro Colorido <GamePass>",
+    Description = "Aviso so aparece pra vc",
     Default = false,
     Callback = function(s)
         isColorChanging = s
@@ -3858,7 +3862,7 @@ Tab5:AddToggle({
 })
 
 Tab5:AddButton({
-    Name = "DARK CAR FLY FREE",
+    Name = "CAR FLY FREE",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/FlyCar.lua', true))()
     end
@@ -4078,8 +4082,8 @@ local Dropdown = Tab5:AddDropdown({
 
 -- Toggle para ver a cÃ¢mera do carro selecionado
 Tab5:AddToggle({
-    Name = "Ver CÃ¢mera do Carro Selecionado",
-    Description = "Foca a cÃ¢mera no carro selecionado",
+    Name = "Ver Câmera do Carro Selecionado",
+    Description = "Foca a câmera no carro selecionado",
     Default = false,
     Callback = function(state)
         if state then
@@ -4390,7 +4394,7 @@ end
 
 Tab5:AddToggle({
     Name = "ESP Carros",
-    Description = "Mostra Carros no mapa",
+    Description = "Mostra todos os Carros no mapa",
     Default = false,
     Callback = toggleESP
 })
@@ -4411,6 +4415,7 @@ end
 
 Tab5:AddToggle({
     Name = "Codigo Varios Carros",
+    Description = "Spawnar vários carros 
     Default = false,
     Callback = function(value)
         spamCarsActive = value
@@ -4429,7 +4434,7 @@ Tab5:AddToggle({
 })
 
 -- ==================== KILL CAR (FLING) ====================
-Tab5:AddSection({Name = ("SeÃ§Ã£o Kill Car")})
+Tab5:AddSection({Name = ("Fling Boat")})
 
 local selectedPlayer = nil
 local flingLoop = false
@@ -4493,9 +4498,10 @@ local function ViewPlayer()
     end)
 end
 
+Tab5:AddSection({ "vc pode usar qualquer veículo etc. para o fling alguns não ira funcionar" })
 local PlayersDropdown = Tab5:AddDropdown({
     Name = ("Escolha um jogador"),
-    Description = ("Selecionar um jogador pra funcionar as funÃ§Ãµes"),
+    Description = ("Selecionar um jogador para o fling"),
     Options = {},
     Default = "Nenhum",
     Callback = function(value)
@@ -4503,8 +4509,19 @@ local PlayersDropdown = Tab5:AddDropdown({
     end
 })
 
+Tab5:AddToggle({
+    Name = ("Visualizar Jogador"),
+    Description = ("Olha jogador de longe qualquer lugar"),
+    Default = false,
+    Callback = function(value)
+        viewLoop = value
+        if value then ViewPlayer() end
+    end
+})
+
 Tab5:AddButton({
     Name = ("Atualizar Lista"),
+    Description = "Atualizar a lista de jogadores",
     Callback = function()
         local lista = {}
         for _, v in pairs(game.Players:GetPlayers()) do
@@ -4523,15 +4540,6 @@ Tab5:AddButton({
     end
 })
 
-Tab5:AddToggle({
-    Name = ("Visualizar Jogador"),
-    Description = ("Olha jogador de longe qualquer lugar"),
-    Default = false,
-    Callback = function(value)
-        viewLoop = value
-        if value then ViewPlayer() end
-    end
-})
 
 Tab5:AddButton({
     Name = ("Inicia Fling"),
@@ -4619,6 +4627,7 @@ Tabscript:AddSection({"Ativa o Fly GUI"})
 -- Botão para Fly Gui
 Tabscript:AddButton({
  Name = "Fly Gui",
+ Description = "Faz seu personagem voar",
  Callback = function()
  loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
  end
@@ -4668,6 +4677,7 @@ Tabscript:AddSection({"Script do Pacote Fantasma"})
 
 Tabscript:AddButton({
     Name = "Abrir Pacote Fanstama",
+    Description = "Não estar funcionando",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
     end
@@ -4696,7 +4706,7 @@ Tabscript:AddSection({"Só vc poderá ver"})
 
 Tabscript:AddButton({
     Name = "C00lkidd Gui ",
-    Description = "Aviso so o cliente Poderá ver",
+    Description = "Aviso so vc Poderá ver",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
     end
@@ -4737,7 +4747,7 @@ local InputID = ""
 TabAudio:AddTextBox({  
     Name = "Insira o ID Audio All",  
     Description = "Digite o ID do som que deseja tocar",  
-    Default = "",  
+    Default = "Colocar o id para o servidor Inteiro ouvir",  
     PlaceholderText = "Exemplo: 6832470734",  
     ClearTextOnFocus = true,  
     Callback = function(text)  
@@ -4759,7 +4769,7 @@ end
 -- BotÃ£o para tocar som manualmente
 TabAudio:AddButton({  
     Name = "Tocar Som",  
-    Description = "Clique para tocar a mÃºsica inserida",  
+    Description = "Clique para tocar a música inserida",  
     Callback = function()  
         if InputID then  
             fireServer("1Gu1nSound1s", {Workspace, InputID, 1})  
@@ -5327,7 +5337,7 @@ ToggleRosquinha:Callback(function(Value)
     end)
 end)
 
-
+TabTabExpansao:AddSection({ "Time HACKELINDO3" })
 TabExpansao:AddButton({
     Name = "Skybox HACKELINDO3 ”®",
     Description = "Ativa a Skybox permanente Avisoa Skyboxe visual",
@@ -5398,7 +5408,7 @@ TabExpansao:AddButton({
         ativarDominio()
 
         -- Ãudio infinito
-        local selectedAudioID = 140031333626044
+        local selectedAudioID = 70605158718179
 
         task.spawn(function()
             while true do
@@ -5426,8 +5436,8 @@ TabExpansao:AddButton({
     end
 })
 TabExpansao:AddButton({
-    Name = "Skybox Dev”®",
-    Description = "Ativa a Skybox permanente Avisoa Skyboxe visual",
+    Name = "Skybox do Dev”®",
+    Description = "Ativa a Skybox permanente Avisoa Skybox e visual",
     Callback = function()
         
         -- ServiÃ§os
@@ -6160,7 +6170,7 @@ local SectionChild = ChildTab:AddSection({ Name = "Controle da Criança FE" })
 local playerChildDropdown = ChildTab:AddDropdown({
     Name = "Selecione um player para perseguir",
     Options = updatePlayerList(),
-    Default = "",
+    Default = "escolha um alvo para molesta",
     Callback = function(selected)
         if game.Players:FindFirstChild(selected) then 
             chasingplayer = selected
@@ -6172,6 +6182,7 @@ local playerChildDropdown = ChildTab:AddDropdown({
 
 ChildTab:AddButton({
     Name = "Atualizar Player List",
+    Description = "Atualizar a lista de jogadores",
     Callback = function()
         local updated = updatePlayerList()
         pcall(function()
@@ -6235,6 +6246,7 @@ ChildTab:AddButton({
 
 ChildTab:AddToggle({
     Name = "Spectar Player",
+    Description = "ver alvo",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -6273,6 +6285,7 @@ end)
 opTab:AddSection({ "Natural Disasters" })
 opTab:AddButton({
     Name = "[OP] Tornado - Pirate Ship (Large)",
+    Description = "Navio louco na praça",
     Callback = function()
 local RS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -6283,7 +6296,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 local Vehicles = workspace:WaitForChild("Vehicles")
 
-local selectedAudioID = 9068077052
+local selectedAudioID = 120817494107898
 local function playAudio()
     if not selectedAudioID then
         return
@@ -6404,3 +6417,4 @@ opTab:AddButton({
         end
     end
 })
+
