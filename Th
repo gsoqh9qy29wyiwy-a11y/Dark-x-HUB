@@ -6398,3 +6398,296 @@ opTab:AddButton({
         end
     end
 })    
+
+-- ====================================================================
+-- ABA: PROPS 
+-- ====================================================================
+pcall(function() 
+    if type(DropdownJogadores.SetOptions) == "function" then DropdownJogadores:SetOptions(ObterListaNomes()) 
+    elseif type(DropdownJogadores.Refresh) == "function" then DropdownJogadores:Refresh(ObterListaNomes())
+    else DropdownJogadores:Set(ObterListaNomes()) end
+end)
+local PropsTab = Window:MakeTab({Title = "Props", Icon = "package"})
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local PropMovementMode = "Nenhum"
+local jogadorSelecionado, selecionarTodos, espionando = nil, false, false
+local cameraConnection, alvoRespawnConnection = nil, nil
+
+local Configs = {
+    Orbita       = { Speed = 2, Distance = 10, Height = 2 },
+    Caotico      = { Speed = 2, Distance = 8,  Height = 2 },
+    Furacao      = { Speed = 2, Distance = 5,  Height = 4 },
+    Alinhamento  = { Speed = 2, Distance = 3.5, Height = 2 }, 
+    Estrela      = { Speed = 2, Distance = 5,  Height = 15 }, 
+    Portal       = { Speed = 2, Distance = 5,  Height = 4 },
+    Aura         = { Speed = 3, Distance = 4,  Height = 1 }, 
+    Tremor       = { Speed = 2, Distance = 8,  Height = 2 }
+}
+
+local PropsActive, WaveSpeed, ColorSpread, ModoAvancadoAtivo = false, 0.2, 0.05, false
+local PropColorPickerRemote = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("NoResetGUIHandler"):WaitForChild("PropColorPicker"):WaitForChild("SetColor")
+
+local function SendNotification(Title, Text, Duration)
+    Duration = Duration or 3
+    pcall(function() game:GetService("StarterGui"):SetCore("SendNotification", {Title = Title, Text = Text, Icon = "rbxassetid://0", Duration = Duration}) end)
+end
+
+local meusPropsCache = {}
+local MeuPropNome = "Prop" .. LocalPlayer.Name
+
+local function AtualizarCacheProps()
+    local workspaceCom = workspace:FindFirstChild("WorkspaceCom")
+    if not workspaceCom then return end
+    local novosProps = {}
+    for _, cat in ipairs(workspaceCom:GetChildren()) do
+        for _, item in ipairs(cat:GetChildren()) do
+            if item.Name == MeuPropNome and item:FindFirstChild("SetCurrentCFrame") then table.insert(novosProps, item) end
+        end
+    end
+    meusPropsCache = novosProps
+end
+
+local function AlgumModoAtivo() return (PropMovementMode ~= "Nenhum" or PropsActive or ModoAvancadoAtivo) end
+
+task.spawn(function()
+    local ferramentaNoInventario = false
+    while true do
+        if AlgumModoAtivo() then
+            local char, mochila = LocalPlayer.Character, LocalPlayer:FindFirstChild("Backpack")
+            if not (char and char:FindFirstChild("PropMaker")) and not (mochila and mochila:FindFirstChild("PropMaker")) then
+                pcall(function() game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer(unpack({"PickingTools", "PropMaker"})) end)
+            end
+            ferramentaNoInventario = true
+        else
+            if ferramentaNoInventario then
+                pcall(function()
+                    local char, mochila = LocalPlayer.Character, LocalPlayer:FindFirstChild("Backpack")
+                    local fE, fM = char and char:FindFirstChild("PropMaker"), mochila and mochila:FindFirstChild("PropMaker")
+                    if fE then fE:Destroy() end if fM then fM:Destroy() end
+                end)
+                ferramentaNoInventario = false
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+task.spawn(function() while true do if AlgumModoAtivo() then pcall(AtualizarCacheProps) end task.wait(0.5) end end)
+
+PropsTab:AddSection({"Lista de jogadores"})
+
+local function ObterListaNomes()
+    local listaNomes = {"Todos"}
+    for _, player in ipairs(Players:GetPlayers()) do if player ~= LocalPlayer then table.insert(listaNomes, player.Name) end end
+    return listaNomes
+end
+
+local DropdownJogadores = nil
+DropdownJogadores = PropsTab:AddDropdown({
+    Name = "Selecionar Jogador", Options = {"..."}, Default = "...", Description = "os três pontinhos na lista também serve para as opções funcionarem para si mesmo",
+    Callback = function(nomeSelecionado)
+        if nomeSelecionado and nomeSelecionado ~= "..." then
+            if nomeSelecionado == "Todos" then selecionarTodos, jogadorSelecionado = true, nil else selecionarTodos, jogadorSelecionado = false, Players:FindFirstChild(nomeSelecionado) end
+            if espionando and jogadorSelecionado and jogadorSelecionado.Character then  
+                local hum = jogadorSelecionado.Character:FindFirstChildWhichIsA("Humanoid") if hum then Camera.CameraSubject = hum end  
+            end  
+        else jogadorSelecionado, selecionarTodos = nil, false end  
+    end
+})
+
+local function AtualizarListaDropdown()
+    local ant, novasOpcoes = jogadorSelecionado and jogadorSelecionado.Name, ObterListaNomes()
+    pcall(function()  
+        if DropdownJogadores and DropdownJogadores.Set then  
+            DropdownJogadores:Set(novasOpcoes)
+            if not jogadorSelecionado and not selecionarTodos then
+                local lbl = DropdownJogadores.Instance and DropdownJogadores.Instance:FindFirstChild("Title", true) or DropdownJogadores.Label
+                if lbl and lbl:IsA("TextLabel") then lbl.Text = "..." end
+            end
+        elseif DropdownJogadores and DropdownJogadores.Options then DropdownJogadores.Options = novasOpcoes end  
+    end)  
+    if ant and not table.find(novasOpcoes, ant) then  
+        SendNotification("⚠️ Alvo Perdido", ant .. " saiu!", 3) jogadorSelecionado = nil  
+        if espionando then local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid") if hum then Camera.CameraSubject = hum end end  
+    end
+end
+
+PropsTab:AddButton({Name = "Atualizar Lista", Callback = function() jogadorSelecionado, selecionarTodos = nil, false pcall(function() DropdownJogadores:Set({"..."}) end) task.wait(0.1) AtualizarListaDropdown() end})
+PropsTab:AddToggle({
+    Name = "Ver Jogador", Default = false,
+    Callback = function(state)
+        espionando = state
+        local function Foco()
+            if espionando and jogadorSelecionado and jogadorSelecionado.Character then
+                local hum = jogadorSelecionado.Character:FindFirstChildWhichIsA("Humanoid") if hum then Camera.CameraSubject = hum end
+            else local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid") if hum then Camera.CameraSubject = hum end end
+        end
+        Foco()
+        task.spawn(function()
+            while espionando do
+                pcall(function()
+                    local a = jogadorSelecionado and jogadorSelecionado.Character and jogadorSelecionado.Character:FindFirstChildWhichIsA("Humanoid")
+                    if a and Camera.CameraSubject ~= a then Camera.CameraSubject = a end
+                end)
+                task.wait(0.2)
+            end
+            Foco()
+        end)
+    end
+})
+
+PropsTab:AddSection({"Modo op"})
+PropsTab:AddToggle({
+    Name = "Matar jogador com Prop", 
+    Default = false,
+    Description = "Navegue até a seção de assentos dos Props e selecione o item desejado. Para executar a ação em um único jogador, toque uma vez na tela. Para executar em todos os jogadores, realize 15 toques. A seleção do alvo pode ser feita na lista de jogadores, escolhendo um usuário específico ou a opção \"Todos\".",
+    Callback = function(state)
+        ModoAvancadoAtivo = state
+        if not state then return end
+        task.spawn(function()
+            local alguemSentou = false
+            while ModoAvancadoAtivo and not alguemSentou do
+                local alvos = {}
+                if selecionarTodos then
+                    for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then table.insert(alvos, p) end end
+                else if jogadorSelecionado and jogadorSelecionado.Character then table.insert(alvos, jogadorSelecionado) end end
+                for _, alvo in ipairs(alvos) do
+                    local hum = alvo.Character:FindFirstChildWhichIsA("Humanoid")
+                    if hum and (hum.SeatPart or hum.Sit) then alguemSentou = true break end
+                end
+                task.wait(0.1)
+            end
+            if alguemSentou and ModoAvancadoAtivo then
+                pcall(function() game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer(unpack({"PickingTools", "PropMaker"})) end)
+            end
+        end)
+    end
+})
+
+PropsTab:AddSection({"Controle de Onda RGB"})
+PropsTab:AddToggle({Name = "Props RGB", Default = false, Callback = function(state) PropsActive = state if state then AtualizarCacheProps() end end})
+PropsTab:AddSlider({Name = "Velocidade da Onda", Min = 1, Max = 100, Default = 50, Callback = function(v) WaveSpeed = v / 200 end})
+PropsTab:AddSlider({Name = "Frequência do Gradiente", Min = 1, Max = 100, Default = 25, Callback = function(v) ColorSpread = v / 500 end})
+
+PropsTab:AddSection({"Opção: Props Órbita"})
+PropsTab:AddToggle({ Name = "Props Órbita", Default = false, Callback = function(s) PropMovementMode = s and "Orbita" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Orbita.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Distância", Min = 2, Max = 50, Default = 10, Callback = function(v) Configs.Orbita.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = -10, Max = 30, Default = 2, Callback = function(v) Configs.Orbita.Height = v end })
+
+PropsTab:AddSection({"Opção: Props Aura"})
+PropsTab:AddToggle({ Name = "Props Aura", Default = false, Callback = function(s) PropMovementMode = s and "Aura" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Aura.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Distância", Min = 2, Max = 50, Default = 4, Callback = function(v) Configs.Aura.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = -10, Max = 30, Default = 1, Callback = function(v) Configs.Aura.Height = v end })
+
+PropsTab:AddSection({"Opção: Props Tremor"})
+PropsTab:AddToggle({ Name = "Props Tremor", Default = false, Callback = function(s) PropMovementMode = s and "Tremor" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Tremor.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Distância", Min = 2, Max = 50, Default = 8, Callback = function(v) Configs.Tremor.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = -10, Max = 30, Default = 2, Callback = function(v) Configs.Tremor.Height = v end })
+
+PropsTab:AddSection({"Opção: Props Caótico"})
+PropsTab:AddToggle({ Name = "Props Caótico", Default = false, Callback = function(s) PropMovementMode = s and "Caotico" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Caotico.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Distância", Min = 2, Max = 50, Default = 8, Callback = function(v) Configs.Caotico.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = -10, Max = 30, Default = 2, Callback = function(v) Configs.Caotico.Height = v end })
+
+PropsTab:AddSection({"Opção: Props Estrela"})
+PropsTab:AddToggle({ Name = "Props Estrela", Default = false, Callback = function(s) PropMovementMode = s and "Estrela" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Estrela.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Distância", Min = 2, Max = 50, Default = 5, Callback = function(v) Configs.Estrela.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = 1, Max = 100, Default = 15, Callback = function(v) Configs.Estrela.Height = v end })
+
+PropsTab:AddSection({"Opção: Props Alinhamento"})
+PropsTab:AddToggle({ Name = "Props Alinhamento", Default = false, Callback = function(s) PropMovementMode = s and "Alinhamento" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade do Balanço", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Alinhamento.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Espaçamento entre Props", Min = 1, Max = 30, Default = 4, Callback = function(v) Configs.Alinhamento.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = -10, Max = 30, Default = 2, Callback = function(v) Configs.Alinhamento.Height = v end })
+
+PropsTab:AddSection({"Opção: Props Furacão"})
+PropsTab:AddToggle({ Name = "Props Furacão", Default = false, Callback = function(s) PropMovementMode = s and "Furacao" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Furacao.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Distância", Min = 2, Max = 50, Default = 5, Callback = function(v) Configs.Furacao.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = -10, Max = 30, Default = 4, Callback = function(v) Configs.Furacao.Height = v end })
+
+PropsTab:AddSection({"Opção: Props Portal"})
+PropsTab:AddToggle({ Name = "Props Portal", Default = false, Callback = function(s) PropMovementMode = s and "Portal" or "Nenhum" if s then AtualizarCacheProps() end end })
+PropsTab:AddSlider({ Name = "Velocidade", Min = 1, Max = 100, Default = 40, Callback = function(v) Configs.Portal.Speed = v / 20 end })
+PropsTab:AddSlider({ Name = "Distância", Min = 2, Max = 50, Default = 5, Callback = function(v) Configs.Portal.Distance = v end })
+PropsTab:AddSlider({ Name = "Altura", Min = -10, Max = 30, Default = 4, Callback = function(v) Configs.Portal.Height = v end })
+
+task.spawn(function()
+    local angle, tempoGeral = 0, 0
+    game:GetService("RunService").Heartbeat:Connect(function(dt)
+        if (PropMovementMode == "Nenhum" and not ModoAvancadoAtivo) or #meusPropsCache == 0 then return end
+        local lista = {}
+        if selecionarTodos then
+            for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then table.insert(lista, p) end end
+        else local t = jogadorSelecionado or LocalPlayer if t.Character and t.Character:FindFirstChild("HumanoidRootPart") then table.insert(lista, t) end end
+        if #lista == 0 then return end
+        
+        local cfg = Configs[PropMovementMode]
+        local speedVal = cfg and cfg.Speed or 2
+        angle, tempoGeral = angle + (dt * speedVal), tempoGeral + dt * (speedVal * 2)
+        local total, shift = #meusPropsCache, selecionarTodos and math.floor(tick() * 30) or 0
+
+        for i, prop in ipairs(meusPropsCache) do
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then
+                local pDono = lista[((i - 1 + shift) % #lista) + 1]
+                if pDono and pDono.Character and pDono.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = pDono.Character.HumanoidRootPart
+                    local rPos, rCF = root.Position, root.CFrame
+                    local pFrente, spacing = rPos + (rCF.LookVector * 5), (math.pi * 2) / total
+                    local fAngle, tPos, olharPara = angle + (i * spacing) + (shift * 0.5), Vector3.zero, rPos
+
+                    if ModoAvancadoAtivo then
+                        local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
+                        if humAlvo and (humAlvo.SeatPart or humAlvo.Sit) then
+                            local posVoid = Vector3.new(rPos.X, -40000, rPos.Z)
+                            task.spawn(function() pcall(remote.InvokeServer, remote, rCF - rCF.Position + posVoid) end)
+                        else
+                            local oscilacaoRapida = Vector3.new(0, math.sin(tempoGeral * 15 + i) * 3, 0)
+                            task.spawn(function() pcall(remote.InvokeServer, remote, rCF + oscilacaoRapida) end)
+                        end
+                    elseif cfg then
+                        if PropMovementMode == "Orbita" then tPos = rPos + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance)
+                        elseif PropMovementMode == "Aura" then local o = math.sin(tempoGeral * 3 + i) * 1.5 tPos = rPos + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance + (o * 0.2)), cfg.Height + o, math.sin(fAngle * 1.5) * (cfg.Distance + (o * 0.2))) olharPara = rPos + Vector3.new(0, o, 0)
+                        elseif PropMovementMode == "Tremor" then tPos = rPos + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tick() * 50 + i) * 0.8, math.cos(tick() * 55 + i) * 0.8, math.sin(tick() * 60 + i) * 0.8)
+                        elseif PropMovementMode == "Caotico" then tPos = rPos + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tempoGeral + (i * 2)) * (cfg.Distance * 0.5), math.cos(tempoGeral * 1.8 + i) * 4, math.sin(tempoGeral * 1.3 + i) * (cfg.Distance * 0.5)) olharPara = tPos + Vector3.new(math.sin(tempoGeral * 5), math.cos(tempoGeral * 5), math.sin(tempoGeral * 3))
+                        elseif PropMovementMode == "Estrela" then local e = cfg.Distance + (math.sin(tempoGeral * 2.5 + i) * (cfg.Distance * 0.4)) tPos = rPos + Vector3.new(math.cos(fAngle) * e, cfg.Height + (math.cos(fAngle) * 2), math.sin(fAngle) * e) olharPara = rPos + Vector3.new(0, cfg.Height, 0)
+                        elseif PropMovementMode == "Alinhamento" then tPos = rPos + (rCF.LookVector * (-5 - (i * cfg.Distance))) + Vector3.new(0, cfg.Height + (math.sin(tempoGeral + i) * 0.5), 0) olharPara = tPos - (rCF.LookVector * 100)
+                        elseif PropMovementMode == "Furacao" then local s = ((tempoGeral + (i * 2)) % 10) - 3 tPos = pFrente + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))), cfg.Height + s, math.sin(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15)))) olharPara = pFrente + Vector3.new(0, 10, 0)
+                        elseif PropMovementMode == "Portal" then local rp = cfg.Distance * 0.7 tPos = (rCF * CFrame.new(0, cfg.Height + (math.sin(fAngle) * rp), -5)).Position + (rCF.RightVector * (math.cos(fAngle) * rp)) olharPara = pFrente + (rCF.LookVector * 20) end
+                        
+                        task.spawn(function() pcall(remote.InvokeServer, remote, CFrame.lookAt(tPos, olharPara)) end)
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+task.spawn(function()
+    while true do
+        if PropsActive and #meusPropsCache > 0 then
+            local tempoAtual = tick()
+            for i, prop in ipairs(meusPropsCache) do
+                local remote = prop:FindFirstChild("ChangePropColor")
+                if remote then
+                    local bp = prop:FindFirstChildWhichIsA("BasePart")
+                    local color = Color3.fromHSV(((tempoAtual * WaveSpeed) + ((bp and bp.Position.X or i) * ColorSpread)) % 1, 1, 1)
+                    for _, part in ipairs(prop:GetDescendants()) do if part:IsA("BasePart") then part.Color = color end end
+                    task.spawn(function() pcall(remote.InvokeServer, remote, color) end)
+                end
+            end
+            pcall(function() PropColorPickerRemote:FireServer(Color3.fromHSV((tempoAtual * WaveSpeed) % 1, 1, 1)) end)
+        end
+        task.wait(0.04)
+    end
+end)
+
+task.wait(0.2) pcall(AtualizarListaDropdown)
