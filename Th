@@ -5321,4 +5321,1080 @@ ToggleRosquinha:Callback(function(Value)
     end)
 end)
 
-       
+   -- ====================================================================
+-- ABA: EXPANSÃO 
+-- ====================================================================
+TabExpansao:AddButton({
+    Name = "Skybox HACKELINDO3 ”®",
+    Description = "Ativa a Skybox permanente Aviso a Skybox e visual",
+    Callback = function()
+        
+        -- ServiÃ§os
+        local TextChatService = game:GetService("TextChatService")
+        local Lighting = game:GetService("Lighting")
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Player = Players.LocalPlayer
+
+        -- FunÃ§Ã£o principal
+        local function ativarDominio()
+            local char = Player.Character or Player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+
+            local dominio = Instance.new("Model", workspace)
+            dominio.Name = "InfiniteVoid"
+
+            local esfera = Instance.new("Part")
+            esfera.Shape = Enum.PartType.Ball
+            esfera.Size = Vector3.new(300, 300, 300)
+            esfera.Position = hrp.Position
+            esfera.Anchored = true
+            esfera.CanCollide = false
+            esfera.Material = Enum.Material.ForceField
+            esfera.Transparency = 0.3
+            esfera.Color = Color3.fromRGB(0, 0, 0)
+            esfera.Parent = dominio
+
+            local luz = Instance.new("PointLight", esfera)
+            luz.Color = Color3.fromRGB(0, 153, 255)
+            luz.Brightness = 10
+            luz.Range = 300
+
+            local ps = Instance.new("ParticleEmitter", esfera)
+            ps.Texture = "rbxassetid://243660364"
+            ps.Color = ColorSequence.new(Color3.fromRGB(0, 153, 255))
+            ps.LightEmission = 1
+            ps.Size = NumberSequence.new(3)
+            ps.Transparency = NumberSequence.new(0.2)
+            ps.Rate = 1000
+            ps.Lifetime = NumberRange.new(2)
+            ps.Speed = NumberRange.new(0)
+            ps.VelocitySpread = 180
+
+            local som = Instance.new("Sound", esfera)
+            som.SoundId = "rbxassetid://1843527678"
+            som.Volume = 2
+            som.Looped = true
+            som:Play()
+
+            local skyOld = Lighting:FindFirstChildOfClass("Sky")
+            if skyOld then
+                skyOld.Parent = nil
+            end
+
+            local newSky = Instance.new("Sky", Lighting)
+            newSky.SkyboxBk = "rbxassetid://96102280701722"
+            newSky.SkyboxDn = "rbxassetid://96102280701722"
+            newSky.SkyboxFt = "rbxassetid://96102280701722"
+            newSky.SkyboxLf = "rbxassetid://96102280701722"
+            newSky.SkyboxRt = "rbxassetid://96102280701722"
+            newSky.SkyboxUp = "rbxassetid://96102280701722"
+        end
+
+        ativarDominio()
+
+        -- Ãudio infinito
+        local selectedAudioID = 140031333626044
+
+        task.spawn(function()
+            while true do
+                local remote = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1nSound1s")
+                if remote then
+                    remote:FireServer(workspace, selectedAudioID, 1)
+                end
+
+                local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local sound = Instance.new("Sound")
+                    sound.SoundId = "rbxassetid://" .. selectedAudioID
+                    sound.Volume = 1
+                    sound.Looped = false
+                    sound.Parent = root
+                    sound:Play()
+                    sound.Ended:Connect(function() sound:Destroy() end)
+                    task.wait(sound.TimeLength + 0.1)
+                else
+                    warn("HumanoidRootPart nÃ£o encontrado")
+                    break
+                end
+            end
+        end)
+    end
+})
+TabExpansao:AddButton({
+    Name = "Skybox Dev”®",
+    Description = "Ativa a Skybox permanente Aviso a Skybox e visual",
+    Callback = function()
+        
+        -- ServiÃ§os
+        local TextChatService = game:GetService("TextChatService")
+        local Lighting = game:GetService("Lighting")
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Player = Players.LocalPlayer
+
+        -- FunÃ§Ã£o principal
+        local function ativarDominio()
+            local char = Player.Character or Player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+
+            local dominio = Instance.new("Model", workspace)
+            dominio.Name = "InfiniteVoid"
+
+            local esfera = Instance.new("Part")
+            esfera.Shape = Enum.PartType.Ball
+            esfera.Size = Vector3.new(300, 300, 300)
+            esfera.Position = hrp.Position
+            esfera.Anchored = true
+            esfera.CanCollide = false
+            esfera.Material = Enum.Material.ForceField
+            esfera.Transparency = 0.3
+            esfera.Color = Color3.fromRGB(0, 0, 0)
+            esfera.Parent = dominio
+
+            local luz = Instance.new("PointLight", esfera)
+            luz.Color = Color3.fromRGB(0, 153, 255)
+            luz.Brightness = 10
+            luz.Range = 300
+
+            local ps = Instance.new("ParticleEmitter", esfera)
+            ps.Texture = "rbxassetid://243660364"
+            ps.Color = ColorSequence.new(Color3.fromRGB(0, 153, 255))
+            ps.LightEmission = 1
+            ps.Size = NumberSequence.new(3)
+            ps.Transparency = NumberSequence.new(0.2)
+            ps.Rate = 1000
+            ps.Lifetime = NumberRange.new(2)
+            ps.Speed = NumberRange.new(0)
+            ps.VelocitySpread = 180
+
+            local som = Instance.new("Sound", esfera)
+            som.SoundId = "rbxassetid://1843527678"
+            som.Volume = 2
+            som.Looped = true
+            som:Play()
+
+            local skyOld = Lighting:FindFirstChildOfClass("Sky")
+            if skyOld then
+                skyOld.Parent = nil
+            end
+
+            local newSky = Instance.new("Sky", Lighting)
+            newSky.SkyboxBk = "rbxassetid://116165302507661"
+            newSky.SkyboxDn = "rbxassetid://116165302507661"
+            newSky.SkyboxFt = "rbxassetid://116165302507661"
+            newSky.SkyboxLf = "rbxassetid://116165302507661"
+            newSky.SkyboxRt = "rbxassetid://116165302507661"
+            newSky.SkyboxUp = "rbxassetid://116165302507661"
+        end
+
+        ativarDominio()
+
+        -- Ãudio infinito
+        local selectedAudioID = 140031333626044
+
+        task.spawn(function()
+            while true do
+                local remote = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1nSound1s")
+                if remote then
+                    remote:FireServer(workspace, selectedAudioID, 1)
+                end
+
+                local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local sound = Instance.new("Sound")
+                    sound.SoundId = "rbxassetid://" .. selectedAudioID
+                    sound.Volume = 1
+                    sound.Looped = false
+                    sound.Parent = root
+                    sound:Play()
+                    sound.Ended:Connect(function() sound:Destroy() end)
+                    task.wait(sound.TimeLength + 0.1)
+                else
+                    warn("HumanoidRootPart nÃ£o encontrado")
+                    break
+                end
+            end
+        end)
+    end
+})
+TabExpansao:AddButton({
+    Name = "Shaders",
+    Description = "ativa shader so que e inreversivel So para quando sair",
+    Callback = function()
+    -- Aviso: script otimizado, ativação automática sem interface gráfica.
+
+local workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local Debris = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local model = workspace:FindFirstChild("Model")
+
+-- Som de ativação
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://131644923"
+sound.Volume = 1
+sound.Parent = SoundService
+sound:Play()
+
+-- Aplicar materiais ao mapa
+if model then
+	local function setMat(obj)
+		for _, c in pairs(obj:GetChildren()) do
+			if c:IsA("BasePart") then
+				c.Material = Enum.Material.Basalt
+			elseif c:IsA("Model") or c:IsA("Folder") then
+				setMat(c)
+			end
+		end
+	end
+	if model:FindFirstChild("001_SnowStreet") then
+		setMat(model["001_SnowStreet"])
+	end
+	if model:FindFirstChild("Street") then
+		for _, o in pairs(model.Street:GetDescendants()) do
+			if o:IsA("BasePart") then
+				o.Material = Enum.Material.Basalt
+			end
+		end
+	end
+	for _, o in pairs(model:GetChildren()) do
+		if o:IsA("BasePart") and (o.Name == "Sidewalk" or o.Name == "Wedge") and o.Material == Enum.Material.SmoothPlastic then
+			o.Material = Enum.Material.Cobblestone
+		end
+	end
+	model.ChildAdded:Connect(function(obj)
+		if obj:IsA("BasePart") and (obj.Name == "Sidewalk" or obj.Name == "Wedge") and obj.Material == Enum.Material.SmoothPlastic then
+			obj.Material = Enum.Material.Cobblestone
+		end
+	end)
+end
+
+local soundPart = Instance.new("Part")
+soundPart.Size = Vector3.new(1,1,1)
+soundPart.Transparency = 1
+soundPart.Anchored = true
+soundPart.CanCollide = false
+soundPart.Parent = workspace
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+local birdSound = Instance.new("Sound")
+birdSound.Name = "BirdsSound"
+birdSound.SoundId = "rbxassetid://1237969272"
+birdSound.Looped = true
+birdSound.Volume = 0.05
+birdSound.Parent = soundPart
+
+local wolfSound = Instance.new("Sound")
+wolfSound.SoundId = "rbxassetid://6654360741"
+wolfSound.Volume = 0.05
+wolfSound.Looped = false
+wolfSound.Parent = workspace
+
+RunService.Heartbeat:Connect(function()
+	if hrp and hrp.Parent then
+		soundPart.Position = hrp.Position + Vector3.new(0,10,0)
+	end
+end)
+
+local function isNight()
+	local t = Lighting.ClockTime
+	return (t >= 18 or t <= 6)
+end
+
+task.spawn(function()
+	while true do
+		if isNight() then
+			if birdSound.IsPlaying then birdSound:Stop() end
+			if wolfSound.IsPlaying then wolfSound:Stop() end
+			wolfSound:Play()
+		else
+			if wolfSound.IsPlaying then wolfSound:Stop() end
+			if not birdSound.IsPlaying then birdSound:Play() end
+		end
+		wait(20)
+	end
+end)
+
+local fountainPart = Instance.new("Part")
+fountainPart.Anchored = true
+fountainPart.CanCollide = false
+fountainPart.Transparency = 1
+fountainPart.Size = Vector3.new(1,1,1)
+fountainPart.Position = Vector3.new(-27,19,15)
+fountainPart.Parent = workspace
+
+local attachment = Instance.new("Attachment")
+attachment.Position = Vector3.new(-27,19,15)
+attachment.Parent = fountainPart
+
+local fountainSound = Instance.new("Sound")
+fountainSound.Name = "FountainSound"
+fountainSound.SoundId = "rbxassetid://4766793559"
+fountainSound.Looped = true
+fountainSound.Volume = 0.03
+fountainSound.EmitterSize = 10
+fountainSound.RollOffMode = Enum.RollOffMode.Linear
+fountainSound.MaxDistance = 100
+fountainSound.Parent = attachment
+fountainSound:Play()
+
+local customSound = Instance.new("Sound")
+customSound.Name = "MyCustomSound"
+customSound.SoundId = "rbxassetid://9048659736"
+customSound.Volume = 0.01
+customSound.Looped = true
+customSound.PlayOnRemove = false
+customSound.Parent = workspace
+customSound:Play()
+
+local active = false
+local stars = {}
+local shootingStarsFolder = Instance.new("Folder",workspace)
+shootingStarsFolder.Name = "ShootingStars"
+local STAR_COUNT = 300
+local SHOOTING_STAR_CHANCE = 0.3
+local SHOOTING_STAR_MAX = 12
+local shootingStarCooldown = 0.1
+
+local spaceSound = Instance.new("Sound",workspace)
+spaceSound.SoundId = "rbxassetid://1843520836"
+spaceSound.Volume = 0.3
+spaceSound.Looped = true
+spaceSound.Name = "SpaceAmbience"
+
+local function createStar()
+	local star = Instance.new("Part")
+	local size = math.random(1,3)*0.5
+	star.Size = Vector3.new(size,size,size)
+	star.Position = Vector3.new(math.random(-1000,1000),math.random(300,700),math.random(-1000,1000))
+	star.Anchored = true
+	star.CanCollide = false
+	star.Material = Enum.Material.Neon
+	local colors = {Color3.fromRGB(255,255,255),Color3.fromRGB(255,255,180),Color3.fromRGB(180,200,255)}
+	star.Color = colors[math.random(1,#colors)]
+	star.Name = "Star"
+	star.Parent = workspace
+	local light = Instance.new("PointLight",star)
+	light.Brightness = 2 + math.random()*1.5
+	light.Range = 12
+	spawn(function()
+		while star.Parent and active do
+			star.Transparency = 0.2 + math.sin(tick()*math.random(2,5))*0.2
+			RunService.Heartbeat:Wait()
+		end
+		if star.Parent then star:Destroy() end
+	end)
+	table.insert(stars,star)
+end
+
+local function createShootingStar()
+	if not active then return end
+	local startPos = Vector3.new(math.random(-1000,1000),math.random(350,600),math.random(-1000,1000))
+	local dir = Vector3.new(math.random(-1,1),math.random(-0.1,0.1),math.random(-1,1)).Unit
+	local speed = math.random(350,550)
+	local isFire = math.random() <= SHOOTING_STAR_CHANCE
+	local color = isFire and Color3.fromRGB(255,50,50) or Color3.fromRGB(255,255,220)
+	local trailColor = isFire and ColorSequence.new(Color3.fromRGB(255,120,0),Color3.fromRGB(255,230,50)) or ColorSequence.new(Color3.fromRGB(255,255,255),Color3.fromRGB(255,255,180))
+	local star = Instance.new("Part")
+	star.Size = Vector3.new(0.5,0.5,3)
+	star.Position = startPos
+	star.Anchored = true
+	star.CanCollide = false
+	star.Material = Enum.Material.Neon
+	star.Color = color
+	star.Name = "ShootingStar"
+	star.Parent = shootingStarsFolder
+	local att0 = Instance.new("Attachment",star)
+	local att1 = Instance.new("Attachment",star)
+	att1.Position = Vector3.new(0,0,-3)
+	local trail = Instance.new("Trail",star)
+	trail.Attachment0 = att0
+	trail.Attachment1 = att1
+	trail.Lifetime = 0.35
+	trail.Color = trailColor
+	trail.LightEmission = 1
+	trail.WidthScale = NumberSequence.new({NumberSequenceKeypoint.new(0,1),NumberSequenceKeypoint.new(1,0)})
+	local light = Instance.new("PointLight",star)
+	light.Brightness = isFire and 12 or 7
+	light.Range = 35
+	light.Color = color
+	if isFire then
+		local fire = Instance.new("Fire",star)
+		fire.Heat = 15
+		fire.Size = 3.5
+		fire.Color = Color3.fromRGB(255,110,0)
+		fire.SecondaryColor = Color3.fromRGB(255,210,0)
+	end
+	local lifetime = math.random(1,1.5)
+	local timePassed = 0
+	local moveConn
+	moveConn = RunService.Heartbeat:Connect(function(dt)
+		if not active then moveConn:Disconnect() if star.Parent then star:Destroy() end return end
+		timePassed += dt
+		if timePassed >= lifetime then moveConn:Disconnect() if star.Parent then star:Destroy() end return end
+		local curve = math.sin(timePassed*20)*0.5
+		star.Position += (dir+Vector3.new(0,curve,0)).Unit*speed*dt
+	end)
+	Debris:AddItem(star,4)
+end
+
+local function updateSky()
+	local hour = Lighting.ClockTime
+	local shouldBeActive = hour >= 18 or hour < 6
+	if shouldBeActive and not active then
+		active = true
+		Lighting.FogColor = Color3.fromRGB(10,10,30)
+		Lighting.FogEnd = 5000
+		Lighting.Brightness = 2
+		for _,s in ipairs(stars) do if s and s.Parent then s:Destroy() end end
+		stars = {}
+		for _,p in ipairs(shootingStarsFolder:GetChildren()) do p:Destroy() end
+		for i=1,STAR_COUNT do createStar() end
+		spaceSound:Play()
+	elseif not shouldBeActive and active then
+		active = false
+		for _,s in ipairs(stars) do if s and s.Parent then s:Destroy() end end
+		stars = {}
+		for _,p in ipairs(shootingStarsFolder:GetChildren()) do p:Destroy() end
+		spaceSound:Stop()
+		Lighting.FogColor = Color3.fromRGB(192,192,192)
+		Lighting.FogEnd = 100000
+		Lighting.Brightness = 2
+	end
+end
+
+task.spawn(function()
+	while true do
+		if active then
+			for i=1,SHOOTING_STAR_MAX do
+				createShootingStar()
+				task.wait(shootingStarCooldown)
+			end
+		else
+			task.wait(1)
+		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		updateSky()
+		task.wait(1)
+	end
+end)
+
+local rainFolder = Instance.new("Folder",workspace)
+rainFolder.Name = "FakeRain"
+local isRaining = false
+
+local birds = Instance.new("Sound",SoundService)
+birds.SoundId = "rbxassetid://9111139882"
+birds.Volume = 0.2
+birds.Looped = true
+birds:Play()
+
+local rainSound = Instance.new("Sound",SoundService)
+rainSound.SoundId = "rbxassetid://9118823106"
+rainSound.Volume = 0.3
+rainSound.Looped = true
+rainSound:Play()
+
+local thunder = Instance.new("Sound",SoundService)
+thunder.SoundId = "rbxassetid://9120018695"
+thunder.Volume = 0.4
+
+local function updateBirdSound()
+	birds.Volume = isRaining and 0 or 0.2
+end
+
+local function spawnRain()
+	isRaining = true
+	updateBirdSound()
+	for i=1,120 do
+		local drop = Instance.new("Part")
+		drop.Size = Vector3.new(0.1,2,0.1)
+		drop.Anchored = true
+		drop.CanCollide = false
+		drop.Material = Enum.Material.Glass
+		drop.Transparency = 0.5
+		drop.Color = Color3.fromRGB(160,160,255)
+		drop.Position = Vector3.new(math.random(-150,150),100,math.random(-150,150))
+		drop.Parent = rainFolder
+		local tween = TweenService:Create(drop,TweenInfo.new(1),{Position=drop.Position-Vector3.new(0,60,0)})
+		tween:Play()
+		Debris:AddItem(drop,1.5)
+	end
+	wait(1.5)
+	isRaining = false
+	updateBirdSound()
+end
+
+local function lightningStrike()
+	local flash = Instance.new("Part")
+	flash.Size = Vector3.new(1,1000,1)
+	flash.Anchored = true
+	flash.CanCollide = false
+	flash.Transparency = 0.4
+	flash.Material = Enum.Material.Neon
+	flash.Color = Color3.new(1,1,1)
+	flash.Position = Vector3.new(math.random(-100,100),500,math.random(-100,100))
+	flash.Parent = workspace
+	Lighting.Brightness = Lighting.Brightness + 1.5
+	thunder:Play()
+	wait(0.1)
+	Lighting.Brightness = Lighting.Brightness - 1.5
+	flash:Destroy()
+end
+
+for _,part in pairs(workspace:GetDescendants()) do
+	if part:IsA("BasePart") and part.Material == Enum.Material.SmoothPlastic then
+		part.Reflectance = 0.25
+	end
+end
+
+task.spawn(function()
+	while true do
+		spawnRain()
+		if math.random() < 0.2 then lightningStrike() end
+		wait(1)
+	end
+end)
+
+-- Iluminação e ambiente geral
+Lighting.Brightness = 2
+Lighting.GlobalShadows = true
+Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+Lighting.FogColor = Color3.fromRGB(120, 130, 140)
+Lighting.FogStart = 80
+Lighting.FogEnd = 600
+Lighting.EnvironmentSpecularScale = 1
+Lighting.EnvironmentDiffuseScale = 0.5
+
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://159454299"
+sky.SkyboxDn = "rbxassetid://159454296"
+sky.SkyboxFt = "rbxassetid://159454293"
+sky.SkyboxLf = "rbxassetid://159454286"
+sky.SkyboxRt = "rbxassetid://159454300"
+sky.SkyboxUp = "rbxassetid://159454304"
+sky.Parent = Lighting
+
+local color = Instance.new("ColorCorrectionEffect", Lighting)
+color.Brightness = 0.03
+color.Contrast = 0.15
+color.Saturation = 0.05
+color.TintColor = Color3.fromRGB(255, 240, 220)
+
+local bloom = Instance.new("BloomEffect", Lighting)
+bloom.Intensity = 0.8
+bloom.Size = 56
+bloom.Threshold = 0.9
+
+local sunRays = Instance.new("SunRaysEffect", Lighting)
+sunRays.Intensity = 0.05
+sunRays.Spread = 0.8
+
+local blur = Instance.new("BlurEffect", Lighting)
+blur.Size = 0
+end})
+-- ====================================================================
+-- ABA: SKY
+-- ====================================================================
+TabSky:AddButton({
+    Name = "Ativar Tubers93 (Shelby)",
+    Description = "TransformaÃ§Ã£o completa Tubers93 by Shelby",
+    Callback = function()
+
+        -- by shelby 
+        pcall(function()
+
+            local args = {
+                [1] = {
+                    [1] = 86500008,
+                    [2] = 86500036,
+                    [3] = 86500054,
+                    [4] = 86500078,
+                    [5] = 86500064,
+                    [6] = 86498048
+                }
+            }
+
+            game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+
+            local Players = game:GetService("Players")
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local UserInputService = game:GetService("UserInputService")
+            local StarterGui = game:GetService("StarterGui")
+
+            local LocalPlayer = Players.LocalPlayer
+            local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+            if not Humanoid then return end
+
+            local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+            local WearRemote = Remotes:WaitForChild("Wear")
+            local WearShirtRemote = Remotes:WaitForChild("WearShirt")
+            local WearPantsRemote = Remotes:WaitForChild("WearPants")
+
+            local Desc = Humanoid:GetAppliedDescription()
+            for _, accessory in ipairs(Desc:GetAccessories(true)) do
+                if accessory.AssetId then
+                    WearRemote:InvokeServer(accessory.AssetId)
+                end
+            end
+
+            local accessoriesToWear = {4085923851,63690008}
+            for _, id in ipairs(accessoriesToWear) do
+                WearRemote:InvokeServer(id)
+            end
+
+            local shirtsToWear = {138121234806572}
+            local pantsToWear = {144076760}
+
+            for _, id in ipairs(shirtsToWear) do
+                WearShirtRemote:InvokeServer(id)
+            end
+
+            for _, id in ipairs(pantsToWear) do
+                WearPantsRemote:InvokeServer(id)
+            end
+
+            local animate = Character:WaitForChild("Animate")
+
+            local tool = Instance.new("Tool")
+            tool.Name = "Tubers93"
+            tool.RequiresHandle = false
+            tool.CanBeDropped = false
+            tool.TextureId = "rbxassetid://7447690378"
+            tool.Parent = LocalPlayer:WaitForChild("Backpack")
+
+            local equipped = false
+            local selectedAnimation = {id = 86760710155841}
+            local active = {}
+            local remote = ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Gu1nSound1s")
+            local soundId = 103215672097028
+            local volume = 0.95
+
+            local function playEmote()
+                pcall(function()
+                    local track = Humanoid:PlayEmoteAndGetAnimTrackById(selectedAnimation.id)
+                    if track then
+                        track.Looped = true
+                        track.Priority = Enum.AnimationPriority.Action
+                        active[selectedAnimation.id] = track
+                        track.Stopped:Connect(function()
+                            active[selectedAnimation.id] = nil
+                        end)
+                    end
+                end)
+            end
+
+            local function playLocalSound(parent)
+                pcall(function()
+                    local sound = Instance.new("Sound")
+                    sound.SoundId = "rbxassetid://"..soundId
+                    sound.Volume = volume
+                    sound.Parent = parent
+                    sound:Play()
+                    sound.Ended:Connect(function()
+                        sound:Destroy()
+                    end)
+                end)
+            end
+
+            tool.Equipped:Connect(function() equipped = true end)
+            tool.Unequipped:Connect(function() equipped = false end)
+
+            UserInputService.InputBegan:Connect(function(input, gpe)
+                if not equipped or gpe then return end
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    playEmote()
+                    if remote then
+                        pcall(function()
+                            remote:FireServer(Character.HumanoidRootPart, soundId, volume)
+                        end)
+                    end
+                    playLocalSound(Character.HumanoidRootPart)
+                end
+            end)
+
+            local char = LocalPlayer.Character
+            local animate = char:WaitForChild("Animate")
+            local humanoid = char:WaitForChild("Humanoid")
+
+            for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+                pcall(function()
+                    track:Stop()
+                    track:Destroy()
+                end)
+            end
+
+            animate.walk.WalkAnim.AnimationId   = "http://www.roblox.com/asset/?id=0"
+            animate.run.RunAnim.AnimationId     = "http://www.roblox.com/asset/?id=0"
+            animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=0"
+            animate.idle.Animation2.AnimationId = "http://www.roblox.com/asset/?id=0"
+            animate.jump.JumpAnim.AnimationId   = "http://www.roblox.com/asset/?id=0"
+            animate.fall.FallAnim.AnimationId   = "http://www.roblox.com/asset/?id=0"
+            animate.climb.ClimbAnim.AnimationId = "http://www.roblox.com/asset/?id=0"
+
+            humanoid.Jump = false
+
+            animate.walk.WalkAnim.AnimationId   = "http://www.roblox.com/asset/?id=121350640829746"
+            animate.run.RunAnim.AnimationId     = "http://www.roblox.com/asset/?id=121350640829746"
+            animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=135425213693488"
+            animate.idle.Animation2.AnimationId = "http://www.roblox.com/asset/?id=135579638960045"
+            animate.jump.JumpAnim.AnimationId   = "http://www.roblox.com/asset/?id=104108770420406"
+            animate.fall.FallAnim.AnimationId   = "http://www.roblox.com/asset/?id=104108770420406"
+            animate.climb.ClimbAnim.AnimationId = "http://www.roblox.com/asset/?id=421121499"
+
+            humanoid.Jump = false
+
+            StarterGui:SetCore("SendNotification", {
+                Title = "Tubers93",
+                Text = "By Shelby/Usuario_X1x1x1",
+                Icon = "rbxassetid://7447690378",
+                Duration = 8,
+                Button1 = "OK"
+            })
+
+        end)
+    end
+})
+-- ====================================================================
+-- ABA: 
+-- ====================================================================
+local Section = Tab2:AddSection({"Player Character"})
+
+
+Tab2:AddSlider({
+    Name = "Velocidade do jogador",
+    Increase = 1,
+    MinValue = 16,
+    MaxValue = 2000,
+    Default = 16,
+    Callback = function(Value)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        
+        if humanoid then
+            humanoid.WalkSpeed = Value
+        end
+    end
+ })
+ 
+ Tab2:AddSlider({
+    Name = "Pulo do jogador",
+    Increase = 1,
+    MinValue = 50,
+    MaxValue = 5000,
+    Default = 50,
+    Callback = function(Value)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        
+        if humanoid then
+            humanoid.JumpPower = Value
+        end
+    end
+ })
+ 
+ Tab2:AddSlider({
+    Name = "Gravidade do jogador",
+    Increase = 1,
+    MinValue = 0,
+    MaxValue = 10000,
+    Default = 196.2,
+    Callback = function(Value)
+        game.Workspace.Gravity = Value
+    end
+ })
+ 
+ local InfiniteJumpEnabled = false
+ 
+ game:GetService("UserInputService").JumpRequest:Connect(function()
+    if InfiniteJumpEnabled then
+       local character = game.Players.LocalPlayer.Character
+       if character and character:FindFirstChild("Humanoid") then
+          character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+       end
+    end
+ end)
+
+ Tab2:AddButton({
+    Name = "Resetar Velocidade/Gravidade/Pulo.",
+    Callback = function()
+        -- Resetar Speed
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 16 -- Valor padrão da Velocidade 
+            humanoid.JumpPower = 50 -- Valor padrão do Pulo
+        end
+        
+        -- Resetar Gravidade 
+        game.Workspace.Gravity = 196.2 -- Valor padrão da gravidade
+        
+        -- Desativar Infinite Jump
+        InfiniteJumpEnabled = false
+    end
+})
+-- ==========================================
+-- ABA: CRIANÇA 
+-- ==========================================
+local SectionChild = ChildTab:AddSection({ Name = "Controle da Criança FE" })
+
+local playerChildDropdown = ChildTab:AddDropdown({
+    Name = "Selecione um player para perseguir",
+    Options = updatePlayerList(),
+    Default = "",
+    Callback = function(selected)
+        if game.Players:FindFirstChild(selected) then 
+            chasingplayer = selected
+        else
+            chasingplayer = nil
+        end
+    end
+})
+
+ChildTab:AddButton({
+    Name = "Atualizar Player List",
+    Callback = function()
+        local updated = updatePlayerList()
+        pcall(function()
+            playerChildDropdown:Refresh(updated)
+        end)
+    end
+})
+
+ChildTab:AddButton({
+    Name = "Enviar criança",
+    Callback = function()
+        if not chasingplayer then
+            warn("Nenhum jogador selecionado!")
+            return 
+        end
+        
+        -- Spawn da Criança
+        local args = { [1] = "CharacterFollowSpawnPlayer", [2] = "BabyBoy" }
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer(unpack(args))
+        end)
+
+        task.wait(0.3)
+
+        local target = chasingplayer
+        local targetPlr = game.Players:FindFirstChild(target)
+        
+        if targetPlr and targetPlr.Character and vu7.Character and vu7.Character:FindFirstChild("FollowCharacter") then
+            local followChar = vu7.Character.FollowCharacter
+            followChar.Parent = targetPlr.Character
+            
+            -- Loop de Movimento FE
+            if getgenv().FollowLoop then getgenv().FollowLoop:Disconnect() end
+            getgenv().FollowLoop = vu10.Heartbeat:Connect(function()
+                if followChar and followChar:FindFirstChild("Torso") and targetPlr.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = targetPlr.Character.HumanoidRootPart
+                    followChar.Torso.BodyPosition.Position = hrp.Position - (hrp.CFrame.LookVector * 3)
+                    followChar.Torso.BodyGyro.CFrame = hrp.CFrame
+                else
+                    getgenv().FollowLoop:Disconnect()
+                end
+            end)
+        end
+    end
+})
+
+ChildTab:AddButton({
+    Name = "Retornar criança",
+    Callback = function() 
+        if getgenv().FollowLoop then
+            getgenv().FollowLoop:Disconnect()
+            getgenv().FollowLoop = nil
+        end
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("DeleteFollowCharacter")
+            task.wait(0.1)
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Bab1yFollo1w"):FireServer("CharacterFollowSpawnPlayer", "BabyBoy")
+        end)
+    end
+})
+
+ChildTab:AddToggle({
+    Name = "Spectar Player",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            if not chasingplayer then return end
+            getgenv().ChildSpectate = vu10.Heartbeat:Connect(function()
+                local target = game.Players:FindFirstChild(chasingplayer)
+                if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                    vuCam.CameraSubject = target.Character.Humanoid
+                end
+            end)
+        else
+            if getgenv().ChildSpectate then getgenv().ChildSpectate:Disconnect() end
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end
+})
+
+ChildTab:AddParagraph({ Title = "FE", Content = "As funções de criança são visíveis para todos (FE)." })
+
+-- Eventos de atualização automática da lista
+game.Players.PlayerAdded:Connect(function()
+    task.wait(1)
+    playerChildDropdown:Refresh(updatePlayerList())
+end)
+game.Players.PlayerRemoving:Connect(function()
+    task.wait(1)
+    playerChildDropdown:Refresh(updatePlayerList())
+end)
+
+-- ====================================================================
+-- ABA: OP
+-- ====================================================================
+opTab:AddSection({ "Natural Disasters" })
+opTab:AddButton({
+    Name = "[OP] Tornado - Pirate Ship (Large)",
+    Callback = function()
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+local Vehicles = workspace:WaitForChild("Vehicles")
+
+local selectedAudioID = 9068077052
+local function playAudio()
+    if not selectedAudioID then
+        return
+    end
+
+    local args = {
+        [1] = workspace,
+        [2] = selectedAudioID,
+        [3] = 1,
+    }
+
+    for i = 1, 5 do
+        RS.RE:FindFirstChild("1Gu1nSound1s"):FireServer(unpack(args))
+
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://" .. tostring(selectedAudioID)
+        sound.Parent = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+        if sound.Parent then
+            sound:Play()
+        else
+            break
+        end
+
+        task.wait(1.5)
+        sound:Destroy()
+    end
+end
+
+local function spawnBoat()
+    RootPart.CFrame = CFrame.new(1754, -2, 58)
+    task.wait(0.5)
+    RS:WaitForChild("RE"):FindFirstChild("1Ca1r"):FireServer("PickingBoat", "PirateFree")
+    task.wait(1)
+    return Vehicles:FindFirstChild(Player.Name .. "Car")
+end
+
+local PCar = spawnBoat()
+if not PCar then
+    return
+end
+
+local Seat = PCar:FindFirstChild("Body") and PCar.Body:FindFirstChild("VehicleSeat")
+if not Seat then
+    return
+end
+
+repeat
+    task.wait(0.1)
+    RootPart.CFrame = Seat.CFrame * CFrame.new(0, 1, 0)
+until Humanoid.SeatPart == Seat
+
+task.spawn(playAudio)
+
+task.delay(4, function()
+    if Humanoid.SeatPart then
+        Humanoid.Sit = false
+    end
+    RootPart.CFrame = CFrame.new(0,0,0)
+end)
+
+local RE_Flip = RS:WaitForChild("RE"):WaitForChild("1Player1sCa1r")
+task.spawn(function()
+    while PCar and PCar.Parent do
+        RE_Flip:FireServer("Flip")
+        task.wait(0.5)
+    end
+end)
+
+local waypoints = {
+    Vector3.new(-32, 3, -33),
+    Vector3.new(-64, 3, 60),
+    Vector3.new(21, 3, 50)
+ }
+
+local currentIndex = 1
+local nextIndex = 2
+local moveSpeed = 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+local rotationSpeed = math.rad(720)
+local progress = 0
+local currentRotation = 0
+
+local function lerpCFrame(a, b, t)
+    return a:lerp(b, t)
+end
+
+RunService.Heartbeat:Connect(function(dt)
+    if not (PCar and PCar.PrimaryPart) then return end
+
+    local startPos = waypoints[currentIndex]
+    local endPos = waypoints[nextIndex]
+
+    progress += (moveSpeed * dt) / (startPos - endPos).Magnitude
+    if progress >= 1 then
+        progress = 0
+        currentIndex = nextIndex
+        nextIndex = (nextIndex % #waypoints) + 1
+    end
+
+    local newPos = lerpCFrame(CFrame.new(startPos), CFrame.new(endPos), progress).p
+    currentRotation += rotationSpeed * dt
+
+    local cf = CFrame.new(newPos) * CFrame.Angles(0, currentRotation, 0)
+    PCar:SetPrimaryPartCFrame(cf)
+end)
+end
+})
+
+opTab:AddButton({
+    Name = "Cancel Tornado",
+    Callback = function()
+        local success, err = pcall(function()
+            local args = { "DeleteAllVehicles" }
+            game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+        end)
+
+        if not success then
+        else
+        end
+    end
+})    
