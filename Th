@@ -7,6 +7,9 @@ local vu8 = game:GetService("ReplicatedStorage")
 local vu9 = game:GetService("Workspace")
 local vu10 = game:GetService("RunService")
 local vuCam = vu9.CurrentCamera
+local PropMovementMode = "Nenhum"
+local jogadorSelecionado, selecionarTodos, espionando = nil, false, false
+local cameraConnection, alvoRespawnConnection = nil, nil
 
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
@@ -6409,12 +6412,6 @@ pcall(function()
     else DropdownJogadores:Set(ObterListaNomes()) end
 end)
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-local PropMovementMode = "Nenhum"
-local jogadorSelecionado, selecionarTodos, espionando = nil, false, false
-local cameraConnection, alvoRespawnConnection = nil, nil
 
 local Configs = {
     Orbita       = { Speed = 2, Distance = 10, Height = 2 },
