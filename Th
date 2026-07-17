@@ -401,6 +401,7 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local opTab = Window:MakeTab({"OP", "home"})
+local PropsTab = Window:MakeTab({Title = "Props", Icon = "package"})
 
 -- ====================================================================
 -- ABA: CREDITS 
@@ -6407,7 +6408,7 @@ pcall(function()
     elseif type(DropdownJogadores.Refresh) == "function" then DropdownJogadores:Refresh(ObterListaNomes())
     else DropdownJogadores:Set(ObterListaNomes()) end
 end)
-local PropsTab = Window:MakeTab({Title = "Props", Icon = "package"})
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
