@@ -352,7 +352,7 @@ local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local TrollTab = Window:MakeTab({"Controls", "settings"})
 local Tab3 = Window:MakeTab({"Avatar", "shirt"})
-local TabAntis = Window:MakeTab({"Antis", "shield"})
+
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
 local Tabscript = Window:MakeTab({"Scripts", "scroll"})
@@ -364,7 +364,6 @@ local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local opTab = Window:MakeTab({"OP", "home"})
-local PropsTab = Window:MakeTab({Title = "Props", Icon = "package"})
 
 -- ===================================================================
 -- ABA: CREDITS 
@@ -2553,6 +2552,7 @@ Tab3:AddButton({
 -- ====================================================================
 -- ABA: ANTIS 
 -- ====================================================================
+local TabAntis = Window:MakeTab({"Antis", "shield"})
 TabAntis:AddToggle({
     Name = "Anti Sit",
     Description = "Não Deixa Seu Personagem Sentar",
@@ -2705,7 +2705,7 @@ pcall(function()
     elseif type(DropdownJogadores.Refresh) == "function" then DropdownJogadores:Refresh(ObterListaNomes())
     else DropdownJogadores:Set(ObterListaNomes()) end
 end)
-
+local PropsTab = Window:MakeTab({Title = "Props", Icon = "package"})
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
