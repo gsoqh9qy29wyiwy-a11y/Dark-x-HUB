@@ -352,7 +352,7 @@ local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local TrollTab = Window:MakeTab({"Controls", "settings"})
 local Tab3 = Window:MakeTab({"Avatar", "shirt"})
-
+local TabAntis = Window:MakeTab({"Antis", "shield"})
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
 local Tabscript = Window:MakeTab({"Scripts", "scroll"})
@@ -2552,7 +2552,6 @@ Tab3:AddButton({
 -- ====================================================================
 -- ABA: ANTIS 
 -- ====================================================================
-local TabAntis = Window:MakeTab({"Antis", "shield"})
 TabAntis:AddToggle({
     Name = "Anti Sit",
     Description = "Não Deixa Seu Personagem Sentar",
