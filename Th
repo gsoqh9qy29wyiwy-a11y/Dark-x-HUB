@@ -4623,14 +4623,6 @@ Tabscript:AddButton({
  loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
  end
 })
-Tabscript:AddSection({"Scriot do Homelander})
-Tabscript:AddButton({
-    Name = "Homelander Script",
-    Description = "Universal",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/refs/heads/main/homelander.lua"))()
-    end
-})
 Tabscript:AddSection({"Script do Ghost Hub"})
 
 -- Botão para Ghost Hub
