@@ -4676,6 +4676,15 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
     end
 })
+Tabscript:AddSection({"Script do Homelander})
+
+Tabscript:AddButton({
+    Name = "Homelander Script",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/refs/heads/main/homelander.lua"))()
+    end
+})
 Tabscript:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
 
 Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
