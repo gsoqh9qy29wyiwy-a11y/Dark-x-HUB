@@ -2248,6 +2248,8 @@ RunService.Heartbeat:Connect(function()
         for _, p in pairs(Players:GetPlayers()) do updateESP(p) end
     end
 end)
+
+
 -- ====================================================================
 -- ABA: AVATAR 
 -- ====================================================================
@@ -2585,6 +2587,7 @@ Tab3:AddButton({
     end
 })
 
+
 -- ====================================================================
 -- ABA: ANTIS 
 -- ====================================================================
@@ -2676,13 +2679,13 @@ TabAntis:AddToggle({
 TabAntis:AddSection({"Anti-Void"})
 TabAntis:AddToggle({ Name = "Anti-Void | v1", Callback = function(s) _G.AntiVoid = s end })
 
-TabAntis:AddSection({"Anti-collision all"})
+TabTabProteção:AddSection({"Anti-collision all"})
     TabAntis:AddToggle({ Name = "Anti-Collision", Callback = function(s) _G.AntiFling = s end })
     
     TabAntis:AddSection({"Anti-Lag"})
 TabAntis:AddToggle({ Name = "Anti-Lag | ainda ta em manutenção", Callback = function(s) _G.AntiLag = s ApplyAntiLag(s) end })
 
-TabAntis:AddSection({"Use isso quando se vc for lançado muito longe"})
+TabTabAntis:AddSection({"Use isso quando se vc for lançado muito longe"})
 TabAntis:AddButton({
     Name = "Anti-Map",
     Description = "Use Isso Quando vc For Lançado pra Fora Do Mapa",
@@ -2732,7 +2735,8 @@ TabAntis:AddButton({
     end
 })
 
- -- ====================================================================
+
+-- ====================================================================
 -- ABA: LAG 
 -- ====================================================================
 TabLag:AddSection({ Name = "Shutdown Personalizado" })
@@ -4672,6 +4676,15 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
     end
 })
+Tabscript:AddSection({"Script do Homelander})
+
+Tabscript:AddButton({
+    Name = "Homelander Script",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/refs/heads/main/homelander.lua"))()
+    end
+})
 Tabscript:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
 
 Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
@@ -5321,7 +5334,7 @@ ToggleRosquinha:Callback(function(Value)
     end)
 end)
 
-   -- ====================================================================
+-- ====================================================================
 -- ABA: EXPANSÃO 
 -- ====================================================================
 TabExpansao:AddButton({
@@ -6397,7 +6410,5 @@ opTab:AddButton({
         else
         end
     end
-})    
-
-
+})
 
