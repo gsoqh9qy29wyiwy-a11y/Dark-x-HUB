@@ -2679,7 +2679,7 @@ TabAntis:AddToggle({
 TabAntis:AddSection({"Anti-Void"})
 TabAntis:AddToggle({ Name = "Anti-Void | v1", Callback = function(s) _G.AntiVoid = s end })
 
-TabTabProteção:AddSection({"Anti-collision all"})
+TabAntis:AddSection({"Anti-collision all"})
     TabAntis:AddToggle({ Name = "Anti-Collision", Callback = function(s) _G.AntiFling = s end })
     
     TabAntis:AddSection({"Anti-Lag"})
