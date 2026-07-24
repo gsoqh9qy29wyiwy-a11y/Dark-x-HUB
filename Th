@@ -377,10 +377,16 @@ local Window = redzlib:MakeWindow({
     SaveFolder = "UnifiedHubConfig"
 })
 
+-- CONFIGURAÇÃO DO BOTÃO MINIMIZADO (Tamanho 60x60)
 Window:AddMinimizeButton({
-    Button = { Image = "rbxassetid://131153193945220", BackgroundTransparency = 0 },
-    Corner = { CornerRadius = UDim.new(0, 8) },
-}) 
+    Button = { 
+        Image = "rbxassetid://131153193945220", 
+        BackgroundTransparency = 0,
+        Size = UDim2.new(0, 60, 0, 60)
+    },
+    Corner = { 
+        CornerRadius = UDim.new(0, 30)
+    },
 
 -- Definição das Abas
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
