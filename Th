@@ -1,4 +1,4 @@
-local redzlib = loadstring(game:HttpGet("https://pastebin.com/raw/XqZsnzRQ",true))()
+local vu1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/redz_hub/refs/heads/main/redzhub-corModificada"))()
 local vu2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
 
 -- 1. SERVIÇOS E VARIÁVEIS INICIAIS
@@ -381,7 +381,7 @@ local Window = redzlib:MakeWindow({
 -- CONFIGURAÇÃO DO BOTÃO MINIMIZADO (Tamanho 60x60)
 Window:AddMinimizeButton({
     Button = { 
-        Image = "rbxassetid://129043251320334", 
+        Image = "rbxassetid://131153193945220", 
         BackgroundTransparency = 0,
         Size = UDim2.new(0, 60, 0, 60)
     },
