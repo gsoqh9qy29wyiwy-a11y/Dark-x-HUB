@@ -401,17 +401,20 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
+local opTab = Window:MakeTab({"OP", "home"})
 
-
-Tab1:AddSection({"Créditos do Hub"})
+-- ====================================================================
+-- ABA: CREDITS 
+-- ====================================================================
+Tab1:AddSection({"Informação do Hub"})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
 Tab1:AddParagraph({"Executor", executorName})
-Tab1:AddSection({"Versão do Hub 5.1"})
+Tab1:AddSection({"Versão do Hub 1.0"})
 Tab1:AddParagraph({"Criadores", "Carlolx777"})
 
-
--- --- ABA: TROLL ---
-
+-- ====================================================================
+-- ABA: TROLL
+-- ====================================================================
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selection" })
 local PlayerDrop = TabTroll:AddDropdown({
@@ -563,7 +566,7 @@ TabTroll:AddButton({Name = "Bring (Trazer)", Callback = function()
         end
     end)
 end})
--- Substitua o bloco do "Fling (Forte)" e "Fling (Fraco)" por este:
+
 
 TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
     _G.FlingToggle = v
@@ -919,75 +922,44 @@ local function updateCamera()
     end)
 end
 
--- Bola Fling Orbitando
+TabTroll:AddSection({ "Clicks TP" })
+
 TabTroll:AddButton({
-    Name = "Bola Fling Orbitando",
+    Name = "Teleport Tool sond",
+    Description = "Teleport Goku",
     Callback = function()
-        -- Se já estiver orbitando, ele desliga ao clicar de novo
-        if orbitando then 
-            orbitando = false
-            if orbitConn then orbitConn:Disconnect() orbitConn = nil end
-            return 
-        end
-
-        if not equipBola() then return end
-        task.wait(0.5)
-
-        local character = vu7.Character or vu7.CharacterAdded:Wait()
-        local myHRP = character:FindFirstChild("HumanoidRootPart")
-        if not myHRP then return end
-
-        -- Localiza a bola no Workspace usando suas variáveis
-        local workspaceCom = vu9:FindFirstChild("WorkspaceCom")
-        local soccerBalls = workspaceCom and workspaceCom:FindFirstChild("001_SoccerBalls")
-        soccerBall = soccerBalls and soccerBalls:FindFirstChild("Soccer" .. vu7.Name)
-
-        if not soccerBall then return end
-
-        -- Salva propriedades originais para resetar depois
-        originalProperties = {
-            Anchored = soccerBall.Anchored,
-            CanCollide = soccerBall.CanCollide,
-            CanTouch = soccerBall.CanTouch
-        }
-
-        soccerBall.Anchored = false
-        soccerBall.CanCollide = true
-        soccerBall.CanTouch = true
-
-        -- Bypassar a rede para ter controle físico da bola
-        pcall(function() sethiddenproperty(vu7, "SimulationRadius", math.huge) end)
-
-        orbitando = true
-        orbitConn = vu10.Heartbeat:Connect(function()
-            if not orbitando or not soccerBall or not soccerBall.Parent or not myHRP or not myHRP.Parent then
-                if orbitConn then orbitConn:Disconnect() orbitConn = nil end
-                orbitando = false
-                if soccerBall and originalProperties then
-                    soccerBall.Anchored = originalProperties.Anchored
-                    soccerBall.CanCollide = originalProperties.CanCollide
-                    soccerBall.CanTouch = originalProperties.CanTouch
-                end
-                return
-            end
-
-            -- Lógica matemática da Órbita
-            local t = tick() * 999999999 -- Velocidade
-            local radius = 6      -- Distância do seu corpo
-            local offset = Vector3.new(math.cos(t) * radius, -1, math.sin(t) * radius)
-
-            soccerBall.CFrame = CFrame.new(myHRP.Position + offset)
-            
-            -- Aplica velocidade extrema para dar o efeito de "Fling" em quem tocar
-            soccerBall.AssemblyLinearVelocity = Vector3.new(10000, 10000, 10000)
-            soccerBall.AssemblyAngularVelocity = Vector3.new(10000, 10000, 10000)
-        end)
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
     end
 })
+
+ TabTroll:AddButton({
+    Name = "Pegar Teleport Tool",
+    Callback = function()
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        
+        local tool = Instance.new("Tool")
+        tool.RequiresHandle = false
+        tool.Name = "Tp Tool"
+        
+        tool.Activated:Connect(function()
+            local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
+            local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+            
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = targetCFrame
+            end
+        end)
+        
+        tool.Parent = game.Players.LocalPlayer.Backpack
+    end
+})
+
 
 TabTroll:AddSection({Name = "Clicks"})
 TabTroll:AddButton({
     Name = "Click Fling Admin v2 (Tool)",
+    Description = "To use, it's recommended to get close to other doors. After they come to you, click on the player you want to fling",
     Callback = function()
         local jogadores = game:GetService("Players")
         local rep = game:GetService("ReplicatedStorage")
@@ -1244,6 +1216,7 @@ end)
 
 TabTroll:AddButton({
  Name = "Click Kill Couch (Tool)",
+ Description = "To use, it's recommended to get close to other doors. After they come to you, click on the player you want to fling",
  Callback = function()
 local jogadores = game:GetService("Players")
 local rep = game:GetService("ReplicatedStorage")
@@ -1408,6 +1381,7 @@ end
 })
 TabTroll:AddButton({
  Name = "Click Fling Couch (Tool)",
+ Description = "To use, it's recommended to get close to other doors. After they come to you, click on the player you want to fling",
  Callback = function()
 local jogadores = game:GetService("Players") local rep = game:GetService("ReplicatedStorage")
 local entrada = game:GetService("UserInputService")
@@ -1519,8 +1493,9 @@ end)
 end
 })
 
-
-
+-- ====================================================================
+-- ABA: CASAS 
+-- ====================================================================
 local SelectHouse = nil
 local HouseDropdown = nil
 local NoclipDoor = nil
@@ -1541,6 +1516,7 @@ end
 pcall(function()
     HouseDropdown = CasasTab:AddDropdown({
         Name = "Selecione a Casa",
+        Descriptio = "Lista de casas",
         Options = getHouseList(),
         Default = "...",
         Callback = function(Value)
@@ -1553,6 +1529,7 @@ end)
 pcall(function()
     CasasTab:AddButton({
         Name = "Atualizar Lista de Casas",
+        Description = "Atualizar Lista de casas",
         Callback = function()
             local novaLista = getHouseList()
             if HouseDropdown then
@@ -1569,6 +1546,7 @@ end)
 pcall(function()
     CasasTab:AddButton({
         Name = "Teleportar para Casa",
+        Description = "Teleporta para casa selecionada",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
             if House and game.Players.LocalPlayer.Character then
@@ -1584,6 +1562,7 @@ end)
 pcall(function()
     CasasTab:AddButton({
         Name = "Teleportar para Cofre",
+        Description = "algumas casa não tem Cofre",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
             if House and House:FindFirstChild("HousePickedByPlayer") and game.Players.LocalPlayer.Character then
@@ -1600,14 +1579,12 @@ pcall(function()
     })
 end)
 
--- Remove Banimento 
-CasasTab:AddButton({Name = "Remover Banimento", Callback = function() pcall(function() vu2:removeBanHouses() end) end})
 
 -- Toggle para atravessar porta
 pcall(function()
     NoclipDoor = CasasTab:AddToggle({
         Name = "Atravessar Porta da Casa",
-        Description = "",
+        Description = "faz vc atravessar a porta da casa selecionada",
         Default = false,
         Callback = function(Value)
             pcall(function()
@@ -1632,7 +1609,7 @@ end)
 pcall(function()
     CasasTab:AddToggle({
         Name = "Tocar Campainha",
-        Description = "",
+        Description = "ative isso quando vc estiver perto da casa selecionada",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorbellValue = Value
@@ -1658,7 +1635,7 @@ end)
 pcall(function()
     CasasTab:AddToggle({
         Name = "Bater na Porta",
-        Description = "",
+        Description = "ative isso quando vc estiver perto da casa selecionada",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorValue = Value
@@ -1679,12 +1656,16 @@ pcall(function()
         end
     })
 end)
-CasasTab:AddToggle({Name = "Auto Remover Ban", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
+
+-- Remove Banimento 
+CasasTab:AddButton({Name = "Remover Banimento", Description = "Remover o banimento da casa manualmente", Callback = function() pcall(function() vu2:removeBanHouses() end) end})
+
+CasasTab:AddToggle({Name = "Auto Remover Ban", Description = "Remover o banimento da casa automaticamente", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
 
 
-
--- --- ABA: TELEPORTES ---
-
+-- ====================================================================
+-- ABA: TELEPORTES 
+-- ====================================================================
 local teleportButtons = {
     {Nome = "Agência", Ponto = CFrame.new(179, 4, -464)},
     {Nome = "Oficina Oculta", Ponto = CFrame.new(0, 4, -495)},
@@ -1744,6 +1725,7 @@ TabTP:AddSection({"Gerenciamento de Servidor"})
 
 TabTP:AddButton({
     Name = "Server Hop",
+    Description = "vc pode entrar em um servidor vazio ou com 1 player",
     Callback = function()
         local PlaceID = game.PlaceId
         local success, response = pcall(function()
@@ -1771,6 +1753,7 @@ TabTP:AddButton({
 
 TabTP:AddButton({
     Name = "Rejoin",
+    Description = "Reentrar no mesmo servidor",
     Callback = function()
         game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, vu7)
     end
@@ -1804,7 +1787,6 @@ vu10.Heartbeat:Connect(function()
     end
     if viewEnabled then updateCamera() end
 end) 
-
 
 Window:SelectTab(TabTroll)
 local Section = TrollTab:AddSection({"Funções"})
@@ -2208,40 +2190,6 @@ end
 coroutine.wrap(JUBNQKI_fake_script)()
     end
 })
- local Section = TrollTab:AddSection({"Fantasia"})
-TrollTab:AddButton({Name = "Ativar Goner", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/goner"))() end})
-TrollTab:AddButton({Name = "Ativar Flash", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Flash%20original"))() end})
-
-local Section = TrollTab:AddSection({"Click TP"})
-TrollTab:AddButton({Name = "TP Tool com som", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Teleport-Tools-34066"))() end})
-
- TrollTab:AddButton({
-    Name = "Pegar Teleport Tool",
-    Callback = function()
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        
-        local tool = Instance.new("Tool")
-        tool.RequiresHandle = false
-        tool.Name = "Tp Tool"
-        
-        tool.Activated:Connect(function()
-            local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
-            local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
-            
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = targetCFrame
-            end
-        end)
-        
-        tool.Parent = game.Players.LocalPlayer.Backpack
-    end
-})
-
-TrollTab:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
-TrollTab:AddButton({Name = "Nameless Admin", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-Universal-73082"))() end}) 
-TrollTab:AddButton({Name = "Infinite Yield", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yeild-93384"))() end})
-TrollTab:AddButton({Name = "Pegar Sofá", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/Brancos.lua", true))() end})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -2302,17 +2250,16 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-----------------------------------------------------------------------------------------------------------------------------
--- Tab3: Avatar Editor
-----------------------------------------------------------------------------------------------------------------------------
 
-
+-- ====================================================================
+-- ABA: AVATAR 
+-- ====================================================================
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 
-local Tab3 = Tab3 -- Certifique-se de que Tab3 jÃ¡ existe
+local Tab3 = Tab3 -- Certifique-se de que Tab3 ja existe
 
 --------------------------------------------------
 -- Section: Copy Avatar
@@ -2333,7 +2280,7 @@ end
 
 local Dropdown = Tab3:AddDropdown({
     Name = "Players List",
-    Description = "",
+    Description = "Escolha um player para copiar a Skin",
     Options = GetPlayerNames(),
     Default = "",
     Flag = "player list",
@@ -2355,7 +2302,7 @@ end})
 Players.PlayerAdded:Connect(UpdatePlayers)
 Players.PlayerRemoving:Connect(UpdatePlayers)
 
--- FunÃ§Ã£o para copiar avatar
+-- Função para copiar avatar
 local function CopyAvatar(targetName)
     if not targetName then return end
 
@@ -2425,6 +2372,7 @@ end
 
 Tab3:AddButton({
     Name = "Copy Avatar",
+    Description = "Copiar a Skin do player selecionado",
     Callback = function()
         CopyAvatar(Target)
     end
@@ -2499,7 +2447,7 @@ function AvatarManager:EquiparAvatar(avatarName)
 end
 
 local AvatarDropdown = Tab3:AddDropdown({
-    Name = "AcessÃ³rios 3D",
+    Name = "Acessórios 3D",
     Description = "Selecione para equipar",
     Default = nil,
     Options = AvatarManager:GetAvatarNames(),
@@ -2539,37 +2487,113 @@ local function EquipBody(ids)
 end
 
 -- BotÃµes de partes do corpo
-Tab3:AddButton({Name = "Mini REPO", Callback = function()
-    EquipBody({117101023704825,125767940563838,137301494386930,87357384184710,133391239416999,111818794467824})
-end})
-
-Tab3:AddButton({Name = "Mini GaranhÃ£o", Callback = function()
-    EquipBody({124355047456535,120507500641962,82273782655463,113625313757230,109182039511426,0})
-end})
-
-Tab3:AddButton({Name = "Stick", Callback = function()
-    EquipBody({14731384498,14731377938,14731377894,14731377875,14731377941,14731382899})
-end})
-
-Tab3:AddButton({Name = "Chunky-Bug", Callback = function()
-    EquipBody({15527827600,15527827578,15527831669,15527836067,15527827184,15527827599})
-end})
-
-Tab3:AddButton({Name = "Cursed-Spider", Callback = function()
-    EquipBody({134555168634906,100269043793774,125607053187319,122504853343598,95907982259204,91289185840375})
-end})
-
-Tab3:AddButton({Name = "Possessed-Horror", Callback = function()
-    EquipBody({122800511983371,132465361516275,125155800236527,83070163355072,102906187256945,78311422507297})
-end})
-
-Tab3:AddParagraph({
-    Title = "Vai ter mais coisas aqui na prÃ³xima atualizaÃ§Ã£o",
-    Content = ""
+Tab3:AddButton({
+    Name = "Mini REPO",
+    Callback = function()
+        local args = {{
+            117101023704825,125767940563838,137301494386930,87357384184710,133391239416999,111818794467824
+        }}
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
+    end
 })
 
+Tab3:AddButton({
+    Name = "Mini Garanhão",
+    Callback = function()
+        local args = {{
+            124355047456535,120507500641962,82273782655463,113625313757230,109182039511426,0
+        }}
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
+    end
+})
+
+Tab3:AddButton({
+    Name = "Stick",
+    Callback = function()
+        local args = {{
+            14731384498,14731377938,14731377894,14731377875,14731377941,14731382899
+        }}
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
+    end
+})
+
+Tab3:AddButton({
+    Name = "Chunky-Bug",
+    Callback = function()
+        local args = {{
+            15527827600,15527827578,15527831669,15527836067,15527827184,15527827599
+        }}
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
+    end
+})
+local Section3 = Tab3:AddSection({"FE Personagens Flash"})
+
+Tab3:AddButton({
+    Name = "Ativar Personagem Black Flash",
+    Description = "Ativa o personagem Black Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Black%20Flash"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar Personagem Flash",
+    Description = "Ativa o personagem Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Flash%20original"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar Personagem God Flash",
+    Description = "Ativa o personagem God Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/GOD%20FLASH"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar Personagem Zoom Flash",
+    Description = "Ativa o personagem Zoom Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Zoom%20Flash"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar Personagem Flash Reverso",
+    Description = "Ativa o personagem Flash Reverso FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/flash%20reverso%20slk%20compen"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar Personagem Flash Reverso",
+    Description = "Ativa o personagem Flash FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Flash%20original"))()
+    end
+})
+
+local Section3 = Tab3:AddSection({"FE Hackes"})
+ 
+ Tab3:AddButton({
+    Name = "Ativar Personagem Goner",
+    Description = "Ativa o personagem Goner FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/goner"))()
+    end
+})
+Tab3:AddButton({
+    Name = "Ativar Personagem 1x1x1x1",
+    Description = "Ativa o personagem 1x1x1x1 FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/1x1x1x1"))()
+    end
+})
+
+-- ====================================================================
+-- ABA: ANTIS 
+-- ====================================================================
 TabAntis:AddToggle({
     Name = "Anti Sit",
+    Description = "Não Deixa Seu Personagem Sentar",
     Default = false,
     Callback = function(state)
         antiToolSit = state
@@ -2595,7 +2619,7 @@ TabAntis:AddToggle({
 
 TabAntis:AddToggle({
     Name = "Anti Fling Ball",
-    Description = "",
+    Description = "Não Deixa a Bola Colidir Com Personagem",
     Default = false,
     Callback = AntiFlingLoop("Balls", function()
         local folder = Workspace:FindFirstChild("WorkspaceCom")
@@ -2604,7 +2628,7 @@ TabAntis:AddToggle({
 })
 TabAntis:AddToggle({
     Name = "Anti Fling Helicópteros",
-    Description = "",
+    Description = "Tira a Colisão do seu Personagem",
     Default = false,
     Callback = AntiFlingLoop("Helis", function()
         local folder = Workspace:FindFirstChild("WorkspaceCom")
@@ -2613,7 +2637,7 @@ TabAntis:AddToggle({
 })
 TabAntis:AddButton({
     Name = "Anti Som",
-    Description = "",
+    Description = "NÃO APERTE AQUI SEU CURIOSO",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/antsom/refs/heads/main/Main.txt"))()
     end
@@ -2622,7 +2646,7 @@ TabAntis:AddButton({
 -- TOGGLES DE ANTI-FLING / SIT
 TabAntis:AddToggle({
     Name = "Anti fling Carros",
-    Description = "",
+    Description = "Tira a Colisão So Seu Personagem",
     Default = false,
     Callback = AntiFlingLoop("Vehicles", function()
         return Workspace:FindFirstChild("Vehicles")
@@ -2631,7 +2655,7 @@ TabAntis:AddToggle({
 
 TabAntis:AddToggle({
     Name = "Anti Canoe Fling",
-    Description = "",
+    Description = "Não Deixa seu personagem Sentar . e Tira a Colisão",
     Default = false,
     Callback = AntiFlingLoop("Canoes", function()
         local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
@@ -2641,7 +2665,7 @@ TabAntis:AddToggle({
 
 TabAntis:AddToggle({
     Name = "Anti Fling Jets",
-    Description = "",
+    Description = "Tira a Colisão do seu personagem",
     Default = false,
     Callback = AntiFlingLoop("Jets", function()
         local folder = Workspace:FindFirstChild("WorkspaceCom")
@@ -2653,17 +2677,18 @@ TabAntis:AddToggle({
 })
 
 TabAntis:AddSection({"Anti-Void"})
-TabAntis:AddToggle({ Name = "Anti-Void", Callback = function(s) _G.AntiVoid = s end })
+TabAntis:AddToggle({ Name = "Anti-Void | v1", Callback = function(s) _G.AntiVoid = s end })
 
-TabAntis:AddSection({"Anti-collision"})
+TabAntis:AddSection({"Anti-collision all"})
     TabAntis:AddToggle({ Name = "Anti-Collision", Callback = function(s) _G.AntiFling = s end })
     
     TabAntis:AddSection({"Anti-Lag"})
-TabAntis:AddToggle({ Name = "Anti-Lag", Callback = function(s) _G.AntiLag = s ApplyAntiLag(s) end })
+TabAntis:AddToggle({ Name = "Anti-Lag | ainda ta em manutenção", Callback = function(s) _G.AntiLag = s ApplyAntiLag(s) end })
 
-TabAntis:AddSection({"Use Isso Quando vc For Lançado pra Fora Do Mapa"})
+TabAntis:AddSection({"Use isso quando se vc for lançado muito longe"})
 TabAntis:AddButton({
     Name = "Anti-Map",
+    Description = "Use Isso Quando vc For Lançado pra Fora Do Mapa",
     Callback = function()
         local Player = game.Players.LocalPlayer
         local Character = Player.Character
@@ -2711,9 +2736,9 @@ TabAntis:AddButton({
 })
 
 
---------------------------------------------------------------------------------------------------------------------------------
-                                                   -- === Tab : Lag === --
----------------------------------------------------------------------------------------------------------------------------------
+-- ====================================================================
+-- ABA: LAG 
+-- ====================================================================
 TabLag:AddSection({ Name = "Shutdown Personalizado" })
 
 local function ShutdownLogic(loops)
@@ -3617,10 +3642,9 @@ end)
 
 TabLag:AddParagraph({ "Informação", "O lag começa após cerca de 35 segundos." })
 
-----------------------------------------------------------------------------------------------------------------------------
-                                          -- === Tab 5: Car === --
----------------------------------------------------------------------------------------------------------------------------------
-
+-- ====================================================================
+-- ABA: CARROS
+-- ====================================================================
 
 -- VariÃ¡veis
 local carSpeed = 25
@@ -4525,9 +4549,10 @@ Tab5:AddButton({
         end
     end
 })
-----------------------------------------------------------------------------------------------------------------------------------------------
-                                               -- === Tab script fe: Scripts === --
-----------------------------------------------------------------------------------------------------------------------------------------------
+
+-- ====================================================================
+-- ABA: Scripts
+-- ====================================================================
 
 Tabscript:AddButton({
     Name = "FE Jerk Off Hub Matrix",
@@ -4595,6 +4620,8 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/M1ZZ001/BrookhavenR4D/main/Brookhaven%20R4D%20Script"))()
     end
 })
+Tabscript:AddSection({"Ativa o Fly GUI"})
+
 -- Botão para Fly Gui
 Tabscript:AddButton({
  Name = "Fly Gui",
@@ -4602,6 +4629,8 @@ Tabscript:AddButton({
  loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
  end
 })
+Tabscript:AddSection({"Script do Ghost Hub"})
+
 -- Botão para Ghost Hub
 Tabscript:AddButton({
  Name = "Ghost Hub",
@@ -4609,32 +4638,75 @@ Tabscript:AddButton({
  loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GhostHub-16534"))()
  end
 })
-
--- Botão para Rael Hub Brook
-Tabscript:AddButton({ Name = "Rael Hub Brook",
- Callback = function()
- loadstring(game:HttpGet("https://rawscripts.net/raw/The-Mimic-Rael-Hub-20921"))()
- end
-})
-
-Tabscript:AddButton({ Name = "Telekines Tool",
- Callback = function()
-  loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
-end 
-})
+Tabscript:AddSection({"Scritp do Rael Hub"})
 
 Tabscript:AddButton({
-
- Name = "ShiftLock",
-
- Callback = function()
-
- loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
-
- end
-
+    Name = "Abrir Rael Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
+    end
 })
+Tabscript:AddSection({"Script Do Brutus"})
 
+Tabscript:AddButton({
+    Name = "Abrir BRUTUS HUB",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/codenixstudios/brutus-hub/script/Games/brookhaven.lua"))()
+    end
+})
+Tabscript:AddSection({"Script do Coquette Hub"})
+
+Tabscript:AddButton({
+    Name = "Abrir Coquette Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Daivd977/Deivd999/refs/heads/main/pessal"))()
+    end
+})
+Tabscript:AddSection({"Script do Cartola Hub"})
+
+Tabscript:AddButton({
+    Name = "Abrir Cartola Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Davi999z/Cartola-Hub/refs/heads/main/Brookhaven", true))()()
+    end
+})
+Tabscript:AddSection({"Script do Pacote Fantasma"})
+
+Tabscript:AddButton({
+    Name = "Abrir Pacote Fanstama",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
+    end
+})
+Tabscript:AddSection({"Script do Homelander})
+
+Tabscript:AddButton({
+    Name = "Homelander Script",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/refs/heads/main/homelander.lua"))()
+    end
+})
+Tabscript:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
+
+Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
+
+Tabscript:AddButton({
+    Name = "Nameless Admin",
+    Description = "Abrir o Nameless Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-Universal-73082"))()
+    end
+})
+Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
+
+Tabscript:AddButton({
+    Name = "Infinite Yield",
+    Description = "Abrir o Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yeild-93384"))()
+    end
+})
 Tabscript:AddSection({"Só vc poderá ver"})
 
 Tabscript:AddButton({
@@ -4644,12 +4716,33 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
     end
 })
+Tabscript:AddSection({"Tool Couch"})
 
----------------------------------------------------------------------------------------------------------------------------
--- === Tab Audio === --
----------------------------------------------------------------------------------------------------------------------------
+Tabscript:AddButton({
+    Name = "Pegar o sofá",
+    Description = "Pegar a Tool Couch",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/Brancos.lua", true))()
+    end
+})
+Tabscript:AddSection({"Tool Telekines"})
 
+Tabscript:AddButton({ Name = "Telekines Tool",
+ Callback = function()
+  loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
+end 
+})
+Tabscript:AddSection({"ShiftLock Aviso Não Da De Tira Da tela"})
 
+Tabscript:AddButton({ Name = "ShiftLock",
+ Callback = function()
+  loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
+end 
+})
+
+-- ====================================================================
+-- ABA: ÁUDIO 
+-- ====================================================================
 local loopAtivo = false  
 local InputID = ""  
 
@@ -4839,11 +4932,10 @@ createSoundDropdown("Selecione um terror ou efeito", {
     }  
 }, "jumpscar")
 
-------------------------------------------------------------------------------------------------------------------------------
--- === Tab Music === --
-------------------------------------------------------------------------------------------------------------------------------
 
-
+-- ====================================================================
+-- ABA: MÚSIC
+-- ====================================================================
 local function tocarMusica(id)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
     
@@ -4990,10 +5082,10 @@ TabMusic:AddButton({
         tocarMusica("")
     end
 })
----------------------------------------------------------------------------------------------------------------------------------
-                                                   -- === Tab RGB === --
----------------------------------------------------------------------------------------------------------------------------------
 
+-- ====================================================================
+-- ABA: RGB
+-- ====================================================================
 local Section = TabRGB:AddSection({"Personagem"})
 
 -- Velocidade controlada pelo slider (quanto maior, mais rápido)
@@ -5003,7 +5095,7 @@ TabRGB:AddSlider({
     Name = "Velocidade RGB",
     Description = "Aumenta a velocidade do efeito RGB",
     Min = 1,
-    Max = 10,
+    Max = 50,
     Increase = 1,
     Default = 3,
     Callback = function(Value)
@@ -5247,10 +5339,12 @@ ToggleRosquinha:Callback(function(Value)
     end)
 end)
 
-
+-- ====================================================================
+-- ABA: EXPANSÃO 
+-- ====================================================================
 TabExpansao:AddButton({
     Name = "Skybox HACKELINDO3 ”®",
-    Description = "Ativa a Skybox permanente Avisoa Skyboxe visual",
+    Description = "Ativa a Skybox permanente Aviso a Skybox e visual",
     Callback = function()
         
         -- ServiÃ§os
@@ -5347,7 +5441,7 @@ TabExpansao:AddButton({
 })
 TabExpansao:AddButton({
     Name = "Skybox Dev”®",
-    Description = "Ativa a Skybox permanente Avisoa Skyboxe visual",
+    Description = "Ativa a Skybox permanente Aviso a Skybox e visual",
     Callback = function()
         
         -- ServiÃ§os
@@ -5828,7 +5922,9 @@ local blur = Instance.new("BlurEffect", Lighting)
 blur.Size = 0
 end})
 
-
+-- ====================================================================
+-- ABA: SKY
+-- ====================================================================
 TabSky:AddButton({
     Name = "Ativar Tubers93 (Shelby)",
     Description = "TransformaÃ§Ã£o completa Tubers93 by Shelby",
@@ -5989,16 +6085,15 @@ TabSky:AddButton({
         end)
     end
 })
- ---------------------------------------------------------------------------------------------------------------------------------
-                                                   -- === Tab 2: Fun === --
------------------------------------------------------------------------------------------------------------------------------------
 
-
-
+-- ====================================================================
+-- ABA: 
+-- ====================================================================
 local Section = Tab2:AddSection({"Player Character"})
 
+
 Tab2:AddSlider({
-    Name = "Speed Player",
+    Name = "Velocidade do jogador",
     Increase = 1,
     MinValue = 16,
     MaxValue = 2000,
@@ -6015,7 +6110,7 @@ Tab2:AddSlider({
  })
  
  Tab2:AddSlider({
-    Name = "Jumppower",
+    Name = "Pulo do jogador",
     Increase = 1,
     MinValue = 50,
     MaxValue = 5000,
@@ -6032,7 +6127,7 @@ Tab2:AddSlider({
  })
  
  Tab2:AddSlider({
-    Name = "Gravity",
+    Name = "Gravidade do jogador",
     Increase = 1,
     MinValue = 0,
     MaxValue = 10000,
@@ -6054,24 +6149,25 @@ Tab2:AddSlider({
  end)
 
  Tab2:AddButton({
-    Name = "Reset Speed/Gravity/Jumppower.",
+    Name = "Resetar Velocidade/Gravidade/Pulo.",
     Callback = function()
         -- Resetar Speed
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local humanoid = character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = 16 -- Valor padrão do Speed
-            humanoid.JumpPower = 50 -- Valor padrão do JumpPower
+            humanoid.WalkSpeed = 16 -- Valor padrão da Velocidade 
+            humanoid.JumpPower = 50 -- Valor padrão do Pulo
         end
         
-        -- Resetar Gravity
+        -- Resetar Gravidade 
         game.Workspace.Gravity = 196.2 -- Valor padrão da gravidade
         
         -- Desativar Infinite Jump
         InfiniteJumpEnabled = false
     end
 })
+
 -- ==========================================
 -- ABA CRIANÇA (INTEGRADA)
 -- ==========================================
@@ -6186,6 +6282,140 @@ game.Players.PlayerRemoving:Connect(function()
     playerChildDropdown:Refresh(updatePlayerList())
 end)
 
+-- ====================================================================
+-- ABA: OP
+-- ====================================================================
+opTab:AddSection({ "Natural Disasters" })
+opTab:AddButton({
+    Name = "[OP] Tornado - Pirate Ship (Large)",
+    Callback = function()
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+local Vehicles = workspace:WaitForChild("Vehicles")
 
+local selectedAudioID = 9068077052
+local function playAudio()
+    if not selectedAudioID then
+        return
+    end
 
+    local args = {
+        [1] = workspace,
+        [2] = selectedAudioID,
+        [3] = 1,
+    }
 
+    for i = 1, 5 do
+        RS.RE:FindFirstChild("1Gu1nSound1s"):FireServer(unpack(args))
+
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://" .. tostring(selectedAudioID)
+        sound.Parent = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+        if sound.Parent then
+            sound:Play()
+        else
+            break
+        end
+
+        task.wait(1.5)
+        sound:Destroy()
+    end
+end
+
+local function spawnBoat()
+    RootPart.CFrame = CFrame.new(1754, -2, 58)
+    task.wait(0.5)
+    RS:WaitForChild("RE"):FindFirstChild("1Ca1r"):FireServer("PickingBoat", "PirateFree")
+    task.wait(1)
+    return Vehicles:FindFirstChild(Player.Name .. "Car")
+end
+
+local PCar = spawnBoat()
+if not PCar then
+    return
+end
+
+local Seat = PCar:FindFirstChild("Body") and PCar.Body:FindFirstChild("VehicleSeat")
+if not Seat then
+    return
+end
+
+repeat
+    task.wait(0.1)
+    RootPart.CFrame = Seat.CFrame * CFrame.new(0, 1, 0)
+until Humanoid.SeatPart == Seat
+
+task.spawn(playAudio)
+
+task.delay(4, function()
+    if Humanoid.SeatPart then
+        Humanoid.Sit = false
+    end
+    RootPart.CFrame = CFrame.new(0,0,0)
+end)
+
+local RE_Flip = RS:WaitForChild("RE"):WaitForChild("1Player1sCa1r")
+task.spawn(function()
+    while PCar and PCar.Parent do
+        RE_Flip:FireServer("Flip")
+        task.wait(0.5)
+    end
+end)
+
+local waypoints = {
+    Vector3.new(-32, 3, -33),
+    Vector3.new(-64, 3, 60),
+    Vector3.new(21, 3, 50)
+ }
+
+local currentIndex = 1
+local nextIndex = 2
+local moveSpeed = 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+local rotationSpeed = math.rad(720)
+local progress = 0
+local currentRotation = 0
+
+local function lerpCFrame(a, b, t)
+    return a:lerp(b, t)
+end
+
+RunService.Heartbeat:Connect(function(dt)
+    if not (PCar and PCar.PrimaryPart) then return end
+
+    local startPos = waypoints[currentIndex]
+    local endPos = waypoints[nextIndex]
+
+    progress += (moveSpeed * dt) / (startPos - endPos).Magnitude
+    if progress >= 1 then
+        progress = 0
+        currentIndex = nextIndex
+        nextIndex = (nextIndex % #waypoints) + 1
+    end
+
+    local newPos = lerpCFrame(CFrame.new(startPos), CFrame.new(endPos), progress).p
+    currentRotation += rotationSpeed * dt
+
+    local cf = CFrame.new(newPos) * CFrame.Angles(0, currentRotation, 0)
+    PCar:SetPrimaryPartCFrame(cf)
+end)
+end
+})
+
+opTab:AddButton({
+    Name = "Cancel Tornado",
+    Callback = function()
+        local success, err = pcall(function()
+            local args = { "DeleteAllVehicles" }
+            game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+        end)
+
+        if not success then
+        else
+        end
+    end
+})
