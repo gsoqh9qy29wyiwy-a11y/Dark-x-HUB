@@ -2685,7 +2685,7 @@ TabAntis:AddSection({"Anti-collision all"})
     TabAntis:AddSection({"Anti-Lag"})
 TabAntis:AddToggle({ Name = "Anti-Lag | ainda ta em manutenção", Callback = function(s) _G.AntiLag = s ApplyAntiLag(s) end })
 
-TabTabAntis:AddSection({"Use isso quando se vc for lançado muito longe"})
+TabAntis:AddSection({"Use isso quando se vc for lançado muito longe"})
 TabAntis:AddButton({
     Name = "Anti-Map",
     Description = "Use Isso Quando vc For Lançado pra Fora Do Mapa",
