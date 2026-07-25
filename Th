@@ -2735,9 +2735,7 @@ TabAntis:AddButton({
     end
 })
 
--- ====================================================================
--- ABA: LAG 
--- ====================================================================
+
 TabLag:AddSection({ Name = "Shutdown Personalizado" })
 
 local function ShutdownLogic(loops)
@@ -3640,4 +3638,3 @@ Toggle:Callback(function(state)
 end)
 
 TabLag:AddParagraph({ "Informação", "O lag começa após cerca de 35 segundos." })
-
