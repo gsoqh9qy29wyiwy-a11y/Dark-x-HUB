@@ -4547,10 +4547,10 @@ Tab5:AddButton({
         end
     end
 })
+
 -- ====================================================================
 -- ABA: Scripts
 -- ====================================================================
-
 Tabscript:AddButton({
     Name = "FE Jerk Off Hub Matrix",
     Description = "Universal",
@@ -4673,15 +4673,6 @@ Tabscript:AddButton({
     Name = "Abrir Pacote Fanstama",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
-    end
-})
-Tabscript:AddSection({"Script do Homelander})
-
-Tabscript:AddButton({
-    Name = "Homelander Script",
-    Description = "Universal",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/refs/heads/main/homelander.lua"))()
     end
 })
 Tabscript:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
