@@ -4549,6 +4549,125 @@ Tab5:AddButton({
         end
     end
 })
+----------------------------------------------------------------------------------------------------------------------------------------------
+                                               -- === Tab script fe: Scripts === --
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Tabscript:AddButton({
+    Name = "FE Jerk Off Hub Matrix",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ExploitFin/AquaMatrix/refs/heads/AquaMatrix/AquaMatrix"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "FE HUGG",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/JSFKGBASDJKHIOAFHDGHIUODSGBJKLFGDKSB/fe/refs/heads/main/FEHUGG"))()
+    end
+})
+
+
+Tabscript:AddButton({
+    Name = "Buraco Negro",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Bac0nHck/Scripts/main/BringFlingPlayers"))("More Scripts: t.me/arceusxscripts")
+    end
+})
+
+local Section = Tabscript:AddSection({"esse system broochk e voidProtection"})
+
+Tabscript:AddButton({
+    Name = "System Broochk",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/script"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Roships",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-rochips-universal-18294"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Sander X",
+    Description = "Somente para Brookhaven",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kigredns/SanderXV4.2.2/refs/heads/main/New.lua"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Reverso",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe./main/L"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "RD4",
+    Description = "Somente para Brookhaven",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/M1ZZ001/BrookhavenR4D/main/Brookhaven%20R4D%20Script"))()
+    end
+})
+-- Botão para Fly Gui
+Tabscript:AddButton({
+ Name = "Fly Gui",
+ Callback = function()
+ loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
+ end
+})
+-- Botão para Ghost Hub
+Tabscript:AddButton({
+ Name = "Ghost Hub",
+ Callback = function()
+ loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GhostHub-16534"))()
+ end
+})
+
+-- Botão para Rael Hub Brook
+Tabscript:AddButton({ Name = "Rael Hub Brook",
+ Callback = function()
+ loadstring(game:HttpGet("https://rawscripts.net/raw/The-Mimic-Rael-Hub-20921"))()
+ end
+})
+
+Tabscript:AddButton({ Name = "Telekines Tool",
+ Callback = function()
+  loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
+end 
+})
+
+Tabscript:AddButton({
+
+ Name = "ShiftLock",
+
+ Callback = function()
+
+ loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
+
+ end
+
+})
+
+Tabscript:AddSection({"Só vc poderá ver"})
+
+Tabscript:AddButton({
+    Name = "C00lkidd Gui ",
+    Description = "Aviso so o cliente Poderá ver",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
+    end
+})
 
 -- ====================================================================
 -- ABA: ÁUDIO 
