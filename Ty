@@ -4646,42 +4646,10 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
     end
 })
-Tabscript:AddSection({"Script Do Brutus"})
 
-Tabscript:AddButton({
-    Name = "Abrir BRUTUS HUB",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/codenixstudios/brutus-hub/script/Games/brookhaven.lua"))()
-    end
-})
-Tabscript:AddSection({"Script do Coquette Hub"})
-
-Tabscript:AddButton({
-    Name = "Abrir Coquette Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Daivd977/Deivd999/refs/heads/main/pessal"))()
-    end
-})
-Tabscript:AddSection({"Script do Cartola Hub"})
-
-Tabscript:AddButton({
-    Name = "Abrir Cartola Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Davi999z/Cartola-Hub/refs/heads/main/Brookhaven", true))()()
-    end
-})
-Tabscript:AddSection({"Script do Pacote Fantasma"})
-
-Tabscript:AddButton({
-    Name = "Abrir Pacote Fanstama",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
-    end
-})
-
--- ====================================================================
+   ==================================================================
 -- ABA: ÁUDIO 
--- ====================================================================
+-- ===================================================================
 local loopAtivo = false  
 local InputID = ""  
 
