@@ -3658,7 +3658,7 @@ Tab5:AddSection({"Velocidade Sem <GamePass>"})
 
 Tab5:AddTextBox({
     Name = "Definir Velocidade",
-    PlaceholderText = "Velocidade: Qualquer Número,
+    PlaceholderText = "Velocidade: 200,
     Callback = function(v)
         carSpeed = tonumber(v) or carSpeed
     end
@@ -3666,7 +3666,7 @@ Tab5:AddTextBox({
 
 Tab5:AddTextBox({
     Name = "Definir Turbo",
-    PlaceholderText = "Turbo: Qualquer Número",
+    PlaceholderText = "Turbo: 200",
     Callback = function(v)
         turboValue = tostring(v)
     end
@@ -4551,13 +4551,9 @@ Tab5:AddButton({
 })
 
 -- ====================================================================
--- ABA: Scripts
--- ====================================================================
-
-
--- ====================================================================
 -- ABA: ÁUDIO 
 -- ====================================================================
+
 local loopAtivo = false  
 local InputID = ""  
 
