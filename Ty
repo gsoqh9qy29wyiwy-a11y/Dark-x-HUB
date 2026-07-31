@@ -2137,7 +2137,152 @@ Tab3:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/1x1x1x1"))()
     end
 })
+-- ====================================================================
+-- ABA: ANTIS 
+-- ====================================================================
+TabAntis:AddToggle({
+    Name = "Anti Sit",
+    Description = "Não Deixa Seu Personagem Sentar",
+    Default = false,
+    Callback = function(state)
+        antiToolSit = state
+        local function updateSitState()
+            local hum = vu7.Character and vu7.Character:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum:SetStateEnabled(Enum.HumanoidStateType.Seated, not (antiToolSit or antiCarSit))
+                if (antiToolSit or antiCarSit) and hum.Sit then hum.Sit = false end
+            end
+        end
+        
+        if state then
+            local connection
+            connection = vu10.Heartbeat:Connect(function()
+                if not antiToolSit then connection:Disconnect() return end
+                updateSitState()
+            end)
+        else
+            updateSitState()
+        end
+    end
+})
 
+TabAntis:AddToggle({
+    Name = "Anti Fling Ball",
+    Description = "Não Deixa a Bola Colidir Com Personagem",
+    Default = false,
+    Callback = AntiFlingLoop("Balls", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        return folder and folder:FindFirstChild("001_SoccerBalls")
+    end)
+})
+TabAntis:AddToggle({
+    Name = "Anti Fling Helicópteros",
+    Description = "Tira a Colisão do seu Personagem",
+    Default = false,
+    Callback = AntiFlingLoop("Helis", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        return folder and folder:FindFirstChild("001_HeliStorage") and folder["001_HeliStorage"]:FindFirstChild("PoliceStationHeli")
+    end)
+})
+TabAntis:AddButton({
+    Name = "Anti Som",
+    Description = "NÃO APERTE AQUI SEU CURIOSO",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/antsom/refs/heads/main/Main.txt"))()
+    end
+})
+
+-- TOGGLES DE ANTI-FLING / SIT
+TabAntis:AddToggle({
+    Name = "Anti fling Carros",
+    Description = "Tira a Colisão So Seu Personagem",
+    Default = false,
+    Callback = AntiFlingLoop("Vehicles", function()
+        return Workspace:FindFirstChild("Vehicles")
+    end)
+})
+
+TabAntis:AddToggle({
+    Name = "Anti Canoe Fling",
+    Description = "Não Deixa seu personagem Sentar . e Tira a Colisão",
+    Default = false,
+    Callback = AntiFlingLoop("Canoes", function()
+        local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
+        return workspaceCom and workspaceCom:FindFirstChild("001_CanoeStorage")
+    end)
+})
+
+TabAntis:AddToggle({
+    Name = "Anti Fling Jets",
+    Description = "Tira a Colisão do seu personagem",
+    Default = false,
+    Callback = AntiFlingLoop("Jets", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        if folder and folder:FindFirstChild("001_Airport") then
+            local storage = folder["001_Airport"]:FindFirstChild("AirportHanger")
+            if storage then return storage:FindFirstChild("001_JetStorage") and storage["001_JetStorage"]:FindFirstChild("JetAirport") end
+        end
+    end)
+})
+
+TabAntis:AddSection({"Anti-Void"})
+TabAntis:AddToggle({ Name = "Anti-Void | v1", Callback = function(s) _G.AntiVoid = s end })
+
+TabAntis:AddSection({"Anti-collision all"})
+    TabAntis:AddToggle({ Name = "Anti-Collision", Callback = function(s) _G.AntiFling = s end })
+    
+    TabAntis:AddSection({"Anti-Lag"})
+TabAntis:AddToggle({ Name = "Anti-Lag | ainda ta em manutenção", Callback = function(s) _G.AntiLag = s ApplyAntiLag(s) end })
+
+TabAntis:AddSection({"Use isso quando se vc for lançado muito longe"})
+TabAntis:AddButton({
+    Name = "Anti-Map",
+    Description = "Use Isso Quando vc For Lançado pra Fora Do Mapa",
+    Callback = function()
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character
+        local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+        if not RootPart or not Humanoid then
+            warn("Nenhum RootPart ou Humanoid encontrado!")
+            return
+        end
+        Humanoid.PlatformStand = true
+        print("Jogador paralisado para reduzir efeitos do spin.")
+        for _, obj in pairs(RootPart:GetChildren()) do
+            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then
+                obj:Destroy()
+            end
+        end
+        print("Spin e forÃ§as removidas do jogador.")
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Ca1r"):FireServer("DeleteAllVehicles")
+        task.wait(0.5)
+        local PCar = Vehicles and Vehicles:FindFirstChild(Player.Name.."Car")
+        if PCar and PCar.PrimaryPart then
+            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
+                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then
+                    obj:Destroy()
+                end
+            end
+            print("Spin removido do barco.")
+        end
+        task.wait(1)
+        local safePos = Vector3.new(0, 100, 0)
+        local bp = Instance.new("BodyPosition", RootPart)
+        bp.Position = safePos
+        bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        local bg = Instance.new("BodyGyro", RootPart)
+        bg.CFrame = RootPart.CFrame
+        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        print("Jogador estÃ¡ preso na coordenada segura.")
+        task.wait(3)
+        bp:Destroy()
+        bg:Destroy()
+        Humanoid.PlatformStand = false
+        print("Jogador liberado, seguro na posiÃ§Ã£o.")
+    end
+})
 -- ====================================================================
 -- ABA: PROPS 
 -- ====================================================================
