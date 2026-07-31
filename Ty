@@ -4098,6 +4098,9 @@ Tab5:AddButton({
 -- ABA: Scripts
 -- ====================================================================
 
+-- Certifique-se que a variável 'Tabscript' foi definida acima deste código!
+-- Exemplo: local Tabscript = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://..."})
+
 Tabscript:AddButton({
     Name = "FE Jerk Off Hub Matrix",
     Description = "Universal",
@@ -4114,7 +4117,6 @@ Tabscript:AddButton({
     end
 })
 
-
 Tabscript:AddButton({
     Name = "Buraco Negro",
     Description = "Universal",
@@ -4123,7 +4125,7 @@ Tabscript:AddButton({
     end
 })
 
-local Section = Tabscript:AddSection({"esse system broochk e voidProtection"})
+Tabscript:AddSection({"System Broochk e VoidProtection"})
 
 Tabscript:AddButton({
     Name = "System Broochk",
@@ -4164,25 +4166,26 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/M1ZZ001/BrookhavenR4D/main/Brookhaven%20R4D%20Script"))()
     end
 })
-Tabscript:AddSection({"Ativa o Fly GUI"})
 
--- Botão para Fly Gui
+Tabscript:AddSection({"Fly GUI"})
+
 Tabscript:AddButton({
- Name = "Fly Gui",
- Callback = function()
- loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
- end
+    Name = "Fly Gui",
+    Callback = function()
+        loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
+    end
 })
+
 Tabscript:AddSection({"Script do Ghost Hub"})
 
--- Botão para Ghost Hub
 Tabscript:AddButton({
- Name = "Ghost Hub",
- Callback = function()
- loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GhostHub-16534"))()
- end
+    Name = "Ghost Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GhostHub-16534"))()
+    end
 })
-Tabscript:AddSection({"Scritp do Rael Hub"})
+
+Tabscript:AddSection({"Script do Rael Hub"})
 
 Tabscript:AddButton({
     Name = "Abrir Rael Hub",
@@ -4190,6 +4193,7 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
     end
 })
+
 Tabscript:AddSection({"Script Do Brutus"})
 
 Tabscript:AddButton({
@@ -4198,6 +4202,7 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/codenixstudios/brutus-hub/script/Games/brookhaven.lua"))()
     end
 })
+
 Tabscript:AddSection({"Script do Coquette Hub"})
 
 Tabscript:AddButton({
@@ -4206,23 +4211,27 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Daivd977/Deivd999/refs/heads/main/pessal"))()
     end
 })
+
 Tabscript:AddSection({"Script do Cartola Hub"})
 
 Tabscript:AddButton({
     Name = "Abrir Cartola Hub",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Davi999z/Cartola-Hub/refs/heads/main/Brookhaven", true))()()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Davi999z/Cartola-Hub/refs/heads/main/Brookhaven"))()
     end
 })
+
 Tabscript:AddSection({"Script do Pacote Fantasma"})
 
 Tabscript:AddButton({
-    Name = "Abrir Pacote Fanstama",
+    Name = "Abrir Pacote Fantasma",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
     end
 })
-Tabscript:AddSection({"Script do Homelander})
+
+-- ERRO CORRIGIDO AQUI ABAIXO:
+Tabscript:AddSection({"Script do Homelander"})
 
 Tabscript:AddButton({
     Name = "Homelander Script",
@@ -4231,9 +4240,8 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/refs/heads/main/homelander.lua"))()
     end
 })
-Tabscript:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
 
-Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
+Tabscript:AddSection({"UNIVERSAL COMMANDS ADMIN 🔨"})
 
 Tabscript:AddButton({
     Name = "Nameless Admin",
@@ -4242,7 +4250,6 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-Universal-73082"))()
     end
 })
-Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
 
 Tabscript:AddButton({
     Name = "Infinite Yield",
@@ -4251,39 +4258,44 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yeild-93384"))()
     end
 })
-Tabscript:AddSection({"Só vc poderá ver"})
+
+Tabscript:AddSection({"Só você poderá ver"})
 
 Tabscript:AddButton({
-    Name = "C00lkidd Gui ",
-    Description = "Aviso so o cliente Poderá ver",
+    Name = "C00lkidd Gui",
+    Description = "Aviso: somente o cliente poderá ver",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
     end
 })
+
 Tabscript:AddSection({"Tool Couch"})
 
 Tabscript:AddButton({
     Name = "Pegar o sofá",
     Description = "Pegar a Tool Couch",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/Brancos.lua", true))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/Brancos.lua"))()
     end
 })
-Tabscript:AddSection({"Tool Telekines"})
 
-Tabscript:AddButton({ Name = "Telekines Tool",
- Callback = function()
-  loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
-end 
-})
-Tabscript:AddSection({"ShiftLock Aviso Não Da De Tira Da tela"})
+Tabscript:AddSection({"Tool Telekinesis"})
 
-Tabscript:AddButton({ Name = "ShiftLock",
- Callback = function()
-  loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
-end 
+Tabscript:AddButton({ 
+    Name = "Telekines Tool",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md'))()
+    end 
 })
 
+Tabscript:AddSection({"ShiftLock (Não sai da tela)"})
+
+Tabscript:AddButton({ 
+    Name = "ShiftLock",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
+    end 
+})
 -- ====================================================================
 -- ABA: PROPS 
 -- ====================================================================
