@@ -4095,6 +4095,196 @@ Tab5:AddButton({
     end
 })
 -- ====================================================================
+-- ABA: Scripts
+-- ====================================================================
+
+Tabscript:AddButton({
+    Name = "FE Jerk Off Hub Matrix",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ExploitFin/AquaMatrix/refs/heads/AquaMatrix/AquaMatrix"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "FE HUGG",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/JSFKGBASDJKHIOAFHDGHIUODSGBJKLFGDKSB/fe/refs/heads/main/FEHUGG"))()
+    end
+})
+
+
+Tabscript:AddButton({
+    Name = "Buraco Negro",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Bac0nHck/Scripts/main/BringFlingPlayers"))("More Scripts: t.me/arceusxscripts")
+    end
+})
+
+local Section = Tabscript:AddSection({"esse system broochk e voidProtection"})
+
+Tabscript:AddButton({
+    Name = "System Broochk",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/script"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Roships",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-rochips-universal-18294"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Sander X",
+    Description = "Somente para Brookhaven",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kigredns/SanderXV4.2.2/refs/heads/main/New.lua"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Reverso",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe./main/L"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "RD4",
+    Description = "Somente para Brookhaven",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/M1ZZ001/BrookhavenR4D/main/Brookhaven%20R4D%20Script"))()
+    end
+})
+Tabscript:AddSection({"Ativa o Fly GUI"})
+
+-- Botão para Fly Gui
+Tabscript:AddButton({
+ Name = "Fly Gui",
+ Callback = function()
+ loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
+ end
+})
+Tabscript:AddSection({"Script do Ghost Hub"})
+
+-- Botão para Ghost Hub
+Tabscript:AddButton({
+ Name = "Ghost Hub",
+ Callback = function()
+ loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GhostHub-16534"))()
+ end
+})
+Tabscript:AddSection({"Scritp do Rael Hub"})
+
+Tabscript:AddButton({
+    Name = "Abrir Rael Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
+    end
+})
+Tabscript:AddSection({"Script Do Brutus"})
+
+Tabscript:AddButton({
+    Name = "Abrir BRUTUS HUB",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/codenixstudios/brutus-hub/script/Games/brookhaven.lua"))()
+    end
+})
+Tabscript:AddSection({"Script do Coquette Hub"})
+
+Tabscript:AddButton({
+    Name = "Abrir Coquette Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Daivd977/Deivd999/refs/heads/main/pessal"))()
+    end
+})
+Tabscript:AddSection({"Script do Cartola Hub"})
+
+Tabscript:AddButton({
+    Name = "Abrir Cartola Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Davi999z/Cartola-Hub/refs/heads/main/Brookhaven", true))()()
+    end
+})
+Tabscript:AddSection({"Script do Pacote Fantasma"})
+
+Tabscript:AddButton({
+    Name = "Abrir Pacote Fanstama",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
+    end
+})
+Tabscript:AddSection({"Script do Homelander})
+
+Tabscript:AddButton({
+    Name = "Homelander Script",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/refs/heads/main/homelander.lua"))()
+    end
+})
+Tabscript:AddSection({"UNIVERSAL COMMADS ADMIN🔨"})
+
+Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
+
+Tabscript:AddButton({
+    Name = "Nameless Admin",
+    Description = "Abrir o Nameless Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-Universal-73082"))()
+    end
+})
+Tabscript:AddSection({"Comandos de Administração em qualquer Jogo"})
+
+Tabscript:AddButton({
+    Name = "Infinite Yield",
+    Description = "Abrir o Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yeild-93384"))()
+    end
+})
+Tabscript:AddSection({"Só vc poderá ver"})
+
+Tabscript:AddButton({
+    Name = "C00lkidd Gui ",
+    Description = "Aviso so o cliente Poderá ver",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
+    end
+})
+Tabscript:AddSection({"Tool Couch"})
+
+Tabscript:AddButton({
+    Name = "Pegar o sofá",
+    Description = "Pegar a Tool Couch",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/Brancos.lua", true))()
+    end
+})
+Tabscript:AddSection({"Tool Telekines"})
+
+Tabscript:AddButton({ Name = "Telekines Tool",
+ Callback = function()
+  loadstring(game:HttpGet('https://raw.githubusercontent.com/SAZXHUB/Control-update/main/README.md', true))()
+end 
+})
+Tabscript:AddSection({"ShiftLock Aviso Não Da De Tira Da tela"})
+
+Tabscript:AddButton({ Name = "ShiftLock",
+ Callback = function()
+  loadstring(game:HttpGet("https://pastebin.com/raw/N2tiHgyv"))()
+end 
+})
+
+-- ====================================================================
 -- ABA: PROPS 
 -- ====================================================================
 pcall(function() 
