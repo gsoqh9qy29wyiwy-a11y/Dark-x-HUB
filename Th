@@ -4675,7 +4675,7 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
     end
 })
-Tabscript:AddSection({"Script do Homelander})
+Tabscript:AddSection({"Script do Homelander"})
 
 Tabscript:AddButton({
     Name = "Homelander Script",
