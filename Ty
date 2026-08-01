@@ -4690,8 +4690,8 @@ TabRGB:AddToggle({
         end
     end
 })
-
-local ToggleBicicleta = TabRGB:AddToggle({
+ 
+TabRGB:AddToggle({ 
     Name = "RGB Bicicleta",
     Description = "RGB na bicicleta",
     Default = false
