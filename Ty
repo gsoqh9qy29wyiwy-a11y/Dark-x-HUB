@@ -4690,6 +4690,46 @@ TabRGB:AddToggle({
         end
     end
 })
+local ToggleCorpo = TabRGB:AddToggle({
+    Name = "RGB Corpo",
+    Description = "RGB  no corpo",
+    Default = false
+})
+ToggleCorpo:Callback(function(Value)
+    getgenv().rgbCorpo = Value
+    task.spawn(function()
+        while getgenv().rgbCorpo do
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+            if remote and remote:FindFirstChild("ChangeBodyColor") then
+                pcall(function()
+                    remote.ChangeBodyColor:FireServer({
+                        BrickColor.new(getRainbowColor(rgbSpeed))
+                    })
+                end)
+            end
+            task.wait(0.1)
+        end
+    end)
+end)
+
+
+local ToggleCabelo = TabRGB:AddToggle({
+    Name = "RGB Cabelo",
+    Description = "RGB  no cabelo",
+    Default = false
+})
+ToggleCabelo:Callback(function(Value)
+    getgenv().rgbCabelo = Value
+    task.spawn(function()
+        while getgenv().rgbCabelo do
+            fireServer("1Max1y", {
+                "ChangeHairColor2",
+                getRainbowColor(rgbSpeed)
+            })
+            task.wait(0.5)
+        end
+    end)
+end)
 -- ====================================================================
 -- ABA: PROPS 
 -- ====================================================================
