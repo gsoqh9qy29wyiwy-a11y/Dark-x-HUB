@@ -4646,7 +4646,7 @@ local rgbSpeed = 3
 
 -- Função para criar cor RGB suave
 local function getRainbowColor(speedMultiplier)
-    local h = (tick() * (speedMultiplier / 10) % 1) 
+    local h = (tick() * (speedMultiplier / 5) % 1) 
     return Color3.fromHSV(h, 1, 1)
 end
 
@@ -4679,7 +4679,7 @@ TabRGB:AddSlider({
     end
 })
 
-TabRGB:AddSection({"Nome + Bio RGB"})
+TabRGB:AddSection({"Personagem"})
 
 -- Nome + Bio RGB
 local nameBioRGBActive = false
@@ -4701,9 +4701,7 @@ TabRGB:AddToggle({
     end
 })
 
-TabRGB:AddSection({"Personagem"})
-
--- TOGGLE: RGB CORPO
+-- RGB Corpo
 TabRGB:AddToggle({
     Name = "RGB Corpo",
     Default = false,
@@ -4713,22 +4711,19 @@ TabRGB:AddToggle({
             while getgenv().rgbCorpo do
                 local remote = ReplicatedStorage:FindFirstChild("Remotes")
                 if remote and remote:FindFirstChild("ChangeBodyColor") then
-                    -- Ele pega o rgbSpeed atualizado pelo slider a cada ciclo
-                    local cor = getRainbowColor(rgbSpeed)
                     pcall(function()
                         remote.ChangeBodyColor:FireServer({
-                            BrickColor.new(cor)
+                            BrickColor.new(getRainbowColor(rgbSpeed))
                         })
                     end)
                 end
-                -- Espera curta para a transição ser rápida se o slider estiver no alto
-                task.wait(0.05) 
+                task.wait(0.1)
             end
         end)
     end
 })
 
--- TOGGLE: RGB CABELO
+-- RGB Cabelo
 TabRGB:AddToggle({
     Name = "RGB Cabelo",
     Default = false,
@@ -4736,12 +4731,8 @@ TabRGB:AddToggle({
         getgenv().rgbCabelo = Value
         task.spawn(function()
             while getgenv().rgbCabelo do
-                -- Ele pega o rgbSpeed atualizado pelo slider a cada ciclo
-                local cor = getRainbowColor(rgbSpeed)
-                fireServer("1Max1y", { "ChangeHairColor2", cor })
-                
-                -- Espera curta para acompanhar a velocidade do slider
-                task.wait(0.05) 
+                fireServer("1Max1y", { "ChangeHairColor2", getRainbowColor(rgbSpeed) })
+                task.wait(0.3)
             end
         end)
     end
