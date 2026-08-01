@@ -2734,15 +2734,14 @@ Tab8:AddButton({
 ---------------------------------------------------------------------------------------------------------------------------------
                                                    -- === Tab 9: troll === --
 -----------------------------------------------------------------------------------------------------------------------------------
-local Players = game:GetService("Players")
+ local Players = game:GetService("Players")
+
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui = game:GetService("StarterGui")
 
 local LocalPlayer = Players.LocalPlayer
 local selectedPlayer = nil
-local valor_do_nome_do_joagdor = ""
 local isFollowingKill = false
 local isFollowingPull = false
 local running = false
@@ -2759,17 +2758,7 @@ local isSpectating = false
 local spectatedPlayer = nil
 local characterConnection = nil
 local flingToggle = nil
-local headsitActive = false
 
--- Variáveis para Headsit e Black Hole (Integrando vu6, vu9, vu10 para os serviços padrões)
-local vu6 = Players
-local vu9 = Workspace
-local vu10 = RunService.Heartbeat
-local headsitActive = false
-
---------------------------------------------------------------------------------------------------------------------------------------------------
--- CONFIGURAÇÃO DO REMOTE EVENT (Network Owner)
---------------------------------------------------------------------------------------------------------------------------------------------------
 local SetNetworkOwnerEvent = Instance.new("RemoteEvent")
 SetNetworkOwnerEvent.Name = "SetNetworkOwnerEvent_" .. tostring(math.random(1000, 9999))
 SetNetworkOwnerEvent.Parent = ReplicatedStorage
@@ -2793,9 +2782,7 @@ local serverScriptCode = [[
 pcall(function()
     loadstring(serverScriptCode)()
 end)
---------------------------------------------------------------------------------------------------------------------------------------------------
--- FUNÇÕES DE UTILIDADE (Veículos, Nomes e Dropdown)
---------------------------------------------------------------------------------------------------------------------------------------------------
+
 local function disableCarClient()
     local backpack = LocalPlayer:WaitForChild("Backpack")
     local carClient = backpack:FindFirstChild("CarClient")
@@ -2821,15 +2808,50 @@ local function getPlayerNames()
     end
     return playerNames
 end
---------------------------------------------------------------------------------------------------------------------------------------------------
--- SISTEMA DE SPECTATE E TELEPORT
---------------------------------------------------------------------------------------------------------------------------------------------------
+
+local function updateDropdown(dropdown, spectateToggle)
+    pcall(function()
+        local currentValue = dropdown:Get()
+        local playerNames = getPlayerNames()
+        dropdown:Set(playerNames) -- Usando :Set como solicitado
+        if currentValue and not table.find(playerNames, currentValue) then
+            dropdown:Set("")
+            selectedPlayer = nil
+            if isSpectating then
+                stopSpectating()
+                if spectateToggle then
+                    pcall(function() spectateToggle:Set(false) end)
+                end
+            end
+            if running or isFollowingKill or isFollowingPull then
+                running = false
+                isFollowingKill = false
+                isFollowingPull = false
+                if connection then connection:Disconnect() connection = nil end
+                if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+                if flingToggle then pcall(function() flingToggle:Set(false) end) end
+            end
+        elseif currentValue and table.find(playerNames, currentValue) then
+            dropdown:Set(currentValue) -- Mantém seleção se jogador ainda está no jogo
+        end
+    end)
+end
+
+
+
+
+
 local function spectatePlayer(playerName)
-    if characterConnection then characterConnection:Disconnect() characterConnection = nil end
+    if characterConnection then
+        characterConnection:Disconnect()
+        characterConnection = nil
+    end
+
     local targetPlayer = Players:FindFirstChild(playerName)
     if targetPlayer and targetPlayer ~= LocalPlayer then
         spectatedPlayer = targetPlayer
         isSpectating = true
+
         local function updateCamera()
             if not isSpectating or not spectatedPlayer then return end
             if spectatedPlayer.Character and spectatedPlayer.Character:FindFirstChild("Humanoid") then
@@ -2838,41 +2860,58 @@ local function spectatePlayer(playerName)
                 Workspace.CurrentCamera.CameraSubject = nil
             end
         end
+
         updateCamera()
+
+
+
+
         characterConnection = RunService.Heartbeat:Connect(function()
-            if not isSpectating then if characterConnection then characterConnection:Disconnect() end return end
+            if not isSpectating then
+                characterConnection:Disconnect()
+                characterConnection = nil
+                return
+            end
             pcall(updateCamera)
         end)
+
+        spectatedPlayer.CharacterAdded:Connect(function()
+            if isSpectating then updateCamera() end
+        end)
+    else
+        isSpectating = false
+        spectatedPlayer = nil
     end
 end
 
 local function stopSpectating()
+    if characterConnection then
+        characterConnection:Disconnect()
+        characterConnection = nil
+    end
+
     isSpectating = false
     spectatedPlayer = nil
-    if characterConnection then characterConnection:Disconnect() characterConnection = nil end
+
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         Workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
+        Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+    else
+        Workspace.CurrentCamera.CameraSubject = nil
         Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
     end
 end
 
+-- Função para teletransportar para o jogador selecionado (com ancoragem segura)
 local function teleportToPlayer(playerName)
     local targetPlayer = Players:FindFirstChild(playerName)
-    if targetPlayer and LocalPlayer.Character and targetPlayer.Character then
+    if targetPlayer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local myHRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if myHRP and targetHRP then
-            for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.Velocity = Vector3.zero part.Anchored = true end
-            end
-            myHRP.CFrame = targetHRP.CFrame + Vector3.new(0, 3, 0)
-            task.wait(0.5)
-            for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.Anchored = false end
-            end
+        local myHumanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if not myHRP or not myHumanoid then
+            print("Seu personagem não está totalmente carregado para teletransporte.")
+            return
         end
-    end
-end
 
         -- Zerar a física do personagem antes do teleporte
         for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
@@ -2921,9 +2960,7 @@ LocalPlayer.CharacterAdded:Connect(function(character)
     end
 end)
 
---------------------------------------------------------------------------------------------------------------------------------------------------
--- INTERFACE TAB9: SELEÇÃO E CONTROLE
---------------------------------------------------------------------------------------------------------------------------------------------------
+local valor_do_nome_do_joagdor
 
 local DropdownPlayerTab2 = Tab9:AddDropdown({
     Name = "Selecionar Jogador",
@@ -3030,13 +3067,6 @@ end)
 
 -- Inicializa o dropdown
 updateDropdown(DropdownPlayerTab2, SpectateToggleTab10)
-
-Tab9:AddToggle({ Name = "Headsit", Callback = function(state) 
-    local T = vu6:FindFirstChild(valor_do_nome_do_joagdor)
-    if T then 
-        if state then headsitOnPlayer(T) headsitActive = true else removeHeadsit() headsitActive = false end 
-    end 
-end })
 
 
 local Section = Tab9:AddSection({"Kill"})
@@ -3544,7 +3574,7 @@ local function flingWithBall(targetPlayer)
     if not humanoid or not myHRP then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
+    local args = { [1] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
@@ -3636,7 +3666,7 @@ local function flingWithBallV2(targetPlayer)
     if not myHRP then return end
     if not equipBola() then return end
     task.wait(0.5)
-    local args = { [1] = "PlayerWantsToDeleteTool", [0] = "SoccerBall" }
+    local args = { [1] = "PlayerWantsToDeleteTool", [2] = "SoccerBall" }
     pcall(function()
         ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(args))
     end)
@@ -4688,7 +4718,6 @@ Tab9:AddButton({"Parar Tudo", function()
     originalProperties = nil
     showNotification("Tudo Parado", "Todas as funções foram desativadas.", nil)
 end})
-
 
 
 
