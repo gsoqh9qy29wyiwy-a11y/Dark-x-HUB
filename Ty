@@ -4730,6 +4730,67 @@ ToggleCabelo:Callback(function(Value)
         end
     end)
 end)
+
+local Section = TabRGB:AddSection({"itens/tool"})
+
+
+-- NOVO TOGGLE: Rádio RGB
+local radioRGBActive = false
+TabRGB:AddToggle({
+    Name = "Rádio RGB  ",
+    Description = "Altera a cor do rádio com RGB contínuo",
+    Default = false,
+    Callback = function(state)
+        radioRGBActive = state
+        if state then
+            task.spawn(function()
+                while radioRGBActive and LocalPlayer.Character do
+                    local color = getRainbowColor(rgbSpeed)
+                    local success, remote = pcall(function()
+                        return LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ToolGui"):WaitForChild("ToolSettings"):WaitForChild("Settings"):WaitForChild("PropsColor"):WaitForChild("SetColor")
+                    end)
+                    if success and remote then
+                        pcall(function()
+                            remote:FireServer(color)
+                        end)
+                    end
+                    task.wait(0.03)
+                end
+            end)
+        end
+    end
+})
+
+local ToggleMegafone = TabRGB:AddToggle({
+    Name = "RGB Megafone",
+    Description = "RGB  no megafone",
+    Default = false
+})
+ToggleMegafone:Callback(function(Value)
+    getgenv().rgbMegafone = Value
+    task.spawn(function() 
+        while getgenv().rgbMegafone do
+            local color = getRainbowColor(rgbSpeed)
+            local gui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+            if gui then
+                local btn = gui:FindFirstChild("ToolGui")
+                if btn then
+                    local settings = btn:FindFirstChild("ToolSettings")
+                    if settings then
+                        local props = settings:FindFirstChild("Settings"):FindFirstChild("PropsColor")
+                        if props and props:FindFirstChild("SetColor") then
+                            pcall(function()
+                                props.SetColor:FireServer(color)
+                            end)
+                        end
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end)
+
 -- ====================================================================
 -- ABA: PROPS 
 -- ====================================================================
