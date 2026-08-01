@@ -1,3 +1,4 @@
+ 
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
 
 -- 1. SERVIÇOS E VARIÁVEIS INICIAIS
@@ -206,20 +207,6 @@ local function FlingBall(targetName)
         end
     end
 end
-local function updateCamera()
-    pcall(function()
-        if viewEnabled then
-            local target = vu6:FindFirstChild(_G.SelectedPlayer)
-            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = target.Character.Humanoid
-            end
-        else
-            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = vu7.Character.Humanoid
-            end
-        end
-    end)
-end
 
 -- Configuração do Black Hole
 local function SetupBlackHole()
@@ -323,9 +310,6 @@ local function TeleportTo(cframe)
     end
 end
 
-
-
--- 3. FUNÇÕES DE SISTEMA
 local function updateMovement()
     local char = vu7.Character
     if char and char:FindFirstChild("Humanoid") then
@@ -334,40 +318,6 @@ local function updateMovement()
         char.Humanoid.UseJumpPower = true
     end
     vu9.Gravity = gravity
-end
-
-local function updateCamera()
-    if viewEnabled then
-        local T = vu6:FindFirstChild(_G.SelectedPlayer)
-        if T and T.Character and T.Character:FindFirstChildOfClass("Humanoid") then
-            vuCam.CameraSubject = T.Character:FindFirstChildOfClass("Humanoid")
-        end
-    else
-        vuCam.CameraSubject = vu7.Character:FindFirstChildOfClass("Humanoid")
-    end
-end
-
-local function FinalReset()
-    _G.IsTrapping = false
-    pcall(function()
-        local root = vu7.Character.HumanoidRootPart
-        root.Velocity = Vector3.new(0,0,0)
-        for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = true end end
-    end)
-end
-
--- 3. FUNÇÕES DE SISTEMA
-local function TeleportTo(cframe)
-    local char = vu7.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        char:PivotTo(cframe)
-    end
-end
-
-local function getPlayerNames()
-    local pNames = {}
-    for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
-    return pNames
 end
 
 --  3. JANELA PRINCIPAL
