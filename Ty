@@ -4691,6 +4691,25 @@ TabRGB:AddToggle({
     end
 })
 
+local ToggleBicicleta = TabRGB:AddToggle({
+    Name = "RGB Bicicleta",
+    Description = "RGB na bicicleta",
+    Default = false
+})
+ToggleBicicleta:Callback(function(Value)
+    getgenv().rgbBicicleta = Value
+    task.spawn(function()
+        while getgenv().rgbBicicleta do
+            fireServer("1Player1sCa1r", {
+                "NoMotorColor",
+                getRainbowColor(rgbSpeed)
+            })
+            task.wait(0.1)
+        end
+    end)
+end)
+
+
 local Section = TabRGB:AddSection({"itens/tool"})
 
 
