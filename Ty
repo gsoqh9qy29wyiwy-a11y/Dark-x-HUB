@@ -4690,7 +4690,34 @@ TabRGB:AddToggle({
         end
     end
 })
- 
+
+-- RGB Corpo
+local bodyRGBActive = false
+TabRGB:AddToggle({
+    Name = "RGB Corpo",
+    Default = false,
+    Callback = function(state)
+        bodyRGBActive = state
+        if state then
+            task.spawn(function()
+                while bodyRGBActive and LocalPlayer.Character do
+                    local color = getRainbowColor(rgbSpeed)
+                    local remote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+                    
+                    if remote and remote:FindFirstChild("ChangeBodyColor") then
+                        pcall(function()
+                            remote.ChangeBodyColor:FireServer({
+                                BrickColor.new(color)
+                            })
+                        end)
+                    end
+                    task.wait(0.1) -- Delay do corpo (geralmente mais lento para evitar lag)
+                end
+            end)
+        end
+    end
+})
+
 local Section = TabRGB:AddSection({"itens/tool"})
 
 
@@ -4721,53 +4748,8 @@ TabRGB:AddToggle({
     end
 })
 
-local ToggleMegafone = TabRGB:AddToggle({
-    Name = "RGB Megafone",
-    Description = "RGB  no megafone",
-    Default = false
-})
-ToggleMegafone:Callback(function(Value)
-    getgenv().rgbMegafone = Value
-    task.spawn(function() 
-        while getgenv().rgbMegafone do
-            local color = getRainbowColor(rgbSpeed)
-            local gui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
-            if gui then
-                local btn = gui:FindFirstChild("ToolGui")
-                if btn then
-                    local settings = btn:FindFirstChild("ToolSettings")
-                    if settings then
-                        local props = settings:FindFirstChild("Settings"):FindFirstChild("PropsColor")
-                        if props and props:FindFirstChild("SetColor") then
-                            pcall(function()
-                                props.SetColor:FireServer(color)
-                            end)
-                        end
-                    end
-                end
-            end
-            task.wait(0.1)
-        end
-    end)
-end)
 
-local ToggleBicicleta = TabRGB:AddToggle({
-    Name = "RGB Bicicleta",
-    Description = "RGB na bicicleta",
-    Default = false
-})
-ToggleBicicleta:Callback(function(Value)
-    getgenv().rgbBicicleta = Value
-    task.spawn(function()
-        while getgenv().rgbBicicleta do
-            fireServer("1Player1sCa1r", {
-                "NoMotorColor",
-                getRainbowColor(rgbSpeed)
-            })
-            task.wait(0.1)
-        end
-    end)
-end)
+
 
 -- ====================================================================
 -- ABA: PROPS 
