@@ -5817,11 +5817,7 @@ Tab2:AddSlider({
     end
  })
  
- Tab2:AddToggle({
-    Name = "Pulo Infinito",
-    Default = false,
-    Callback = function(Value) InfiniteJumpEnabled = Value end
-})
+ 
  local InfiniteJumpEnabled = false
  
  game:GetService("UserInputService").JumpRequest:Connect(function()
