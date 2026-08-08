@@ -1854,20 +1854,14 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-TrollTab:AddSection({("MENU Esp")})
+TrollTab:AddSection({Translator:traduzir("MENU Esp")})
 
 local ESPSystem = {
     showLine = false,
     showHealth = false,
     showName = false,
     showDistance = false,
-    drawings = {},
-    healthColors = {
-        Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0), Color3.fromRGB(0, 0, 255),
-        Color3.fromRGB(255, 255, 0), Color3.fromRGB(255, 0, 255), Color3.fromRGB(0, 255, 255),
-        Color3.fromRGB(255, 128, 0)
-    },
-    healthColorIndex = 1
+    drawings = {}
 }
 
 local function clearESP()
@@ -1876,7 +1870,7 @@ local function clearESP()
             drawing:Remove()
         end
     end
-    ESPSystem.drawings = {}
+    table.clear(ESPSystem.drawings)
 end
 
 local function createPlayerESP(player)
@@ -1887,56 +1881,83 @@ local function createPlayerESP(player)
 
     local head = character:FindFirstChild("Head")
     local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not head or not humanoidRootPart then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not head or not humanoidRootPart or not humanoid then return end
 
     local headPosition, onScreen = Camera:WorldToViewportPoint(head.Position)
     if not onScreen then return end
 
     local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
 
+    -- Linha
     if ESPSystem.showLine then
         local line = Drawing.new("Line")
         line.From = screenCenter
         line.To = Vector2.new(headPosition.X, headPosition.Y)
-        line.Color = Color3.new(1, 1, 1)
-        line.Thickness = 2
+        line.Color = Color3.fromRGB(255, 255, 255)
+        line.Thickness = 1.5
         line.Transparency = 1
         line.Visible = true
         table.insert(ESPSystem.drawings, line)
     end
 
+    -- Barra de Vida
     if ESPSystem.showHealth then
+        local healthPercent = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+        local barHeight = 40 * healthPercent
+        local barWidth = 4
+
+        local healthColor
+        if healthPercent > 0.5 then
+            healthColor = Color3.fromRGB(0, 255, 0):Lerp(Color3.fromRGB(255, 255, 0), (1 - healthPercent) * 2)
+        else
+            healthColor = Color3.fromRGB(255, 255, 0):Lerp(Color3.fromRGB(255, 0, 0), (0.5 - healthPercent) * 2)
+        end
+
+        local healthBg = Drawing.new("Square")
+        healthBg.Size = Vector2.new(barWidth, 40)
+        healthBg.Position = Vector2.new(headPosition.X - 32, headPosition.Y - 20)
+        healthBg.Color = Color3.fromRGB(30, 30, 30)
+        healthBg.Filled = true
+        healthBg.Transparency = 0.6
+        healthBg.Visible = true
+        table.insert(ESPSystem.drawings, healthBg)
+
         local healthBar = Drawing.new("Square")
-        healthBar.Size = Vector2.new(4, 35)
-        healthBar.Position = Vector2.new(headPosition.X - 30, headPosition.Y - 17.5)
-        healthBar.Color = ESPSystem.healthColors[ESPSystem.healthColorIndex]
+        healthBar.Size = Vector2.new(barWidth, barHeight)
+        healthBar.Position = Vector2.new(headPosition.X - 32, headPosition.Y - 20 + (40 - barHeight))
+        healthBar.Color = healthColor
         healthBar.Filled = true
         healthBar.Transparency = 1
         healthBar.Visible = true
         table.insert(ESPSystem.drawings, healthBar)
     end
 
+    -- Nome
     if ESPSystem.showName then
         local nameTag = Drawing.new("Text")
         nameTag.Text = player.DisplayName
-        nameTag.Position = Vector2.new(headPosition.X, headPosition.Y - 25)
+        nameTag.Position = Vector2.new(headPosition.X, headPosition.Y - 30)
         nameTag.Color = Color3.fromRGB(255, 255, 255)
         nameTag.Center = true
-        nameTag.Size = 18
+        nameTag.Size = 16
         nameTag.Outline = true
+        nameTag.OutlineColor = Color3.fromRGB(0, 0, 0)
         nameTag.Visible = true
         table.insert(ESPSystem.drawings, nameTag)
     end
 
+    -- Distância
     if ESPSystem.showDistance then
         local distance = math.floor((Camera.CFrame.Position - head.Position).Magnitude)
         local distanceTag = Drawing.new("Text")
         distanceTag.Text = distance .. "m"
-        distanceTag.Position = Vector2.new(headPosition.X, headPosition.Y + 25)
+        distanceTag.Position = Vector2.new(headPosition.X, headPosition.Y + 22)
         distanceTag.Color = Color3.fromRGB(0, 255, 255)
         distanceTag.Center = true
-        distanceTag.Size = 16
+        distanceTag.Size = 14
         distanceTag.Outline = true
+        distanceTag.OutlineColor = Color3.fromRGB(0, 0, 0)
         distanceTag.Visible = true
         table.insert(ESPSystem.drawings, distanceTag)
     end
@@ -1951,22 +1972,42 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-local espToggles = {
-    {name = "Linhas <Esp>", key = "showLine", desc = "Mostra linhas da posição dos jogadores"},
-    {name = "Vida <Esp>", key = "showHealth", desc = "Mostra a vida dos jogadores"},
-    {name = "Nome <Esp>", key = "showName", desc = "Mostra os nomes dos jogadores no mapa"},
-    {name = "Distância <Esp>", key = "showDistance", desc = "Mostra as distâncias dos jogadores"}
-}
+-- Toggles individuais
+TrollTab:AddToggle({
+    Name = "Linhas <Esp>",
+    Description = "Mostra linhas da posição dos jogadores",
+    Default = false,
+    Callback = function(value)
+        ESPSystem.showLine = value
+    end
+})
 
-for _, toggle in ipairs(espToggles) do
-    TrollTab:AddToggle({
-        Name = toggle.name,
-        Description = toggle.desc,
-        Default = false,
-        Callback = function(value)
-            ESPSystem[toggle.key] = value
-        end
-    })
+TrollTab:AddToggle({
+    Name = "Vida <Esp>",
+    Description = "Mostra a barra de vida dos jogadores",
+    Default = false,
+    Callback = function(value)
+        ESPSystem.showHealth = value
+    end
+})
+
+TrollTab:AddToggle({
+    Name = "Nome <Esp>",
+    Description = "Mostra os nomes dos jogadores",
+    Default = false,
+    Callback = function(value)
+        ESPSystem.showName = value
+    end
+})
+
+TrollTab:AddToggle({
+    Name = "Distância <Esp>",
+    Description = "Mostra a distância dos jogadores",
+    Default = false,
+    Callback = function(value)
+        ESPSystem.showDistance = value
+    end
+})
 -- ====================================================================
 -- ABA: AVATAR 
 -- ====================================================================
