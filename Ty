@@ -1854,6 +1854,119 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+TrollTab:AddSection({("MENU Esp")})
+
+local ESPSystem = {
+    showLine = false,
+    showHealth = false,
+    showName = false,
+    showDistance = false,
+    drawings = {},
+    healthColors = {
+        Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0), Color3.fromRGB(0, 0, 255),
+        Color3.fromRGB(255, 255, 0), Color3.fromRGB(255, 0, 255), Color3.fromRGB(0, 255, 255),
+        Color3.fromRGB(255, 128, 0)
+    },
+    healthColorIndex = 1
+}
+
+local function clearESP()
+    for _, drawing in pairs(ESPSystem.drawings) do
+        if drawing and drawing.Remove then
+            drawing:Remove()
+        end
+    end
+    ESPSystem.drawings = {}
+end
+
+local function createPlayerESP(player)
+    if player == LocalPlayer then return end
+
+    local character = player.Character
+    if not character then return end
+
+    local head = character:FindFirstChild("Head")
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not head or not humanoidRootPart then return end
+
+    local headPosition, onScreen = Camera:WorldToViewportPoint(head.Position)
+    if not onScreen then return end
+
+    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+
+    if ESPSystem.showLine then
+        local line = Drawing.new("Line")
+        line.From = screenCenter
+        line.To = Vector2.new(headPosition.X, headPosition.Y)
+        line.Color = Color3.new(1, 1, 1)
+        line.Thickness = 2
+        line.Transparency = 1
+        line.Visible = true
+        table.insert(ESPSystem.drawings, line)
+    end
+
+    if ESPSystem.showHealth then
+        local healthBar = Drawing.new("Square")
+        healthBar.Size = Vector2.new(4, 35)
+        healthBar.Position = Vector2.new(headPosition.X - 30, headPosition.Y - 17.5)
+        healthBar.Color = ESPSystem.healthColors[ESPSystem.healthColorIndex]
+        healthBar.Filled = true
+        healthBar.Transparency = 1
+        healthBar.Visible = true
+        table.insert(ESPSystem.drawings, healthBar)
+    end
+
+    if ESPSystem.showName then
+        local nameTag = Drawing.new("Text")
+        nameTag.Text = player.DisplayName
+        nameTag.Position = Vector2.new(headPosition.X, headPosition.Y - 25)
+        nameTag.Color = Color3.fromRGB(255, 255, 255)
+        nameTag.Center = true
+        nameTag.Size = 18
+        nameTag.Outline = true
+        nameTag.Visible = true
+        table.insert(ESPSystem.drawings, nameTag)
+    end
+
+    if ESPSystem.showDistance then
+        local distance = math.floor((Camera.CFrame.Position - head.Position).Magnitude)
+        local distanceTag = Drawing.new("Text")
+        distanceTag.Text = distance .. "m"
+        distanceTag.Position = Vector2.new(headPosition.X, headPosition.Y + 25)
+        distanceTag.Color = Color3.fromRGB(0, 255, 255)
+        distanceTag.Center = true
+        distanceTag.Size = 16
+        distanceTag.Outline = true
+        distanceTag.Visible = true
+        table.insert(ESPSystem.drawings, distanceTag)
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    clearESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("Head") then
+            createPlayerESP(player)
+        end
+    end
+end)
+
+local espToggles = {
+    {name = "Linhas <Esp>", key = "showLine", desc = "Mostra linhas da posição dos jogadores"},
+    {name = "Vida <Esp>", key = "showHealth", desc = "Mostra a vida dos jogadores"},
+    {name = "Nome <Esp>", key = "showName", desc = "Mostra os nomes dos jogadores no mapa"},
+    {name = "Distância <Esp>", key = "showDistance", desc = "Mostra as distâncias dos jogadores"}
+}
+
+for _, toggle in ipairs(espToggles) do
+    TrollTab:AddToggle({
+        Name = toggle.name,
+        Description = toggle.desc,
+        Default = false,
+        Callback = function(value)
+            ESPSystem[toggle.key] = value
+        end
+    })
 -- ====================================================================
 -- ABA: AVATAR 
 -- ====================================================================
