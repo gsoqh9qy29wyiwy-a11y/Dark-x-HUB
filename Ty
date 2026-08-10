@@ -1128,112 +1128,74 @@ TabTroll:AddButton({
     end
 })
 
-
 -- ====================================================================
 -- ABA: CASAS 
 -- ====================================================================
 local SelectHouse = nil
 local HouseDropdown = nil
 local NoclipDoor = nil
-local isUnbanActive = false
 
 local function getHouseList()
     local Tabela = {}
     local lots = workspace:FindFirstChild("001_Lots")
     if lots then
         for _, House in ipairs(lots:GetChildren()) do
-            if House.Name ~= "For Sale" and House:IsA("Model") then
-                table.insert(Tabela, House.Name)
-            end
+            if House.Name ~= "For Sale" and House:IsA("Model") then table.insert(Tabela, House.Name) end
         end
     end
     return Tabela
 end
+
 pcall(function()
     HouseDropdown = CasasTab:AddDropdown({
         Name = "Selecione a Casa",
-        Descriptio = "Lista de casas",
         Options = getHouseList(),
         Default = "...",
-        Callback = function(Value)
-            SelectHouse = Value
-            print("Casa selecionada: " .. tostring(Value))
-        end
+        Callback = function(Value) SelectHouse = Value end
     })
 end)
 
 pcall(function()
     CasasTab:AddButton({
         Name = "Atualizar Lista de Casas",
-        Description = "Atualizar Lista de casas",
-        Callback = function()
-            local novaLista = getHouseList()
-            if HouseDropdown then
-                pcall(function()
-                    HouseDropdown:Set(novaLista)
-                end)
-            end
-            print("✅ Lista de casas atualizada!")
-        end
+        Callback = function() if HouseDropdown then HouseDropdown:Set(getHouseList()) end end
     })
 end)
 
--- Teleportar para casa
 pcall(function()
     CasasTab:AddButton({
         Name = "Teleportar para Casa",
-        Description = "Teleporta para casa selecionada",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-            if House and game.Players.LocalPlayer.Character then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
-            else
-                print("Casa no encontrada: " .. tostring(SelectHouse))
-            end
+            if House and game.Players.LocalPlayer.Character then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position) end
         end
     })
 end)
 
--- Teleportar para cofre
 pcall(function()
     CasasTab:AddButton({
         Name = "Teleportar para Cofre",
-        Description = "algumas casa não tem Cofre",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
             if House and House:FindFirstChild("HousePickedByPlayer") and game.Players.LocalPlayer.Character then
                 local safe = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
-                if safe then
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position)
-                else
-                    print("Cofre no encontrado na casa: " .. tostring(SelectHouse))
-                end
-            else
-                print("Casa no encontrada: " .. tostring(SelectHouse))
+                if safe then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position) end
             end
         end
     })
 end)
 
-
--- Toggle para atravessar porta
 pcall(function()
     NoclipDoor = CasasTab:AddToggle({
         Name = "Atravessar Porta da Casa",
-        Description = "faz vc atravessar a porta da casa selecionada",
         Default = false,
         Callback = function(Value)
             pcall(function()
                 local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
                 if House and House:FindFirstChild("HousePickedByPlayer") then
-                    local housepickedbyplayer = House.HousePickedByPlayer
-                    local doors = housepickedbyplayer.HouseModel:FindFirstChild("001_HouseDoors")
+                    local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
                     if doors and doors:FindFirstChild("HouseDoorFront") then
-                        for _, Base in ipairs(doors.HouseDoorFront:GetChildren()) do
-                            if Base:IsA("BasePart") then
-                                Base.CanCollide = not Value
-                            end
-                        end
+                        for _, Base in ipairs(doors.HouseDoorFront:GetChildren()) do if Base:IsA("BasePart") then Base.CanCollide = not Value end end
                     end
                 end
             end)
@@ -1241,11 +1203,9 @@ pcall(function()
     })
 end)
 
--- Toggle para tocar campainha
 pcall(function()
     CasasTab:AddToggle({
         Name = "Tocar Campainha",
-        Description = "ative isso quando vc estiver perto da casa selecionada",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorbellValue = Value
@@ -1254,11 +1214,7 @@ pcall(function()
                     local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
                     if House and House:FindFirstChild("HousePickedByPlayer") then
                         local doorbell = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_DoorBell")
-                        if doorbell and doorbell:FindFirstChild("TouchBell") then
-                            pcall(function()
-                                fireclickdetector(doorbell.TouchBell.ClickDetector)
-                            end)
-                        end
+                        if doorbell and doorbell:FindFirstChild("TouchBell") then fireclickdetector(doorbell.TouchBell.ClickDetector) end
                     end
                     task.wait(0.5)
                 end
@@ -1267,11 +1223,9 @@ pcall(function()
     })
 end)
 
--- Toggle para bater na porta
 pcall(function()
     CasasTab:AddToggle({
         Name = "Bater na Porta",
-        Description = "ative isso quando vc estiver perto da casa selecionada",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorValue = Value
@@ -1281,9 +1235,7 @@ pcall(function()
                     if House and House:FindFirstChild("HousePickedByPlayer") then
                         local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
                         if doors and doors:FindFirstChild("HouseDoorFront") and doors.HouseDoorFront:FindFirstChild("Knock") then
-                            pcall(function()
-                                fireclickdetector(doors.HouseDoorFront.Knock.TouchBell.ClickDetector)
-                            end)
+                            fireclickdetector(doors.HouseDoorFront.Knock.TouchBell.ClickDetector)
                         end
                     end
                     task.wait(0.5)
@@ -1293,11 +1245,6 @@ pcall(function()
     })
 end)
 
--- Remove Banimento 
-CasasTab:AddButton({Name = "Remover Banimento", Description = "Remover o banimento da casa manualmente", Callback = function() pcall(function() vu2:removeBanHouses() end) end})
-
-CasasTab:AddToggle({Name = "Auto Remover Ban", Description = "Remover o banimento da casa automaticamente", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
-    
 -- ====================================================================
 -- ABA: TELEPORTES 
 -- ====================================================================
@@ -1854,160 +1801,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-TrollTab:AddSection({Translator:traduzir("MENU Esp")})
-
-local ESPSystem = {
-    showLine = false,
-    showHealth = false,
-    showName = false,
-    showDistance = false,
-    drawings = {}
-}
-
-local function clearESP()
-    for _, drawing in pairs(ESPSystem.drawings) do
-        if drawing and drawing.Remove then
-            drawing:Remove()
-        end
-    end
-    table.clear(ESPSystem.drawings)
-end
-
-local function createPlayerESP(player)
-    if player == LocalPlayer then return end
-
-    local character = player.Character
-    if not character then return end
-
-    local head = character:FindFirstChild("Head")
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not head or not humanoidRootPart or not humanoid then return end
-
-    local headPosition, onScreen = Camera:WorldToViewportPoint(head.Position)
-    if not onScreen then return end
-
-    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-
-    -- Linha
-    if ESPSystem.showLine then
-        local line = Drawing.new("Line")
-        line.From = screenCenter
-        line.To = Vector2.new(headPosition.X, headPosition.Y)
-        line.Color = Color3.fromRGB(255, 255, 255)
-        line.Thickness = 1.5
-        line.Transparency = 1
-        line.Visible = true
-        table.insert(ESPSystem.drawings, line)
-    end
-
-    -- Barra de Vida
-    if ESPSystem.showHealth then
-        local healthPercent = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
-        local barHeight = 40 * healthPercent
-        local barWidth = 4
-
-        local healthColor
-        if healthPercent > 0.5 then
-            healthColor = Color3.fromRGB(0, 255, 0):Lerp(Color3.fromRGB(255, 255, 0), (1 - healthPercent) * 2)
-        else
-            healthColor = Color3.fromRGB(255, 255, 0):Lerp(Color3.fromRGB(255, 0, 0), (0.5 - healthPercent) * 2)
-        end
-
-        local healthBg = Drawing.new("Square")
-        healthBg.Size = Vector2.new(barWidth, 40)
-        healthBg.Position = Vector2.new(headPosition.X - 32, headPosition.Y - 20)
-        healthBg.Color = Color3.fromRGB(30, 30, 30)
-        healthBg.Filled = true
-        healthBg.Transparency = 0.6
-        healthBg.Visible = true
-        table.insert(ESPSystem.drawings, healthBg)
-
-        local healthBar = Drawing.new("Square")
-        healthBar.Size = Vector2.new(barWidth, barHeight)
-        healthBar.Position = Vector2.new(headPosition.X - 32, headPosition.Y - 20 + (40 - barHeight))
-        healthBar.Color = healthColor
-        healthBar.Filled = true
-        healthBar.Transparency = 1
-        healthBar.Visible = true
-        table.insert(ESPSystem.drawings, healthBar)
-    end
-
-    -- Nome
-    if ESPSystem.showName then
-        local nameTag = Drawing.new("Text")
-        nameTag.Text = player.DisplayName
-        nameTag.Position = Vector2.new(headPosition.X, headPosition.Y - 30)
-        nameTag.Color = Color3.fromRGB(255, 255, 255)
-        nameTag.Center = true
-        nameTag.Size = 16
-        nameTag.Outline = true
-        nameTag.OutlineColor = Color3.fromRGB(0, 0, 0)
-        nameTag.Visible = true
-        table.insert(ESPSystem.drawings, nameTag)
-    end
-
-    -- Distância
-    if ESPSystem.showDistance then
-        local distance = math.floor((Camera.CFrame.Position - head.Position).Magnitude)
-        local distanceTag = Drawing.new("Text")
-        distanceTag.Text = distance .. "m"
-        distanceTag.Position = Vector2.new(headPosition.X, headPosition.Y + 22)
-        distanceTag.Color = Color3.fromRGB(0, 255, 255)
-        distanceTag.Center = true
-        distanceTag.Size = 14
-        distanceTag.Outline = true
-        distanceTag.OutlineColor = Color3.fromRGB(0, 0, 0)
-        distanceTag.Visible = true
-        table.insert(ESPSystem.drawings, distanceTag)
-    end
-end
-
-RunService.RenderStepped:Connect(function()
-    clearESP()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Character and player.Character:FindFirstChild("Head") then
-            createPlayerESP(player)
-        end
-    end
-end)
-
--- Toggles individuais
-TrollTab:AddToggle({
-    Name = "Linhas <Esp>",
-    Description = "Mostra linhas da posição dos jogadores",
-    Default = false,
-    Callback = function(value)
-        ESPSystem.showLine = value
-    end
-})
-
-TrollTab:AddToggle({
-    Name = "Vida <Esp>",
-    Description = "Mostra a barra de vida dos jogadores",
-    Default = false,
-    Callback = function(value)
-        ESPSystem.showHealth = value
-    end
-})
-
-TrollTab:AddToggle({
-    Name = "Nome <Esp>",
-    Description = "Mostra os nomes dos jogadores",
-    Default = false,
-    Callback = function(value)
-        ESPSystem.showName = value
-    end
-})
-
-TrollTab:AddToggle({
-    Name = "Distância <Esp>",
-    Description = "Mostra a distância dos jogadores",
-    Default = false,
-    Callback = function(value)
-        ESPSystem.showDistance = value
-    end
-})
 -- ====================================================================
 -- ABA: AVATAR 
 -- ====================================================================
@@ -5887,7 +5680,6 @@ Tab2:AddSlider({
         game.Workspace.Gravity = Value
     end
  })
- 
  
  local InfiniteJumpEnabled = false
  
