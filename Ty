@@ -1127,75 +1127,111 @@ TabTroll:AddButton({
         end)
     end
 })
-
 -- ====================================================================
 -- ABA: CASAS 
 -- ====================================================================
 local SelectHouse = nil
 local HouseDropdown = nil
 local NoclipDoor = nil
+local isUnbanActive = false
 
 local function getHouseList()
     local Tabela = {}
     local lots = workspace:FindFirstChild("001_Lots")
     if lots then
         for _, House in ipairs(lots:GetChildren()) do
-            if House.Name ~= "For Sale" and House:IsA("Model") then table.insert(Tabela, House.Name) end
+            if House.Name ~= "For Sale" and House:IsA("Model") then
+                table.insert(Tabela, House.Name)
+            end
         end
     end
     return Tabela
 end
-
 pcall(function()
     HouseDropdown = CasasTab:AddDropdown({
         Name = "Selecione a Casa",
+        Descriptio = "Lista de casas",
         Options = getHouseList(),
         Default = "...",
-        Callback = function(Value) SelectHouse = Value end
+        Callback = function(Value)
+            SelectHouse = Value
+            print("Casa selecionada: " .. tostring(Value))
+        end
     })
 end)
 
 pcall(function()
     CasasTab:AddButton({
         Name = "Atualizar Lista de Casas",
-        Callback = function() if HouseDropdown then HouseDropdown:Set(getHouseList()) end end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Teleportar para Casa",
+        Description = "Atualizar Lista de casas",
         Callback = function()
-            local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-            if House and game.Players.LocalPlayer.Character then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position) end
+            local novaLista = getHouseList()
+            if HouseDropdown then
+                pcall(function()
+                    HouseDropdown:Set(novaLista)
+                end)
+            end
+            print("✅ Lista de casas atualizada!")
         end
     })
 end)
 
+-- Teleportar para casa
 pcall(function()
     CasasTab:AddButton({
-        Name = "Teleportar para Cofre",
+        Name = "Teleportar para Casa",
+        Description = "Teleporta para casa selecionada",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-            if House and House:FindFirstChild("HousePickedByPlayer") and game.Players.LocalPlayer.Character then
-                local safe = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
-                if safe then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position) end
+            if House and game.Players.LocalPlayer.Character then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
+            else
+                print("Casa no encontrada: " .. tostring(SelectHouse))
             end
         end
     })
 end)
 
+-- Teleportar para cofre
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Teleportar para Cofre",
+        Description = "algumas casa não tem Cofre",
+        Callback = function()
+            local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+            if House and House:FindFirstChild("HousePickedByPlayer") and game.Players.LocalPlayer.Character then
+                local safe = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
+                if safe then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position)
+                else
+                    print("Cofre no encontrado na casa: " .. tostring(SelectHouse))
+                end
+            else
+                print("Casa no encontrada: " .. tostring(SelectHouse))
+            end
+        end
+    })
+end)
+
+
+-- Toggle para atravessar porta
 pcall(function()
     NoclipDoor = CasasTab:AddToggle({
         Name = "Atravessar Porta da Casa",
+        Description = "faz vc atravessar a porta da casa selecionada",
         Default = false,
         Callback = function(Value)
             pcall(function()
                 local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
                 if House and House:FindFirstChild("HousePickedByPlayer") then
-                    local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
+                    local housepickedbyplayer = House.HousePickedByPlayer
+                    local doors = housepickedbyplayer.HouseModel:FindFirstChild("001_HouseDoors")
                     if doors and doors:FindFirstChild("HouseDoorFront") then
-                        for _, Base in ipairs(doors.HouseDoorFront:GetChildren()) do if Base:IsA("BasePart") then Base.CanCollide = not Value end end
+                        for _, Base in ipairs(doors.HouseDoorFront:GetChildren()) do
+                            if Base:IsA("BasePart") then
+                                Base.CanCollide = not Value
+                            end
+                        end
                     end
                 end
             end)
@@ -1203,9 +1239,11 @@ pcall(function()
     })
 end)
 
+-- Toggle para tocar campainha
 pcall(function()
     CasasTab:AddToggle({
         Name = "Tocar Campainha",
+        Description = "ative isso quando vc estiver perto da casa selecionada",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorbellValue = Value
@@ -1214,7 +1252,11 @@ pcall(function()
                     local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
                     if House and House:FindFirstChild("HousePickedByPlayer") then
                         local doorbell = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_DoorBell")
-                        if doorbell and doorbell:FindFirstChild("TouchBell") then fireclickdetector(doorbell.TouchBell.ClickDetector) end
+                        if doorbell and doorbell:FindFirstChild("TouchBell") then
+                            pcall(function()
+                                fireclickdetector(doorbell.TouchBell.ClickDetector)
+                            end)
+                        end
                     end
                     task.wait(0.5)
                 end
@@ -1223,9 +1265,11 @@ pcall(function()
     })
 end)
 
+-- Toggle para bater na porta
 pcall(function()
     CasasTab:AddToggle({
         Name = "Bater na Porta",
+        Description = "ative isso quando vc estiver perto da casa selecionada",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorValue = Value
@@ -1235,7 +1279,9 @@ pcall(function()
                     if House and House:FindFirstChild("HousePickedByPlayer") then
                         local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
                         if doors and doors:FindFirstChild("HouseDoorFront") and doors.HouseDoorFront:FindFirstChild("Knock") then
-                            fireclickdetector(doors.HouseDoorFront.Knock.TouchBell.ClickDetector)
+                            pcall(function()
+                                fireclickdetector(doors.HouseDoorFront.Knock.TouchBell.ClickDetector)
+                            end)
                         end
                     end
                     task.wait(0.5)
@@ -1244,6 +1290,14 @@ pcall(function()
         end
     })
 end)
+
+-- Remove Banimento 
+CasasTab:AddButton({Name = "Remover Banimento", Description = "Remover o banimento da casa manualmente", Callback = function() pcall(function() vu2:removeBanHouses() end) end})
+
+CasasTab:AddToggle({Name = "Auto Remover Ban", Description = "Remover o banimento da casa automaticamente", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
+
+
+
 
 -- ====================================================================
 -- ABA: TELEPORTES 
