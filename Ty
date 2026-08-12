@@ -548,6 +548,7 @@ TabTroll:AddToggle({Name = "Fling (Forte) - Couch V2", Callback = function(v)
             
             if not root or not hum then return end
             
+            -- Salva a posição exata onde o personagem estava quando você ATIVOU
             local PosOrig = root.CFrame
             local defaultHeight = workspace.FallenPartsDestroyHeight
             
@@ -594,7 +595,7 @@ TabTroll:AddToggle({Name = "Fling (Forte) - Couch V2", Callback = function(v)
                 root.Velocity = velocityFling
                 root.RotVelocity = velocityFling
                 
-                -- Desativa colisão das partes para não travar no próprio personagem
+                -- Desativa colisão das partes
                 for _, part in ipairs(char:GetChildren()) do 
                     if part:IsA("BasePart") then 
                         part.CanCollide = false 
@@ -602,14 +603,17 @@ TabTroll:AddToggle({Name = "Fling (Forte) - Couch V2", Callback = function(v)
                 end
             end
             
-            -- === LIMPEZA E RESTAURAÇÃO DE ESTADO ===
+            -- === RETORNO À POSIÇÃO INICIAL E LIMPEZA ===
             if forca then forca:Destroy() end
             
             hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
             hum:UnequipTools()
             
+            -- Zera o movimento para não voltar voando/descontrolado
             root.Velocity = Vector3.zero
             root.RotVelocity = Vector3.zero
+            
+            -- Teleporta o personagem de volta ao CFrame salvo na ativação
             root.CFrame = PosOrig
             
             workspace.FallenPartsDestroyHeight = defaultHeight
