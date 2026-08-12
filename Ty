@@ -539,53 +539,90 @@ end})
 
 TabTroll:AddToggle({Name = "Fling (Forte) - Couch V2", Callback = function(v)
     _G.FlingToggle = v
+    
     if v then
         task.spawn(function()
-            local char = vu7.Character
+            local char = vu7.Character or vu7.CharacterAdded:Wait()
             local root = char:FindFirstChild("HumanoidRootPart")
             local hum = char:FindFirstChildOfClass("Humanoid")
+            
+            if not root or not hum then return end
+            
             local PosOrig = root.CFrame
+            local defaultHeight = workspace.FallenPartsDestroyHeight
+            
+            -- Evita que o personagem morra por limite de altura do mapa
             workspace.FallenPartsDestroyHeight = 0/0
+            
+            -- Pegar a ferramenta
             vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
             task.wait(0.2)
             
+            -- Configuração da força do Fling
             local forca = Instance.new("BodyVelocity")
             forca.Name = "FlingForce"
             forca.Velocity = Vector3.new(9e8, 9e8, 9e8)
             forca.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
             forca.Parent = root
+
             hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
             
             local angulo = 0
+            local velocityFling = Vector3.new(9e8, 9e8, 9e8)
+            
             while _G.FlingToggle do
                 vu10.Heartbeat:Wait()
-                local T = vu6:FindFirstChild(_G.SelectedPlayer)
-                if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
-                    if Tool then hum:EquipTool(Tool) end
-                    
-                    angulo = angulo + 100
-                    local targetRoot = T.Character.HumanoidRootPart
-                    local targetPos = targetRoot.Position + (targetRoot.Velocity / 1.5)
-                    root.CFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(angulo), math.rad(angulo), 0)
-                    root.Velocity = Vector3.new(9e8, 9e8, 9e8)
-                    root.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
-                    for _, p in pairs(char:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
-                else break end
+                
+                local Target = vu6:FindFirstChild(_G.SelectedPlayer)
+                if not Target or not Target.Character then break end
+                
+                local targetRoot = Target.Character:FindFirstChild("HumanoidRootPart")
+                if not targetRoot then break end
+                
+                -- Equipar a ferramenta caso não esteja equipada
+                local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+                if Tool and Tool.Parent ~= char then 
+                    hum:EquipTool(Tool) 
+                end
+                
+                -- Cálculo de posição e predição do alvo
+                angulo = (angulo + 100) % 360
+                local targetPos = targetRoot.Position + (targetRoot.Velocity / 1.5)
+                
+                -- Aplicação de CFrame e física do Fling
+                root.CFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(angulo), math.rad(angulo), 0)
+                root.Velocity = velocityFling
+                root.RotVelocity = velocityFling
+                
+                -- Desativa colisão das partes para não travar no próprio personagem
+                for _, part in ipairs(char:GetChildren()) do 
+                    if part:IsA("BasePart") then 
+                        part.CanCollide = false 
+                    end 
+                end
             end
             
+            -- === LIMPEZA E RESTAURAÇÃO DE ESTADO ===
             if forca then forca:Destroy() end
+            
             hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
             hum:UnequipTools()
-            root.Velocity = Vector3.new(0,0,0)
-            root.RotVelocity = Vector3.new(0,0,0)
+            
+            root.Velocity = Vector3.zero
+            root.RotVelocity = Vector3.zero
             root.CFrame = PosOrig
-            workspace.FallenPartsDestroyHeight = -500
-            FinalReset()
+            
+            workspace.FallenPartsDestroyHeight = defaultHeight
+            
+            if typeof(FinalReset) == "function" then
+                FinalReset()
+            end
         end)
     else 
         _G.FlingToggle = false
-        FinalReset() 
+        if typeof(FinalReset) == "function" then
+            FinalReset() 
+        end
     end
 end})
 
