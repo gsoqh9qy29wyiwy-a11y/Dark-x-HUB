@@ -356,6 +356,12 @@ local opTab = Window:MakeTab({"OP", "home"})
 -- ABA: CREDITS 
 -- ====================================================================
 Tab1:AddSection({"Informação do Hub"})
+Tab1:AddDiscordInvite({
+    Name = "Dark x hub",
+    Description = "Servidor oficial",
+    Logo = "rbxassetid://113088956809836",
+    Invite = "",
+})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
 Tab1:AddParagraph({"Executor", executorName})
 Tab1:AddSection({"Versão do Hub 1.1"})
