@@ -367,15 +367,15 @@ Tab1:AddParagraph({"Criadores", "Carlolx777"})
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selection" })
 local PlayerDrop = TabTroll:AddDropdown({
-    Name = "Lista de Jogadores",
+    Name = "Lista de Player",
     Options = getPlayerNames(),
     Callback = function(v) _G.SelectedPlayer = v end
 })
-TabTroll:AddButton({"Atualizar Lista de Jogadores", function() PlayerDrop:Set(getPlayerNames()) end})
+TabTroll:AddButton({"Atualizar Lista", function() PlayerDrop:Set(getPlayerNames()) end})
 
-TabTroll:AddToggle({Name = "view player (Ver Jogandr)", Callback = function(s) viewEnabled = s updateCamera() end})
+TabTroll:AddToggle({Name = "View Player (Ver Alvo)", Callback = function(s) viewEnabled = s updateCamera() end})
 
-TabTroll:AddButton({Name = "Teleporta para o Jogador", Callback = function()
+TabTroll:AddButton({Name = "Go To", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
     if T and T.Character then vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,0) end
 end})
