@@ -371,7 +371,7 @@ local PlayerDrop = TabTroll:AddDropdown({
     Options = getPlayerNames(),
     Callback = function(v) _G.SelectedPlayer = v end
 })
-TabTroll:AddButton({"Atualizar Lista de Jogadores", function() PlayerDrop:Set(getPlayerNames()) end})
+TabTroll:AddButton({"Atualizar Lista", function() PlayerDrop:Set(getPlayerNames()) end})
 
 TabTroll:AddToggle({Name = "View Player (Ver Alvo)", Callback = function(s) viewEnabled = s updateCamera() end})
 
