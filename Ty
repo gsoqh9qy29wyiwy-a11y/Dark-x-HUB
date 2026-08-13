@@ -1493,7 +1493,7 @@ end)
 
 Window:SelectTab(TabTroll)
 local Section = TrollTab:AddSection({"Funções"})
-TrollTab:AddSection({ "Puxar Parts" })
+
 TrollTab:AddButton({
     Name = "Puxar Parts",
     Description = " Ativando isso você puxa Parts até o seu personagem",
@@ -2292,6 +2292,7 @@ Tab3:AddButton({
 -- ====================================================================
 -- ABA: ANTIS 
 -- ====================================================================
+TabAntis:AddSection({"Proteção"})
 TabAntis:AddToggle({
     Name = "Anti Sit",
     Description = "Não Deixa Seu Personagem Sentar",
@@ -4254,6 +4255,7 @@ Tab5:AddButton({
 
 -- Certifique-se que a variável 'Tabscript' foi definida acima deste código!
 -- Exemplo: local Tabscript = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://..."})
+Tabscript:AddSection({"Scripts👾Exploits"})
 
 Tabscript:AddButton({
     Name = "FE Jerk Off Hub Matrix",
