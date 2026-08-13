@@ -45,13 +45,6 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
--- Variáveis da Aba Antis
-local antiToolSit, antiCarSit, antiVehicleCollision = false, false, false
-local keywords = { "bomb", "soccer", "boat" }
-local carKeyword = "car"
-local wheelKeyword = "wheel"
-local AntiWeaponConn = nil
-
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 -- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
 local function updateCamera()
@@ -3402,7 +3395,6 @@ Tab5:AddButton({
                 Title = "Sucesso ✅",
                 Text = "Velocidade e Turbo Aplicados ",
                 Duration = 5
-Icon = "rbxassetid://113088956809836"
             })
         end
 })
