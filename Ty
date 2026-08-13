@@ -4451,6 +4451,8 @@ Tabscript:AddButton({
 local loopAtivo = false  
 local InputID = ""  
 
+TabAudio:AddSection({"Áudio All Serve"})
+
 -- Caixa de texto para ID de Ã¡udio
 TabAudio:AddTextBox({  
     Name = "Insira o ID Audio All",  
@@ -4640,7 +4642,7 @@ createSoundDropdown("Selecione um terror ou efeito", {
 -- ====================================================================
 -- ABA: MÚSIC
 -- ====================================================================
-
+TabMusic:AddSection({"Música s pra tocar no Rádio 📻"})
 
 local function tocarMusica(id)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -5238,6 +5240,7 @@ TabExpansao:AddButton({
         end)
     end
 })
+TabExpansao:AddSection({"shaders Realista"})
 TabExpansao:AddButton({
     Name = "Shaders",
     Description = "ativa shader so que e inreversivel So para quando sair",
