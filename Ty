@@ -1,4 +1,4 @@
-local vu1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/redz_hub/refs/heads/main/redzhub-corModificada"))()
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
 
 -- 1. SERVIÇOS E VARIÁVEIS INICIAIS
 local vu6 = game:GetService("Players")
