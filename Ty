@@ -358,9 +358,35 @@ local opTab = Window:MakeTab({"OP", "home"})
 Tab1:AddSection({"Informação do Hub"})
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
 Tab1:AddParagraph({"Executor", executorName})
-Tab1:AddSection({"Versão do Hub 1.0"})
+Tab1:AddSection({"Versão do Hub 1.1"})
 Tab1:AddParagraph({"Criadores", "Carlolx777"})
 
+Tab1:AddButton({
+    Name = "Copiar @ do Insta",
+    Callback = function()
+        setclipboard("@carlolx7") -- Copia o user
+        
+        -- Opcional: Notificação para avisar que copiou
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Insta @carlolx7 copiado!",
+            Duration = 3
+        })
+    end
+})
+
+Tab1:AddButton({
+    Name = "Copiar Link do Insta",
+    Callback = function()
+        setclipboard("https://www.instagram.com/carlolx7/") -- Copia o link completo
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Link do Insta copiado!",
+            Duration = 3
+        })
+    end
+})
 -- ====================================================================
 -- ABA: TROLL
 -- ====================================================================
