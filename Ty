@@ -807,7 +807,10 @@ TabTroll:AddButton({
     Name = "Teleport Tool sond",
     Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))() end
 })
-
+TabTroll:AddButton({
+    Name = "Teleport Portal",
+    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))() end
+})
 TabTroll:AddButton({
     Name = "Pegar Teleport Tool",
     Callback = function()
@@ -3594,6 +3597,12 @@ Tab5:AddToggle({
     end
 })
 
+Tab5:AddButton({
+    Name = "Controle de Carros",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DeepSecSentry/MR.dsScripts/refs/heads/main/Vehicle%20Controller-v17"))()
+    end
+})
 Tab5:AddButton({
     Name = "DARK CAR FLY FREE",
     Callback = function()
