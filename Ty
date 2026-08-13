@@ -365,7 +365,7 @@ Tab1:AddParagraph({"Criadores", "Carlolx777"})
 -- ABA: TROLL
 -- ====================================================================
 _G.SelectedPlayer = ""
-TabTroll:AddSection({ "Selection" })
+TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
     Options = getPlayerNames(),
@@ -4642,7 +4642,7 @@ createSoundDropdown("Selecione um terror ou efeito", {
 -- ====================================================================
 -- ABA: MÚSIC
 -- ====================================================================
-TabMusic:AddSection({"Música s pra tocar no Rádio 📻"})
+TabMusic:AddSection({"Música para tocar no Rádio 📻"})
 
 local function tocarMusica(id)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
