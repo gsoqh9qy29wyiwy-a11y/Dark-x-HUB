@@ -1189,7 +1189,7 @@ local function getHouseList()
     end
     return Tabela
 end
-
+CasasTab:AddSection({"Selecione uma Casa"})
 pcall(function()
     HouseDropdown = CasasTab:AddDropdown({
         Name = "Selecione a Casa",
@@ -1202,8 +1202,6 @@ pcall(function()
         end
     })
 end)
-
-CasasTab:AddSection({"Selecione uma Casa"})
 
 pcall(function()
     CasasTab:AddButton({
