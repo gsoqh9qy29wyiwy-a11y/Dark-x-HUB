@@ -371,11 +371,11 @@ local PlayerDrop = TabTroll:AddDropdown({
     Options = getPlayerNames(),
     Callback = function(v) _G.SelectedPlayer = v end
 })
-TabTroll:AddButton({"Atualizar Lista", function() PlayerDrop:Set(getPlayerNames()) end})
+TabTroll:AddButton({"Atualizar Lista de jogadores", function() PlayerDrop:Set(getPlayerNames()) end})
 
-TabTroll:AddToggle({Name = "View Player (Ver Alvo)", Callback = function(s) viewEnabled = s updateCamera() end})
+TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
 
-TabTroll:AddButton({Name = "Go To", Callback = function()
+TabTroll:AddButton({Name = "Teleporta para o jogador", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
     if T and T.Character then vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,0) end
 end})
