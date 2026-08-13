@@ -1,0 +1,170 @@
+local redzlib = loadstring(game:HttpGet("https://pastebin.com/raw/XqZsnzRQ",true))()
+
+-- 1. SERVIÇOS
+local vu6 = game:GetService("Players")
+local vu7 = vu6.LocalPlayer
+local vu9 = game:GetService("Workspace")
+local vu10 = game:GetService("RunService")
+local vuCam = vu9.CurrentCamera
+
+-- Variáveis de Controle
+_G.SelectedPlayer = ""
+local OrbitEnabled = false
+local WingsEnabled = false
+local RingEnabled = false
+local RainbowEnabled = false
+local KillEnabled = false
+local FlingEnabled = false
+local CachedProps = {}
+local TargetCFrame = CFrame.new(-21, -410, -42) -- O CFrame solicitado
+
+-- 2. FUNÇÕES BASE
+local function UpdateProps()
+    table.clear(CachedProps)
+    local Folder = workspace:FindFirstChild("WorkspaceCom") and workspace.WorkspaceCom:FindFirstChild("001_TrafficCones")
+    if not Folder then return end
+    for _, prop in ipairs(Folder:GetChildren()) do
+        if prop.Name:find("Prop" .. vu7.Name) then
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then table.insert(CachedProps, { Model = prop, Remote = remote }) end
+        end
+    end
+end
+
+local function DisableAllProps()
+    OrbitEnabled = false
+    WingsEnabled = false
+    RingEnabled = false
+    KillEnabled = false
+    FlingEnabled = false
+end
+
+-- 3. JANELA PRINCIPAL
+local Window = redzlib:MakeWindow({
+    Title = "Dark x Hub",
+    SubTitle = "Brookhaven RP | Props v2",
+    SaveFolder = "UnifiedHubConfig"
+})
+
+local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
+
+-- Dropdown de Seleção
+local function getPlayerNames()
+    local pNames = {}
+    for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
+    return pNames
+end
+
+local PlayerDrop = TabTroll:AddDropdown({
+    Name = "Lista de Player",
+    Options = getPlayerNames(),
+    Callback = function(v) _G.SelectedPlayer = v end
+})
+
+TabTroll:AddButton({"Atualizar Lista", function() PlayerDrop:Set(getPlayerNames()) end})
+
+TabTroll:AddSection({ "Ações de Props" })
+
+TabTroll:AddButton({Name = "Bring Props (Trazer Cones)", Callback = function()
+    local target = vu6:FindFirstChild(_G.SelectedPlayer)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPos = target.Character.HumanoidRootPart.CFrame
+        for _, data in ipairs(CachedProps) do
+            pcall(function() data.Remote:InvokeServer(targetPos) end)
+        end
+    end
+end})
+
+-- FUNÇÃO KILL (Usa o CFrame solicitado para puxar o player)
+TabTroll:AddToggle({Name = "Kill Props (Matar)", Callback = function(s) 
+    DisableAllProps()
+    KillEnabled = s 
+end})
+
+-- FUNÇÃO FLING (Usa o CFrame com rotação para arremessar)
+TabTroll:AddToggle({Name = "Fling Props (Arremessar)", Callback = function(s) 
+    DisableAllProps()
+    FlingEnabled = s 
+end})
+
+TabTroll:AddSection({ "Animações" })
+
+TabTroll:AddToggle({Name = "Wings (Asas)", Callback = function(s) DisableAllProps() WingsEnabled = s end})
+TabTroll:AddToggle({Name = "Orbit (Orbitar)", Callback = function(s) DisableAllProps() OrbitEnabled = s end})
+TabTroll:AddToggle({Name = "Rainbow", Callback = function(s) RainbowEnabled = s end})
+
+TabTroll:AddButton({Name = "Reset Props", Callback = function()
+    DisableAllProps()
+    for _, data in ipairs(CachedProps) do
+        pcall(function() data.Remote:InvokeServer(CFrame.new(0, -999, 0)) end)
+    end
+end})
+
+-- 4. LOOP DE FÍSICA (RENDERSTEPPED)
+vu10.RenderStepped:Connect(function()
+    local targetPlayer = vu6:FindFirstChild(_G.SelectedPlayer)
+    if not targetPlayer or not targetPlayer.Character then return end
+    local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not targetHRP then return end
+
+    local count = #CachedProps
+    if count <= 0 then return end
+    
+    local time = tick()
+
+    for i, data in ipairs(CachedProps) do
+        local finalCF
+
+        if KillEnabled then
+            -- Alterna entre o player e o CFrame alvo para bugar a física e matá-lo
+            data.Remote:InvokeServer(targetHRP.CFrame)
+            data.Remote:InvokeServer(TargetCFrame)
+            continue -- Pula o invoke final para evitar lentidão
+
+        elseif FlingEnabled then
+            -- Gira violentamente e envia para o CFrame alvo
+            local rotation = CFrame.Angles(math.random() * math.pi, math.random() * math.pi, math.random() * math.pi)
+            data.Remote:InvokeServer(targetHRP.CFrame * rotation)
+            data.Remote:InvokeServer(TargetCFrame)
+            continue
+
+        elseif OrbitEnabled then
+            local radius = 15
+            local angle = ((i - 1) / count) * math.pi * 2 + (time * 2)
+            local offset = Vector3.new(math.cos(angle) * radius, -2, math.sin(angle) * radius)
+            finalCF = targetHRP.CFrame * CFrame.new(offset)
+
+        elseif WingsEnabled then
+            local side = i - ((count + 1) / 2)
+            local flap = math.sin(time * 5)
+            local offset = Vector3.new(side * 4, (math.abs(side) * 2) + flap, 2)
+            local rotation = CFrame.Angles(0, 0, -math.rad(side * 15))
+            finalCF = targetHRP.CFrame * CFrame.new(offset) * rotation
+        end
+
+        if finalCF then
+            pcall(function() data.Remote:InvokeServer(finalCF) end)
+        end
+    end
+end)
+
+-- LOOP RAINBOW
+task.spawn(function()
+    while true do
+        if RainbowEnabled then
+            local folder = workspace:FindFirstChild("WorkspaceCom") and workspace.WorkspaceCom:FindFirstChild("001_TrafficCones")
+            if folder then
+                for _, prop in ipairs(folder:GetChildren()) do
+                    if prop.Name:find("Prop" .. vu7.Name) then
+                        local remote = prop:FindFirstChild("ChangePropColor")
+                        if remote then remote:InvokeServer(Color3.fromHSV((tick()*0.2)%1, 1, 1)) end
+                    end
+                end
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+UpdateProps()
+workspace.DescendantAdded:Connect(function() task.wait(0.5) UpdateProps() end)
