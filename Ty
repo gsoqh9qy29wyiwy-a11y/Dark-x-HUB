@@ -3402,7 +3402,7 @@ Tab5:AddButton({
                 Title = "Sucesso ✅",
                 Text = "Velocidade e Turbo Aplicados ",
                 Duration = 5
-Icon =      Icon = "rbxassetid://113088956809836"
+Icon = "rbxassetid://113088956809836"
             })
         end
 })
