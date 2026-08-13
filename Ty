@@ -335,9 +335,9 @@ local Window = redzlib:MakeWindow({
 })
 
 Window:AddMinimizeButton({
-    Button = { Image = "rbxassetid://131153193945220", BackgroundTransparency = 0 },
-    Corner = { CornerRadius = UDim.new(0, 8) },
-}) 
+    Button = { Image = "rbxassetid://113088956809", BackgroundTransparency = 0 },
+    Corner = { CornerRadius = UDim.new(35, 1) },
+})
 
 -- Definição das Abas
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
@@ -374,15 +374,15 @@ Tab1:AddParagraph({"Criadores", "Carlolx777"})
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selection" })
 local PlayerDrop = TabTroll:AddDropdown({
-    Name = "Lista de Player",
+    Name = "Lista de Jogadores",
     Options = getPlayerNames(),
     Callback = function(v) _G.SelectedPlayer = v end
 })
-TabTroll:AddButton({"Atualizar Lista", function() PlayerDrop:Set(getPlayerNames()) end})
+TabTroll:AddButton({"Atualizar Lista de Jogadores", function() PlayerDrop:Set(getPlayerNames()) end})
 
-TabTroll:AddToggle({Name = "View Player (Ver Alvo)", Callback = function(s) viewEnabled = s updateCamera() end})
+TabTroll:AddToggle({Name = "view player (Ver Jogandr)", Callback = function(s) viewEnabled = s updateCamera() end})
 
-TabTroll:AddButton({Name = "Go To", Callback = function()
+TabTroll:AddButton({Name = "Teleporta para o Jogador", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
     if T and T.Character then vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,0) end
 end})
@@ -3398,13 +3398,16 @@ Tab5:AddButton({
             apply(car.Body:FindFirstChild("VehicleSeat"))
         end
 
-        StarterGui:SetCore("SendNotification", {
-            Title = "Sucesso",
-            Text = "Velocidade e Turbo aplicados!",
-            Duration = 3
-        })
-    end
+        game.StarterGui:SetCore("SendNotification", {
+                Title = "Sucesso ✅",
+                Text = "Velocidade e Turbo Aplicados ",
+                Duration = 5
+Icon =      Icon = "rbxassetid://113088956809836"
+            })
+        end
 })
+
+
 
 -- ==================== MÃšSICA NO CARRO ====================
 Tab5:AddSection({"MÃºsica No Carro <GamePass>"})
