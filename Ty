@@ -367,7 +367,7 @@ Tab1:AddParagraph({"Criadores", "Carlolx777"})
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selection" })
 local PlayerDrop = TabTroll:AddDropdown({
-    Name = "Lista de Player",
+    Name = "Lista de jogadores",
     Options = getPlayerNames(),
     Callback = function(v) _G.SelectedPlayer = v end
 })
