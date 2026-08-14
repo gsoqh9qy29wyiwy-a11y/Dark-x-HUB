@@ -805,11 +805,11 @@ TabTroll:AddToggle({
 TabTroll:AddSection({ "Clicks TP" })
 TabTroll:AddButton({
     Name = "Teleport Tool sond",
-    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))() end
+    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tptool-107347"))() end
 })
 TabTroll:AddButton({
     Name = "Teleport Portal",
-    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))() end
+    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Marts-teleport-tool-80005"))() end
 })
 TabTroll:AddButton({
     Name = "Pegar Teleport Tool",
@@ -3749,65 +3749,6 @@ Tab5:AddParagraph({
     Content = ""
 })
 
--- Toggle para matar todos os carros
-Tab5:AddToggle({
-    Name = "Matar todos os carros do server",
-    Description = "Teleporta os carros para o void",
-    Default = false,
-    Callback = function(state)
-        local originalPosition
-        local teleportActive = state
-        local fallDamageDisabled = false
-
-        if state then
-            if self.LocalPlayer.Character and self.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                originalPosition = self.LocalPlayer.Character.HumanoidRootPart.Position
-            else
-                TeleportCarro:MostrarNotificacao("Personagem nÃ£o encontrado!")
-                return
-            end
-
-            fallDamageDisabled = TeleportCarro:ToggleFallDamage(true)
-
-            spawn(function()
-                local vehiclesFolder = TeleportCarro.Workspace:FindFirstChild("Vehicles")
-                if not vehiclesFolder then
-                    TeleportCarro:MostrarNotificacao("Pasta de veÃ­culos nÃ£o encontrada!")
-                    return
-                end
-
-                local cars = {}
-                for _, car in ipairs(vehiclesFolder:GetChildren()) do
-                    if car.Name:match("Car$") then
-                        table.insert(cars, car)
-                    end
-                end
-
-                for _, car in ipairs(cars) do
-                    if not teleportActive then break end
-
-                    local vehicleSeat = car:FindFirstChildWhichIsA("VehicleSeat", true)
-                    if vehicleSeat and vehicleSeat.Occupant == nil then
-                        local success = TeleportCarro:TeleportToSeat(vehicleSeat, car)
-                        if success then
-                            TeleportCarro:TeleportToVoid(car)
-                            TeleportCarro:ExitCarAndReturn(originalPosition)
-                            task.wait(1)
-                        end
-                    end
-                end
-
-                if teleportActive then
-                    teleportActive = false
-                    TeleportCarro:ToggleFallDamage(false)
-                end
-            end)
-        else
-            teleportActive = false
-            TeleportCarro:ToggleFallDamage(false)
-        end
-    end
-})
 
 local Section = Tab5:AddSection({"functions dos carro"})
 
@@ -4060,65 +4001,8 @@ TeleportCarro.LocalPlayer.CharacterAdded:Connect(function(character)
         humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
     end
 end)-- ==================== REMOVER TODOS OS COM FLING CARROS ====================
--- Toggle para matar todos os carros
-Tab5:AddToggle({
-    Name = "Matar todos os carros do server",
-    Description = "Teleporta os carros para o void",
-    Default = false,
-    Callback = function(state)
-        local originalPosition
-        local teleportActive = state
-        local fallDamageDisabled = false
 
-        if state then
-            if self.LocalPlayer.Character and self.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                originalPosition = self.LocalPlayer.Character.HumanoidRootPart.Position
-            else
-                TeleportCarro:MostrarNotificacao("Personagem não encontrado!")
-                return
-            end
-
-            fallDamageDisabled = TeleportCarro:ToggleFallDamage(true)
-
-            spawn(function()
-                local vehiclesFolder = TeleportCarro.Workspace:FindFirstChild("Vehicles")
-                if not vehiclesFolder then
-                    TeleportCarro:MostrarNotificacao("Pasta de veículos não encontrada!")
-                    return
-                end
-
-                local cars = {}
-                for _, car in ipairs(vehiclesFolder:GetChildren()) do
-                    if car.Name:match("Car$") then
-                        table.insert(cars, car)
-                    end
-                end
-
-                for _, car in ipairs(cars) do
-                    if not teleportActive then break end
-
-                    local vehicleSeat = car:FindFirstChildWhichIsA("VehicleSeat", true)
-                    if vehicleSeat and vehicleSeat.Occupant == nil then
-                        local success = TeleportCarro:TeleportToSeat(vehicleSeat, car)
-                        if success then
-                            TeleportCarro:TeleportToVoid(car)
-                            TeleportCarro:ExitCarAndReturn(originalPosition)
-                            task.wait(1)
-                        end
-                    end
-                end
-
-                if teleportActive then
-                    teleportActive = false
-                    TeleportCarro:ToggleFallDamage(false)
-                end
-            end)
-        else
-            teleportActive = false
-            TeleportCarro:ToggleFallDamage(false)
-        end
-    end
-})
+                    
 
 -- ==================== ESP CARROS ====================
 Tab5:AddSection({"Dark AvanÃ§ado"})
@@ -4130,7 +4014,7 @@ local function createESP(vehicle)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ESP"
     billboard.Adornee = vehicle.PrimaryPart or vehicle
-    billboard.Size = UDim2.new(0, 150, 0, 30)
+    billboard.Size = UDim2.new(0, 250, 0, 30)
     billboard.StudsOffset = Vector3.new(0, 3, 0)
     billboard.AlwaysOnTop = true
 
