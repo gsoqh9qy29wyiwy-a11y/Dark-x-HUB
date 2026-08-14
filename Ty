@@ -479,7 +479,161 @@ TabTroll:AddToggle({
         end
     end
 })
+-- Botão de exemplo (mantive como estava)
+TabTroll:AddButton({
+    Name = "House Ban Kill",
+    Callback = houseBanKill
+})
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local cam = workspace.CurrentCamera
+
+local currentPlayers = {}
+local selectedPlayer = nil
+
+local viewing = false
+local flingActive = false
+
+TabTroll:AddToggle({
+    Name = "Auto Fling ",
+    Default = false,
+    Callback = function(state)
+        flingActive = state
+
+        if not state or not selectedPlayer then
+            return
+        end
+
+        local target = Players:FindFirstChild(selectedPlayer)
+        if not target or not target.Character then
+            return
+        end
+
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local tRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+        if not root or not tRoot then
+            return
+        end
+
+        local char = LocalPlayer.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if not char or not hum then
+            return
+        end
+
+        local original = root.CFrame
+
+        -- limpar ferramentas
+        local clearArgs = { "ClearAllTools" }
+        pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(clearArgs))
+        end)
+
+        task.wait(0.2)
+
+        -- pegar ferramenta "Couch"
+        local pickArgs = {
+            [1] = "PickingTools",
+            [2] = "Couch"
+        }
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(pickArgs))
+        end)
+
+        task.wait(0.3)
+
+        local tool = LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Couch")
+        if tool then
+            tool.Parent = char
+        end
+
+        task.wait(0.2)
+
+        -- simula apertar F
+        pcall(function()
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
+        end)
+
+        task.wait(0.25)
+
+        -- evita queda por limite de partes
+        workspace.FallenPartsDestroyHeight = 0/0
+
+        -- aplicando força
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "FlingForce"
+        bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
+        bv.MaxForce = Vector3.new(1/0, 1/0, 1/0)
+        bv.Parent = root
+
+        hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+        hum.PlatformStand = false
+
+        cam.CameraSubject = target.Character:FindFirstChild("Head") or tRoot or target.Character:FindFirstChildOfClass("Humanoid")
+
+        task.spawn(function()
+            local angle = 0
+            local parts = { root }
+
+            while flingActive and target and target.Character and target.Character:FindFirstChildOfClass("Humanoid") do
+                local tHum = target.Character:FindFirstChildOfClass("Humanoid")
+                if not tHum or tHum.Sit then
+                    break
+                end
+
+                angle = angle + 50
+
+                for _, part in ipairs(parts) do
+                    local pos_x = target.Character.HumanoidRootPart.Position.X
+                    local pos_y = target.Character.HumanoidRootPart.Position.Y
+                    local pos_z = target.Character.HumanoidRootPart.Position.Z
+
+                    pos_x = pos_x + (target.Character.HumanoidRootPart.Velocity.X / 1.5)
+                    pos_y = pos_y + (target.Character.HumanoidRootPart.Velocity.Y / 1.5)
+                    pos_z = pos_z + (target.Character.HumanoidRootPart.Velocity.Z / 1.5)
+
+                    part.CFrame = CFrame.new(pos_x, pos_y, pos_z) * CFrame.Angles(math.rad(angle), 0, 0)
+                end
+
+                root.Velocity = Vector3.new(9e8, 9e8, 9e8)
+                root.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+
+                task.wait()
+            end
+
+            -- finalizar fling
+            flingActive = false
+            if bv and bv.Parent then
+                bv:Destroy()
+            end
+
+            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+            hum.PlatformStand = false
+
+            -- restaura posição e câmera
+            if original then
+                root.CFrame = original
+            end
+            cam.CameraSubject = hum
+
+            -- zera velocidades das partes do personagem
+            for _, p in pairs(char:GetDescendants()) do
+                if p:IsA("BasePart") then
+                    p.Velocity = Vector3.zero
+                    p.RotVelocity = Vector3.zero
+                end
+            end
+
+            hum:UnequipTools()
+
+            -- tentar novamente limpar/invocar (mantive como no original)
+            pcall(function()
+                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(pickArgs))
+            end)
+        end)
+    end
+})
 TabTroll:AddSection({"Couch "})
 TabTroll:AddButton({Name = "Kill", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
