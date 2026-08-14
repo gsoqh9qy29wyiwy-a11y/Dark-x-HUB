@@ -3689,7 +3689,7 @@ function TeleportCarro:TeleportToVoid(car)
             return
         end
     end
-    local voidPosition = Vector3.new(0, -1000, 0)
+    local voidPosition = Vector3.new(-21, -410, -42)
     car:SetPrimaryPartCFrame(CFrame.new(voidPosition))
     task.wait(0.5)
 end
