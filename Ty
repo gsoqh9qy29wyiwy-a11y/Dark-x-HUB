@@ -479,161 +479,7 @@ TabTroll:AddToggle({
         end
     end
 })
--- Botão de exemplo (mantive como estava)
-TabTroll:AddButton({
-    Name = "House Ban Kill",
-    Callback = houseBanKill
-})
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local cam = workspace.CurrentCamera
-
-local currentPlayers = {}
-local selectedPlayer = nil
-
-local viewing = false
-local flingActive = false
-
-TabTroll:AddToggle({
-    Name = "Auto Fling ",
-    Default = false,
-    Callback = function(state)
-        flingActive = state
-
-        if not state or not selectedPlayer then
-            return
-        end
-
-        local target = Players:FindFirstChild(selectedPlayer)
-        if not target or not target.Character then
-            return
-        end
-
-        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local tRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
-        if not root or not tRoot then
-            return
-        end
-
-        local char = LocalPlayer.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if not char or not hum then
-            return
-        end
-
-        local original = root.CFrame
-
-        -- limpar ferramentas
-        local clearArgs = { "ClearAllTools" }
-        pcall(function()
-            game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer(unpack(clearArgs))
-        end)
-
-        task.wait(0.2)
-
-        -- pegar ferramenta "Couch"
-        local pickArgs = {
-            [1] = "PickingTools",
-            [2] = "Couch"
-        }
-        pcall(function()
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(pickArgs))
-        end)
-
-        task.wait(0.3)
-
-        local tool = LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Couch")
-        if tool then
-            tool.Parent = char
-        end
-
-        task.wait(0.2)
-
-        -- simula apertar F
-        pcall(function()
-            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
-        end)
-
-        task.wait(0.25)
-
-        -- evita queda por limite de partes
-        workspace.FallenPartsDestroyHeight = 0/0
-
-        -- aplicando força
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "FlingForce"
-        bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
-        bv.MaxForce = Vector3.new(1/0, 1/0, 1/0)
-        bv.Parent = root
-
-        hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-        hum.PlatformStand = false
-
-        cam.CameraSubject = target.Character:FindFirstChild("Head") or tRoot or target.Character:FindFirstChildOfClass("Humanoid")
-
-        task.spawn(function()
-            local angle = 0
-            local parts = { root }
-
-            while flingActive and target and target.Character and target.Character:FindFirstChildOfClass("Humanoid") do
-                local tHum = target.Character:FindFirstChildOfClass("Humanoid")
-                if not tHum or tHum.Sit then
-                    break
-                end
-
-                angle = angle + 50
-
-                for _, part in ipairs(parts) do
-                    local pos_x = target.Character.HumanoidRootPart.Position.X
-                    local pos_y = target.Character.HumanoidRootPart.Position.Y
-                    local pos_z = target.Character.HumanoidRootPart.Position.Z
-
-                    pos_x = pos_x + (target.Character.HumanoidRootPart.Velocity.X / 1.5)
-                    pos_y = pos_y + (target.Character.HumanoidRootPart.Velocity.Y / 1.5)
-                    pos_z = pos_z + (target.Character.HumanoidRootPart.Velocity.Z / 1.5)
-
-                    part.CFrame = CFrame.new(pos_x, pos_y, pos_z) * CFrame.Angles(math.rad(angle), 0, 0)
-                end
-
-                root.Velocity = Vector3.new(9e8, 9e8, 9e8)
-                root.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
-
-                task.wait()
-            end
-
-            -- finalizar fling
-            flingActive = false
-            if bv and bv.Parent then
-                bv:Destroy()
-            end
-
-            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-            hum.PlatformStand = false
-
-            -- restaura posição e câmera
-            if original then
-                root.CFrame = original
-            end
-            cam.CameraSubject = hum
-
-            -- zera velocidades das partes do personagem
-            for _, p in pairs(char:GetDescendants()) do
-                if p:IsA("BasePart") then
-                    p.Velocity = Vector3.zero
-                    p.RotVelocity = Vector3.zero
-                end
-            end
-
-            hum:UnequipTools()
-
-            -- tentar novamente limpar/invocar (mantive como no original)
-            pcall(function()
-                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(pickArgs))
-            end)
-        end)
-    end
-})
 TabTroll:AddSection({"Couch "})
 TabTroll:AddButton({Name = "Kill", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
@@ -959,11 +805,11 @@ TabTroll:AddToggle({
 TabTroll:AddSection({ "Clicks TP" })
 TabTroll:AddButton({
     Name = "Teleport Tool sond",
-    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tptool-107347"))() end
+    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Marts-teleport-tool-80005"))() end
 })
 TabTroll:AddButton({
     Name = "Teleport Portal",
-    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Marts-teleport-tool-80005"))() end
+    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tptool-107347"))() end
 })
 TabTroll:AddButton({
     Name = "Pegar Teleport Tool",
@@ -984,6 +830,99 @@ TabTroll:AddButton({
 })
 
 TabTroll:AddSection({Name = "Clicks"})
+local jogadores = game:GetService("Players")
+local rep = game:GetService("ReplicatedStorage")
+local mundo = game:GetService("Workspace")
+local entrada = game:GetService("UserInputService")
+local cam = mundo.CurrentCamera
+local eu = jogadores.LocalPlayer
+local toggleFlingBallActive = false
+
+TabTroll:AddToggle({
+	Name = ("Clique Bola <Fling>"),
+	Description = ("trolar jogadores usando isso apenas damdo clique"),
+	Default = false,
+	Callback = function(valor)
+		toggleFlingBallActive = valor
+	end
+})
+
+local function FlingBall(target)
+	local player = eu
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local hrp = character:WaitForChild("HumanoidRootPart")
+	local backpack = player:WaitForChild("Backpack")
+	local ServerBalls = mundo.WorkspaceCom:FindFirstChild("001_SoccerBalls")
+	if not ServerBalls then return end
+
+	local function GetBall()
+		if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then
+			rep.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
+		end
+
+		repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")
+
+		local ballTool = backpack:FindFirstChild("SoccerBall")
+		if ballTool then ballTool.Parent = character end
+
+		repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
+		return ServerBalls:FindFirstChild("Soccer" .. player.Name)
+	end
+
+	local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
+	if not Ball then return end
+
+	Ball.CanCollide = false
+	Ball.Massless = true
+	Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
+
+	if target ~= player then
+		local tchar = target.Character
+		if not tchar then return end
+
+		local troot = tchar:FindFirstChild("HumanoidRootPart")
+		local thum = tchar:FindFirstChild("Humanoid")
+		if not troot or not thum then return end
+
+		local bvAntigo = Ball:FindFirstChildWhichIsA("BodyVelocity")
+		if bvAntigo then bvAntigo:Destroy() end
+
+		local bv = Instance.new("BodyVelocity")
+		bv.Name = "FlingPower"
+		bv.Velocity = Vector3.new(1e9, 1e9, 1e9)
+		bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+		bv.P = 9e900
+		bv.Parent = Ball
+
+		repeat
+			local pos = troot.Position + (troot.Velocity / 1.5)
+			local tempo = tick()
+
+		
+			local altura = math.sin(tempo * 7) * 2
+			Ball.CFrame = CFrame.new(pos.X, pos.Y + altura, pos.Z)
+			Ball.Orientation += Vector3.new(45, 60, 30)
+
+			task.wait(1 / 5000)
+		until troot.Velocity.Magnitude > 1000 or thum.Health <= 0 or not tchar:IsDescendantOf(mundo) or target.Parent ~= jogadores
+	end
+end
+
+entrada.TouchTap:Connect(function(toques, processado)
+	if not toggleFlingBallActive or processado then return end
+	local pos = toques[1]
+	local raio = cam:ScreenPointToRay(pos.X, pos.Y)
+	local hit = mundo:Raycast(raio.Origin, raio.Direction * 1000)
+	if hit and hit.Instance then
+		local modelo = hit.Instance:FindFirstAncestorOfClass("Model")
+		local jogador = jogadores:GetPlayerFromCharacter(modelo)
+		if jogador and jogador ~= eu then
+			FlingBall(jogador)
+		end
+	end
+end)
+
 TabTroll:AddButton({
     Name = "Click Fling Admin v2 (Tool)",
     Callback = function()
@@ -993,6 +932,7 @@ TabTroll:AddButton({
         local entrada = game:GetService("UserInputService")
         local cam = mundo.CurrentCamera
         local eu = jogadores.LocalPlayer
+
         local NOME_FERRAMENTA = "Admin Fling"
         local ferramentaEquipada = false
         local mochila = eu:WaitForChild("Backpack")
@@ -1008,10 +948,13 @@ TabTroll:AddButton({
             ferramenta.Name = NOME_FERRAMENTA
             ferramenta.RequiresHandle = true
             ferramenta.CanBeDropped = false
+
             local handle = Instance.new("Part")
             handle.Name = "Handle"
             handle.Size = Vector3.new(1, 1, 1)
+            handle.Transparency = 1
             handle.Parent = ferramenta
+
             ferramenta.Equipped:Connect(function() ferramentaEquipada = true end)
             ferramenta.Unequipped:Connect(function() ferramentaEquipada = false end)
             ferramenta.Parent = mochila
@@ -1037,7 +980,8 @@ TabTroll:AddButton({
 
             local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
             Ball.CanCollide = false
-            Ball.Massless = true         
+            Ball.Massless = true
+            Ball.Transparency = 1
             Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
 
             if target ~= player then
@@ -1045,13 +989,16 @@ TabTroll:AddButton({
                 if tchar and tchar:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("Humanoid") then
                     local troot = tchar.HumanoidRootPart
                     local thum = tchar.Humanoid
-                    if Ball:FindFirstChildWhichIsA("BodyVelocity") then Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy() end
+                    if Ball:FindFirstChildWhichIsA("BodyVelocity") then
+                        Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
+                    end
                     local bv = Instance.new("BodyVelocity")
                     bv.Name = "FlingPower"
                     bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
                     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                     bv.P = 9e900
                     bv.Parent = Ball
+                    mundo.CurrentCamera.CameraSubject = thum
 
                     repeat
                         if troot.Velocity.Magnitude > 0 then
@@ -1068,6 +1015,7 @@ TabTroll:AddButton({
                         end
                         task.wait(1/6000)
                     until troot.Velocity.Magnitude > 1000 or thum.Health <= 0 or not tchar:IsDescendantOf(mundo) or target.Parent ~= jogadores
+
                     mundo.CurrentCamera.CameraSubject = humanoid
                 end
             end
@@ -1081,92 +1029,156 @@ TabTroll:AddButton({
                 if hit and hit.Instance then
                     local modelo = hit.Instance:FindFirstAncestorOfClass("Model")
                     local jogador = jogadores:GetPlayerFromCharacter(modelo)
-                    if jogador and jogador ~= eu then FlingBallTool(jogador) end
+                    if jogador and jogador ~= eu then
+                        FlingBallTool(jogador)
+                    end
                 end
             end
         end)
     end
 })
 
-TabTroll:AddButton({
+local PhysicsService = game:GetService("PhysicsService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local isEnabled = false
+
+-- Conexões e instâncias ativas
+local heartbeatConnection
+local touchConnection
+local descendantConnection
+local ControlledDoors = {}
+local BlackHole = nil
+
+local function SetCharacterCollision(enabled)
+    local char = LocalPlayer.Character
+    if not char then return end
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = enabled
+        end
+    end
+end
+
+TabTroll:AddToggle({
     Name = "Click Fling Doors [Beta]",
-    Callback = function()
-        local Players = game:GetService("Players")
-        local Workspace = game:GetService("Workspace")
-        local RunService = game:GetService("RunService")
-        local UserInputService = game:GetService("UserInputService")
-        local LocalPlayer = Players.LocalPlayer
-        local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-        local HRP = Character:WaitForChild("HumanoidRootPart")
+    Default = false,
+    Callback = function(Value)
+        isEnabled = Value
 
-        local BlackHole = Instance.new("Part")
-        BlackHole.Size = Vector3.new(100000, 100000, 100000)
-        BlackHole.Transparency = 1
-        BlackHole.Anchored = true
-        BlackHole.CanCollide = false
-        BlackHole.Name = "BlackHoleTarget"
-        BlackHole.Parent = Workspace
+        if isEnabled then
+            local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local HRP = Character:WaitForChild("HumanoidRootPart")
 
-        local baseAttachment = Instance.new("Attachment")
-        baseAttachment.Name = "Luscaa_BlackHoleAttachment"
-        baseAttachment.Parent = BlackHole
+            BlackHole = Instance.new("Part")
+            BlackHole.Size = Vector3.new(100000, 100000, 100000)
+            BlackHole.Transparency = 1
+            BlackHole.Anchored = true
+            BlackHole.CanCollide = false
+            BlackHole.Name = "BlackHoleTarget"
+            BlackHole.Parent = Workspace
 
-        RunService.Heartbeat:Connect(function() BlackHole.CFrame = HRP.CFrame end)
+            local baseAttachment = Instance.new("Attachment")
+            baseAttachment.Name = "Luscaa_BlackHoleAttachment"
+            baseAttachment.Parent = BlackHole
 
-        local ControlledDoors = {}
-        local function SetupPart(part)
-            if not part:IsA("BasePart") or part.Anchored or not string.find(part.Name, "Door") then return end
-            if part:FindFirstChild("Luscaa_Attached") then return end
-            part.CanCollide = false
-            for _, obj in ipairs(part:GetChildren()) do
-                if obj:IsA("AlignPosition") or obj:IsA("Torque") or obj:IsA("Attachment") then obj:Destroy() end
+            -- Mantém a posição do BlackHole e remove a colisão do seu personagem
+            heartbeatConnection = RunService.Heartbeat:Connect(function()
+                if BlackHole and HRP then
+                    BlackHole.CFrame = HRP.CFrame
+                end
+                SetCharacterCollision(false)
+            end)
+
+            local function SetupPart(part)
+                if not part:IsA("BasePart") or part.Anchored or not string.find(part.Name, "Door") then return end
+                if part:FindFirstChild("Luscaa_Attached") then return end
+                part.CanCollide = false
+                for _, obj in ipairs(part:GetChildren()) do
+                    if obj:IsA("AlignPosition") or obj:IsA("Torque") or obj:IsA("Attachment") then obj:Destroy() end
+                end
+                local marker = Instance.new("BoolValue", part)
+                marker.Name = "Luscaa_Attached"
+                local a1 = Instance.new("Attachment", part)
+                local align = Instance.new("AlignPosition", part)
+                align.Attachment0 = a1
+                align.Attachment1 = baseAttachment
+                align.MaxForce = 1e20
+                align.MaxVelocity = math.huge
+                align.Responsiveness = 99999
+                local torque = Instance.new("Torque", part)
+                torque.Attachment0 = a1
+                torque.RelativeTo = Enum.ActuatorRelativeTo.World
+                torque.Torque = Vector3.new(math.random(-10e5, 10e5) * 10000, math.random(-10e5, 10e5) * 10000, math.random(-10e5, 10e5) * 10000)
+                table.insert(ControlledDoors, {Part = part, Align = align})
             end
-            local marker = Instance.new("BoolValue", part)
-            marker.Name = "Luscaa_Attached"
-            local a1 = Instance.new("Attachment", part)
-            local align = Instance.new("AlignPosition", part)
-            align.Attachment0 = a1
-            align.Attachment1 = baseAttachment
-            align.MaxForce = 1e20
-            align.MaxVelocity = math.huge
-            align.Responsiveness = 99999
-            local torque = Instance.new("Torque", part)
-            torque.Attachment0 = a1
-            torque.RelativeTo = Enum.ActuatorRelativeTo.World
-            torque.Torque = Vector3.new(math.random(-10e5, 10e5) * 10000, math.random(-10e5, 10e5) * 10000, math.random(-10e5, 10e5) * 10000)
-            table.insert(ControlledDoors, {Part = part, Align = align})
+
+            for _, obj in ipairs(Workspace:GetDescendants()) do 
+                if obj:IsA("BasePart") and string.find(obj.Name, "Door") then SetupPart(obj) end 
+            end
+            
+            descendantConnection = Workspace.DescendantAdded:Connect(function(obj) 
+                if obj:IsA("BasePart") and string.find(obj.Name, "Door") then SetupPart(obj) end 
+            end)
+
+            local function FlingPlayer(player)
+                local char = player.Character
+                if not char then return end
+                local targetHRP = char:FindFirstChild("HumanoidRootPart")
+                if not targetHRP then return end
+                local targetAttachment = targetHRP:FindFirstChild("SHNMAX_TargetAttachment") or Instance.new("Attachment", targetHRP)
+                targetAttachment.Name = "SHNMAX_TargetAttachment"
+                for _, data in ipairs(ControlledDoors) do if data.Align then data.Align.Attachment1 = targetAttachment end end
+                local start = tick()
+                while tick() - start < 5 do
+                    if targetHRP.Velocity.Magnitude >= 20 or not isEnabled then break end
+                    RunService.Heartbeat:Wait()
+                end
+                for _, data in ipairs(ControlledDoors) do if data.Align then data.Align.Attachment1 = baseAttachment end end
+            end
+
+            touchConnection = UserInputService.TouchTap:Connect(function(touchPositions, processed)
+                if processed or not isEnabled then return end
+                local pos = touchPositions[1]
+                local camera = Workspace.CurrentCamera
+                local unitRay = camera:ScreenPointToRay(pos.X, pos.Y)
+                local raycast = Workspace:Raycast(unitRay.Origin, unitRay.Direction * 1000)
+                if raycast and raycast.Instance then
+                    local player = Players:GetPlayerFromCharacter(raycast.Instance:FindFirstAncestorOfClass("Model"))
+                    if player and player ~= LocalPlayer then FlingPlayer(player) end
+                end
+            end)
+        else
+            -- Desativa e limpa conexões/instâncias
+            if heartbeatConnection then heartbeatConnection:Disconnect() end
+            if touchConnection then touchConnection:Disconnect() end
+            if descendantConnection then descendantConnection:Disconnect() end
+
+            for _, data in ipairs(ControlledDoors) do
+                if data.Part then
+                    local marker = data.Part:FindFirstChild("Luscaa_Attached")
+                    if marker then marker:Destroy() end
+                    for _, obj in ipairs(data.Part:GetChildren()) do
+                        if obj:IsA("AlignPosition") or obj:IsA("Torque") or obj:IsA("Attachment") then 
+                            obj:Destroy() 
+                        end
+                    end
+                end
+            end
+            ControlledDoors = {}
+
+            if BlackHole then
+                BlackHole:Destroy()
+                BlackHole = nil
+            end
+
+            -- Restaura a colisão padrão do personagem
+            SetCharacterCollision(true)
         end
-
-        for _, obj in ipairs(Workspace:GetDescendants()) do if obj:IsA("BasePart") and string.find(obj.Name, "Door") then SetupPart(obj) end end
-        Workspace.DescendantAdded:Connect(function(obj) if obj:IsA("BasePart") and string.find(obj.Name, "Door") then SetupPart(obj) end end)
-
-        local function FlingPlayer(player)
-            local char = player.Character
-            if not char then return end
-            local targetHRP = char:FindFirstChild("HumanoidRootPart")
-            if not targetHRP then return end
-            local targetAttachment = targetHRP:FindFirstChild("SHNMAX_TargetAttachment") or Instance.new("Attachment", targetHRP)
-            targetAttachment.Name = "SHNMAX_TargetAttachment"
-            for _, data in ipairs(ControlledDoors) do if data.Align then data.Align.Attachment1 = targetAttachment end end
-            local start = tick()
-            while tick() - start < 5 do
-                if targetHRP.Velocity.Magnitude >= 20 then break end
-                RunService.Heartbeat:Wait()
-            end
-            for _, data in ipairs(ControlledDoors) do if data.Align then data.Align.Attachment1 = baseAttachment end end
-        end
-
-        UserInputService.TouchTap:Connect(function(touchPositions, processed)
-            if processed then return end
-            local pos = touchPositions[1]
-            local camera = Workspace.CurrentCamera
-            local unitRay = camera:ScreenPointToRay(pos.X, pos.Y)
-            local raycast = Workspace:Raycast(unitRay.Origin, unitRay.Direction * 1000)
-            if raycast and raycast.Instance then
-                local player = Players:GetPlayerFromCharacter(raycast.Instance:FindFirstAncestorOfClass("Model"))
-                if player and player ~= LocalPlayer then FlingPlayer(player) end
-            end
-        end)
     end
 })
 
