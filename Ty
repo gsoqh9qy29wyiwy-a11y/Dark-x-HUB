@@ -5716,6 +5716,33 @@ TabSky:AddButton({
 -- ====================================================================
 local Section = Tab2:AddSection({"Player Character"})
 
+Tab2:AddToggle({
+    Name = "Girar",
+    Default = false,
+    Callback = function(Value)
+        getgenv().Spin = Value
+        local conn
+        conn = game:GetService("RunService").RenderStepped:Connect(function()
+            if getgenv().Spin then
+                local p = game.Players.LocalPlayer
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = p.Character.HumanoidRootPart
+                    local speed = getgenv().SpinSpeed or 49
+                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(speed), 0)
+                end
+            end
+        end)
+        if Value then getgenv().SpinConn = conn else conn:Disconnect() end
+    end
+})
+
+Tab2:AddSlider({
+    Name = "Velocidade do giro",
+    Min = 0, Max = 100, Increase = 1, Default = 49,
+    Callback = function(Value)
+        getgenv().SpinSpeed = Value
+    end
+})
 
 Tab2:AddSlider({
     Name = "Velocidade do jogador",
