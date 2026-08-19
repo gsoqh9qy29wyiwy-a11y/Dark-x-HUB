@@ -5716,6 +5716,102 @@ TabSky:AddButton({
 -- ====================================================================
 local Section = Tab2:AddSection({"Player Character"})
 
+
+local animationConn = nil
+local originalAnimationSpeed = 1
+
+-- Função para aplicar velocidade da animação
+local function SetAnimationSpeed(speed)
+    local p = game.Players.LocalPlayer
+    if p and p.Character and p.Character:FindFirstChild("Humanoid") then
+        local humanoid = p.Character.Humanoid
+        -- Ajusta a velocidade de todas as animações
+        if humanoid.Animator then
+            -- Para animações ativas
+            local animator = humanoid.Animator
+            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+                track:AdjustSpeed(speed)
+            end
+        end
+        -- Armazena a velocidade atual para novas animações
+        getgenv().AnimationSpeed = speed
+    end
+end
+
+-- Função para monitorar novas animações
+local function SetupAnimationSpeed()
+    local p = game.Players.LocalPlayer
+    if not p or not p.Character then return end
+    
+    local humanoid = p.Character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    
+    -- Cria um Animator se não existir
+    local animator = humanoid:FindFirstChild("Animator")
+    if not animator then
+        animator = Instance.new("Animator")
+        animator.Parent = humanoid
+    end
+    
+    -- Monitora novas animações sendo carregadas
+    local function onAnimationPlayed(track)
+        if getgenv().AnimationSpeedEnabled and getgenv().AnimationSpeed then
+            task.wait(0.05) -- Pequeno delay para a animação iniciar
+            track:AdjustSpeed(getgenv().AnimationSpeed)
+        end
+    end
+    
+    -- Conecta ao evento de novas animações
+    if not getgenv().AnimationConnection then
+        getgenv().AnimationConnection = animator.AnimationPlayed:Connect(onAnimationPlayed)
+    end
+end
+
+Tab2:AddToggle({
+    Name = "Velocidade da Animação",
+    Description = "modifica a velocidade das animações e emotes",
+    Default = false,
+    Callback = function(Value)
+        getgenv().AnimationSpeedEnabled = Value
+        if Value then
+            SetupAnimationSpeed()
+            if getgenv().AnimationSpeed then
+                SetAnimationSpeed(getgenv().AnimationSpeed)
+            end
+        else
+            -- Restaura a velocidade original quando desligar
+            SetAnimationSpeed(1)
+            if getgenv().AnimationConnection then
+                getgenv().AnimationConnection:Disconnect()
+                getgenv().AnimationConnection = nil
+            end
+        end
+    end
+})
+
+Tab2:AddSlider({
+    Name = "Velocidade da Animação",
+    Min = 0.02, Max = 100, Increase = 0.02, Default = 1,
+    Callback = function(Value)
+        getgenv().AnimationSpeed = Value
+        if getgenv().AnimationSpeedEnabled then
+            SetAnimationSpeed(Value)
+        end
+    end
+})
+
+-- Monitorar troca de personagem (respawn)
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    if getgenv().AnimationSpeedEnabled then
+        SetupAnimationSpeed()
+        if getgenv().AnimationSpeed then
+            SetAnimationSpeed(getgenv().AnimationSpeed)
+        end
+    end
+end)
+
+
 Tab2:AddToggle({
     Name = "Girar",
     Default = false,
