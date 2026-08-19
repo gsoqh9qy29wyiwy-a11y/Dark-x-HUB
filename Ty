@@ -11,12 +11,6 @@ local vuCam = vu9.CurrentCamera
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
-local moveSpeed = 5
-local gogoSpeed = 10
-local connectionPrasmey = nil
-local gogoConnection = nil
-local BH_Connection = nil
-
 _G.SelectedPlayer = ""
 _G.AntiSit = false
 _G.AntiVoid = false
