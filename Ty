@@ -1164,10 +1164,10 @@ TabTroll:AddButton({
                 if alvo and alvo ~= eu then
                     podeClicar = false jogarComSofa(alvo)
                     task.delay(2, function() podeClicar = true end)
-                end
+                end)
             end
-        end)
-    end
+        end
+    end)
 })
 
 -- ====================================================================
