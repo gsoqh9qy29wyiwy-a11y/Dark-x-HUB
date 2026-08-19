@@ -593,7 +593,7 @@ TabTroll:AddToggle({Name = "Fling (Forte)", Callback = function(v)
                     if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
                     angle = angle + 1.4 
                     vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -2, math.sin(angle)*50.90)
-                    vu7.Character.HumanoidRootPart.Velocity = Vector3.new(9000000, 9000000, 9000000)
+                    vu7.Character.HumanoidRootPart.Velocity = Vector3.new(90000, 90000, 90000)
                     for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
                 else break end
             end
@@ -639,6 +639,79 @@ TabTroll:AddButton({Name = "Spawn", Callback = function()
         end
     end)
 end})
+TabTroll:AddSection({"+18 Animations"})
+
+TabTroll:AddSlider({
+    Name = "Velocidade do +18",
+    Min = 1, Max = 100, Default = 5,
+    Callback = function(v) moveSpeed = v end
+})
+
+TabTroll:AddToggle({
+    Name = "Frente e Trás +18",
+    Description = "recomendo ativar o emote de Algemado do brookhaven",
+    Default = false,
+    Callback = function(state)
+        if connectionPrasmey then connectionPrasmey:Disconnect() connectionPrasmey = nil end
+        if state then
+            local timeOffset = 0
+            connectionPrasmey = vu10.Heartbeat:Connect(function(dt)
+                local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                if target and target.Character and vu7.Character then
+                    local thrp = target.Character:FindFirstChild("HumanoidRootPart")
+                    local mhrp = vu7.Character:FindFirstChild("HumanoidRootPart")
+                    if thrp and mhrp then
+                        timeOffset = timeOffset + dt * (moveSpeed * 5)
+                        local backAndForth = math.sin(timeOffset) * 2
+                        mhrp.CFrame = thrp.CFrame * CFrame.new(0, 0, 3 + backAndForth)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+TabTroll:AddSlider({
+    Name = "Velocidade do Gogogo",
+    Min = 1, Max = 100, Default = 10,
+    Callback = function(v) gogoSpeed = v end
+})
+
+TabTroll:AddToggle({
+    Name = "Gogogo no Player",
+    Default = false,
+    Callback = function(state)
+        if gogoConnection then gogoConnection:Disconnect() gogoConnection = nil end
+        local char = vu7.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if not state then
+            if hum then hum.Sit = false end
+            if hrp then 
+                hrp.Velocity = Vector3.new(0, 0, 0) 
+                hrp.RotVelocity = Vector3.new(0, 0, 0)
+            end
+            return
+        end
+        local timeValue = 0
+        gogoConnection = vu10.Heartbeat:Connect(function(dt)
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and hrp and hum then
+                hum.Sit = true
+                timeValue = timeValue + dt * (gogoSpeed or 10)
+                local tHead = target.Character:FindFirstChild("Head")
+                if tHead then
+                    local backAndForth = math.sin(timeValue) * 2
+                    hrp.Velocity = Vector3.new(0, 0, 0) 
+                    hrp.CFrame = CFrame.new(tHead.Position + tHead.CFrame.LookVector * (2 + backAndForth), tHead.Position)
+                end
+            else
+                if gogoConnection then gogoConnection:Disconnect() gogoConnection = nil end
+            end
+        end)
+    end
+})
+
 
 TabTroll:AddButton({
     Name = "Fling - Boat",
@@ -1169,80 +1242,6 @@ TabTroll:AddButton({
         end)
     end
 })
-
-TabTroll:AddSection({"+18 Animations"})
-
-TabTroll:AddSlider({
-    Name = "Velocidade do +18",
-    Min = 1, Max = 100, Default = 5,
-    Callback = function(v) moveSpeed = v end
-})
-
-TabTroll:AddToggle({
-    Name = "Frente e Trás +18",
-    Description = "recomendo ativar o emote de Algemado do brookhaven",
-    Default = false,
-    Callback = function(state)
-        if connectionPrasmey then connectionPrasmey:Disconnect() connectionPrasmey = nil end
-        if state then
-            local timeOffset = 0
-            connectionPrasmey = vu10.Heartbeat:Connect(function(dt)
-                local target = vu6:FindFirstChild(_G.SelectedPlayer)
-                if target and target.Character and vu7.Character then
-                    local thrp = target.Character:FindFirstChild("HumanoidRootPart")
-                    local mhrp = vu7.Character:FindFirstChild("HumanoidRootPart")
-                    if thrp and mhrp then
-                        timeOffset = timeOffset + dt * (moveSpeed * 5)
-                        local backAndForth = math.sin(timeOffset) * 2
-                        mhrp.CFrame = thrp.CFrame * CFrame.new(0, 0, 3 + backAndForth)
-                    end
-                end
-            end)
-        end
-    end
-})
-
-TabTroll:AddSlider({
-    Name = "Velocidade do Gogogo",
-    Min = 1, Max = 100, Default = 10,
-    Callback = function(v) gogoSpeed = v end
-})
-
-TabTroll:AddToggle({
-    Name = "Gogogo no Player",
-    Default = false,
-    Callback = function(state)
-        if gogoConnection then gogoConnection:Disconnect() gogoConnection = nil end
-        local char = vu7.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if not state then
-            if hum then hum.Sit = false end
-            if hrp then 
-                hrp.Velocity = Vector3.new(0, 0, 0) 
-                hrp.RotVelocity = Vector3.new(0, 0, 0)
-            end
-            return
-        end
-        local timeValue = 0
-        gogoConnection = vu10.Heartbeat:Connect(function(dt)
-            local target = vu6:FindFirstChild(_G.SelectedPlayer)
-            if target and target.Character and hrp and hum then
-                hum.Sit = true
-                timeValue = timeValue + dt * (gogoSpeed or 10)
-                local tHead = target.Character:FindFirstChild("Head")
-                if tHead then
-                    local backAndForth = math.sin(timeValue) * 2
-                    hrp.Velocity = Vector3.new(0, 0, 0) 
-                    hrp.CFrame = CFrame.new(tHead.Position + tHead.CFrame.LookVector * (2 + backAndForth), tHead.Position)
-                end
-            else
-                if gogoConnection then gogoConnection:Disconnect() gogoConnection = nil end
-            end
-        end)
-    end
-})
-
 
 -- ====================================================================
 -- ABA: CASAS 
