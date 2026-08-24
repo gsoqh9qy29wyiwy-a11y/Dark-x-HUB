@@ -536,3 +536,219 @@ TabTroll:AddButton({Name = "Kill", Callback = function()
         end
     end)
 end})
+TabTroll:AddButton({Name = "Bring (Trazer)", Callback = function()
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if not T or not T.Character then return end
+    _G.IsTrapping = true
+    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
+    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+    local angle = 100000000000000
+    local connection
+    connection = vu10.Heartbeat:Connect(function()
+        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
+        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
+        local THum = T.Character:FindFirstChild("Humanoid")
+        if THRP and THum then
+            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+            angle = angle + 10000000000
+            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3,-2, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
+            if THum.Sit then
+                connection:Disconnect()
+                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
+                task.wait(0.3)
+                vu7.Character.Humanoid:UnequipTools()
+                task.wait(0.4)
+                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "Couch")
+                FinalReset()
+            end
+        end
+    end)
+end})
+TabTroll:AddToggle({Name = "Fling (Fraco)", Callback = function(v)
+    _G.FlingToggle = v
+    if v then
+        task.spawn(function()
+            local PosOrig = vu7.Character.HumanoidRootPart.CFrame
+            vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+            local angle = 100
+            while _G.FlingToggle do
+                vu10.Heartbeat:Wait()
+                local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+                    if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+                    angle = angle + 1.4 
+                    vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -2, math.sin(angle)*50.90)
+                    vu7.Character.HumanoidRootPart.Velocity = Vector3.new(900, 900, 900)
+                    for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
+                else break end
+            end
+            if vu7.Character then
+                vu7.Character.Humanoid:UnequipTools()
+                vu7.Character.HumanoidRootPart.CFrame = PosOrig
+            end
+            FinalReset()
+        end)
+    else FinalReset() end
+end})
+
+TabTroll:AddToggle({Name = "Fling (Forte)", Callback = function(v)
+    _G.FlingToggle = v
+    if v then
+        task.spawn(function()
+            local PosOrig = vu7.Character.HumanoidRootPart.CFrame
+            vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+            local angle = 100
+            while _G.FlingToggle do
+                vu10.Heartbeat:Wait()
+                local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                    local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+                    if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+                    angle = angle + 1.4 
+                    vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(math.cos(angle)*1.3, -2, math.sin(angle)*50.90)
+                    vu7.Character.HumanoidRootPart.Velocity = Vector3.new(90000, 90000, 90000)
+                    for _, p in pairs(vu7.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end
+                else break end
+            end
+            if vu7.Character then
+                vu7.Character.Humanoid:UnequipTools()
+                vu7.Character.HumanoidRootPart.CFrame = PosOrig
+            end
+            FinalReset()
+        end)
+    else FinalReset() end
+end})
+
+TabTroll:AddSection({"Teleportar o alvo para..."}) 
+TabTroll:AddButton({Name = "Spawn", Callback = function()
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if not T or not T.Character then return end
+    _G.IsTrapping = true
+    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
+    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+    local angle = 1000000000000000000
+    local connection
+    connection = vu10.Heartbeat:Connect(function()
+        if not _G.IsTrapping or not T.Character then connection:Disconnect() FinalReset() return end
+        local THRP = T.Character:FindFirstChild("HumanoidRootPart")
+        local THum = T.Character:FindFirstChild("Humanoid")
+        if THRP and THum then
+            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Stretcher")
+            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+            angle = angle + 1000000000000
+            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(math.cos(angle)*1.3, 1.8, math.sin(angle)*10.100) * CFrame.Angles(0, angle, angle/2)
+            if THum.Sit then
+                connection:Disconnect()
+                vu7.Character.HumanoidRootPart.CFrame = CFrame.new(-26, 52, 16)
+                task.wait(0.3)
+                vu7.Character.Humanoid:UnequipTools()
+                task.wait(0.2)
+                vu7.Character.HumanoidRootPart.CFrame = PosOriginal
+                task.wait(0.1)
+                vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "ClearAllTools")
+                task.wait(0.2)
+                FinalReset()
+            end
+        end
+    end)
+end})
+    
+
+TabTroll:AddButton({
+    Name = "Fling - Boat",
+    Callback = function()
+        local selectedPlayerName = _G.SelectedPlayer
+        if not selectedPlayerName or not game.Players:FindFirstChild(selectedPlayerName) then return end
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+        local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+        if not Humanoid or not RootPart then return end
+        local function spawnBoat()
+            RootPart.CFrame = CFrame.new(1754, -2, 58)
+            task.wait(0.5)
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Ca1r"):FireServer("PickingBoat", "MilitaryBoatFree")
+            task.wait(1)
+            return Vehicles:FindFirstChild(Player.Name.."Car")
+        end
+        local PCar = Vehicles:FindFirstChild(Player.Name.."Car") or spawnBoat()
+        if not PCar then return end
+        local Seat = PCar:FindFirstChild("Body") and PCar.Body:FindFirstChild("VehicleSeat")
+        if not Seat then return end
+        repeat 
+            task.wait(0.1)
+            RootPart.CFrame = Seat.CFrame * CFrame.new(0, 1, 0)
+        until Humanoid.SeatPart == Seat
+        
+        local TargetPlayer = game.Players:FindFirstChild(selectedPlayerName)
+        if not TargetPlayer or not TargetPlayer.Character then return end
+        local TargetC = TargetPlayer.Character
+        local TargetRP = TargetC:FindFirstChild("HumanoidRootPart")
+        if not TargetRP then return end
+        
+        local Spin = Instance.new("BodyAngularVelocity")
+        Spin.Name = "Spinning"
+        Spin.Parent = PCar.PrimaryPart
+        Spin.MaxTorque = Vector3.new(0, math.huge, 0)
+        Spin.AngularVelocity = Vector3.new(0, 369, 0) 
+        
+        local function moveCar(TargetRP, offset)
+            if PCar and PCar.PrimaryPart then PCar:SetPrimaryPartCFrame(CFrame.new(TargetRP.Position + offset)) end
+        end
+        task.spawn(function()
+            while PCar and PCar.Parent and TargetRP and TargetRP.Parent do
+                task.wait(0.01) 
+                moveCar(TargetRP, Vector3.new(0, 1, 0)) 
+                moveCar(TargetRP, Vector3.new(0, -2.25, 5)) 
+                moveCar(TargetRP, Vector3.new(0, 2.25, 0.25)) 
+                moveCar(TargetRP, Vector3.new(-2.25, -1.5, 2.25)) 
+                moveCar(TargetRP, Vector3.new(0, 1.5, 0)) 
+                moveCar(TargetRP, Vector3.new(0, -1.5, 0)) 
+                if PCar and PCar.PrimaryPart then 
+                    local Rotation = CFrame.Angles(math.rad(math.random(-369, 369)), math.rad(math.random(-369, 369)), math.rad(math.random(-369, 369)))
+                    PCar:SetPrimaryPartCFrame(CFrame.new(TargetRP.Position + Vector3.new(0, 1.5, 0)) * Rotation)
+                end
+            end
+            if Spin and Spin.Parent then Spin:Destroy() end
+        end)
+    end
+})
+
+TabTroll:AddButton({
+    Name = "Desligar Fling - Boat",
+    Callback = function()
+        local Player = game.Players.LocalPlayer
+        local Character = Player.Character
+        local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+        if not RootPart or not Humanoid then return end
+        Humanoid.PlatformStand = true
+        for _, obj in pairs(RootPart:GetChildren()) do
+            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+        end
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Ca1r"):FireServer("DeleteAllVehicles")
+        task.wait(0.5)
+        local PCar = Vehicles and Vehicles:FindFirstChild(Player.Name.."Car")
+        if PCar and PCar.PrimaryPart then
+            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
+                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+            end
+        end
+        task.wait(1)
+        local safePos = Vector3.new(0, 100, 0)
+        local bp = Instance.new("BodyPosition", RootPart)
+        bp.Position = safePos
+        bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        local bg = Instance.new("BodyGyro", RootPart)
+        bg.CFrame = RootPart.CFrame
+        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        task.wait(3)
+        bp:Destroy()
+        bg:Destroy()
+        Humanoid.PlatformStand = false
+    end
+})
