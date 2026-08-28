@@ -11,6 +11,8 @@ local vuCam = vu9.CurrentCamera
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
+local FlingBallAuto = false
+
 _G.SelectedPlayer = ""
 _G.AntiSit = false
 _G.AntiVoid = false
@@ -733,10 +735,94 @@ TabTroll:AddButton({
 })
 
 TabTroll:AddSection({ "Fling Ball" })
+-- TOGGLE DO FLING BALL AUTOMÁTICO REFORÇADO E DINÂMICO
 TabTroll:AddToggle({
-    Name = "Fling Ball",
-    Callback = function()
-        if _G.SelectedPlayer ~= "" then FlingBall(_G.SelectedPlayer) end
+    Name = "Fling Ball Automático",
+    Default = false,
+    Callback = function(state)
+        FlingBallAuto = state
+        if state then
+            ForcarEquipamento()
+            
+            task.spawn(function()
+                while FlingBallAuto do
+                    local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                    if target and target.Character then
+                        local ball = GetBall()
+                        
+                        if not ball then
+                            ForcarEquipamento()
+                            task.wait(0.2)
+                            ball = GetBall()
+                        end
+
+                        if ball then
+                            local tchar = target.Character
+                            local troot = tchar:FindFirstChild("HumanoidRootPart")
+                            local thum = tchar:FindFirstChild("Humanoid")
+
+                            if troot and thum and thum.Health > 0 then
+                                ball.CanCollide = false
+                                ball.Massless = true
+                                ball.CustomPhysicalProperties = PhysicalProperties.new(10000, 100, 100, 100, 100)
+
+                                local bv = ball:FindFirstChildWhichIsA("BodyVelocity")
+                                if not bv then
+                                    bv = Instance.new("BodyVelocity")
+                                    bv.Name = "FlingPower"
+                                    bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                                    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                    bv.P = 9e900
+                                    bv.Parent = ball
+                                else
+                                    bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                                end
+
+                                local bav = ball:FindFirstChildWhichIsA("BodyAngularVelocity")
+                                if not bav then
+                                    bav = Instance.new("BodyAngularVelocity")
+                                    bav.Name = "FlingSpin"
+                                    bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                                    bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                                    bav.P = 9e900
+                                    bav.Parent = ball
+                                else
+                                    bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                                end
+
+                                ball.AssemblyLinearVelocity = Vector3.new(9e9, 9e9, 9e9)
+                                ball.AssemblyAngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+
+                                vuCam.CameraSubject = thum
+
+                                local t = tick() * 9999999
+                                local moveOffset = Vector3.new(
+                                    math.sin(t) * 1.5,
+                                    math.cos(t * 1.3) * 1.2,
+                                    math.cos(t) * 1.5
+                                )
+
+                                local targetPos = troot.Position
+                                if troot.Velocity.Magnitude > 0 then
+                                    targetPos = targetPos + (troot.Velocity / 1.2)
+                                end
+
+                                ball.CFrame = CFrame.new(targetPos + moveOffset) * CFrame.Angles(
+                                    math.rad(math.random(0, 360)),
+                                    math.rad(math.random(0, 360)),
+                                    math.rad(math.random(0, 360))
+                                )
+                            end
+                        end
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+
+                updateCamera()
+            end)
+        else
+            updateCamera()
+        end
     end
 })
 
