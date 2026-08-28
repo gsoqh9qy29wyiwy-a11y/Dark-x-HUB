@@ -138,73 +138,24 @@ local function clickNormally(object)
     if clickDetector then fireclickdetector(clickDetector) end
 end
 
-local function FlingBall(targetName)
-    local target = game:GetService("Players"):FindFirstChild(targetName)
-    if not target then return end
-    local players = game:GetService("Players")
-    local player = players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    local backpack = player:WaitForChild("Backpack")
-    local ServerBalls = workspace.WorkspaceCom:WaitForChild("001_SoccerBalls")
-    local function GetBall()
-        if not backpack:FindFirstChild("SoccerBall") then
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
-        end
-        repeat task.wait() until backpack:FindFirstChild("SoccerBall")
-        backpack.SoccerBall.Parent = character
-        repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
-        character.SoccerBall.Parent = backpack
-        return ServerBalls:FindFirstChild("Soccer" .. player.Name)
+local function GetBall()
+    local folder = Workspace:FindFirstChild("WorkspaceCom") and Workspace.WorkspaceCom:FindFirstChild("001_SoccerBalls")
+    return folder and folder:FindFirstChild("Soccer" .. LocalPlayer.Name)
+end
+
+local function ForcarEquipamento()
+    local character = LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not (backpack and backpack:FindFirstChild("SoccerBall")) and not (character and character:FindFirstChild("SoccerBall")) then
+        pcall(function() ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall") end)
+        task.wait(0.2)
     end
-
-    local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
-    Ball.CanCollide = false
-    Ball.Massless = true
-    Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
-
-    if target ~= player then
-        local tchar = target.Character
-        if tchar and tchar:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("Humanoid") then
-            local troot = tchar.HumanoidRootPart
-            local thum = tchar.Humanoid
-            
-            if Ball:FindFirstChildWhichIsA("BodyVelocity") then
-                Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
-            end
-            
-            local bv = Instance.new("BodyVelocity")
-            bv.Name = "FlingPower"
-            bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
-            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.P = 9e900
-            bv.Parent = Ball
-            
-            workspace.CurrentCamera.CameraSubject = thum
-            
-            local connection
-            connection = vu10.Heartbeat:Connect(function()
-                if not tchar or not tchar:IsDescendantOf(workspace) or thum.Health <= 0 or target.Parent ~= players or troot.Velocity.Magnitude > 1000 then
-                    workspace.CurrentCamera.CameraSubject = humanoid
-                    connection:Disconnect()
-                    return
-                end
-                
-                if troot.Velocity.Magnitude > 0 then
-                    local pos_x = troot.Position.X + (troot.Velocity.X / 1.5)
-                    local pos_y = troot.Position.Y + (troot.Velocity.Y / 1.5)
-                    local pos_z = troot.Position.Z + (troot.Velocity.Z / 1.5)
-                    Ball.CFrame = CFrame.new(Vector3.new(pos_x, pos_y, pos_z))
-                    Ball.Orientation += Vector3.new(45, 60, 30)
-                else
-                    for _, v in pairs(tchar:GetChildren()) do
-                        if v:IsA("BasePart") and v.CanCollide and not v.Anchored then
-                            Ball.CFrame = v.CFrame
-                        end
-                    end
-                end
-            end)
-        end
+    local ball = backpack and backpack:FindFirstChild("SoccerBall")
+    if ball and humanoid then
+        humanoid:EquipTool(ball)
+        task.wait(0.05)
+        ball:Activate()
     end
 end
 
@@ -634,103 +585,6 @@ TabTroll:AddButton({Name = "Spawn", Callback = function()
     end)
 end})
     
-
-TabTroll:AddButton({
-    Name = "Fling - Boat",
-    Callback = function()
-        local selectedPlayerName = _G.SelectedPlayer
-        if not selectedPlayerName or not game.Players:FindFirstChild(selectedPlayerName) then return end
-        local Player = game.Players.LocalPlayer
-        local Character = Player.Character
-        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
-        local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-        local Vehicles = game.Workspace:FindFirstChild("Vehicles")
-        if not Humanoid or not RootPart then return end
-        local function spawnBoat()
-            RootPart.CFrame = CFrame.new(1754, -2, 58)
-            task.wait(0.5)
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Ca1r"):FireServer("PickingBoat", "MilitaryBoatFree")
-            task.wait(1)
-            return Vehicles:FindFirstChild(Player.Name.."Car")
-        end
-        local PCar = Vehicles:FindFirstChild(Player.Name.."Car") or spawnBoat()
-        if not PCar then return end
-        local Seat = PCar:FindFirstChild("Body") and PCar.Body:FindFirstChild("VehicleSeat")
-        if not Seat then return end
-        repeat 
-            task.wait(0.1)
-            RootPart.CFrame = Seat.CFrame * CFrame.new(0, 1, 0)
-        until Humanoid.SeatPart == Seat
-        
-        local TargetPlayer = game.Players:FindFirstChild(selectedPlayerName)
-        if not TargetPlayer or not TargetPlayer.Character then return end
-        local TargetC = TargetPlayer.Character
-        local TargetRP = TargetC:FindFirstChild("HumanoidRootPart")
-        if not TargetRP then return end
-        
-        local Spin = Instance.new("BodyAngularVelocity")
-        Spin.Name = "Spinning"
-        Spin.Parent = PCar.PrimaryPart
-        Spin.MaxTorque = Vector3.new(0, math.huge, 0)
-        Spin.AngularVelocity = Vector3.new(0, 369, 0) 
-        
-        local function moveCar(TargetRP, offset)
-            if PCar and PCar.PrimaryPart then PCar:SetPrimaryPartCFrame(CFrame.new(TargetRP.Position + offset)) end
-        end
-        task.spawn(function()
-            while PCar and PCar.Parent and TargetRP and TargetRP.Parent do
-                task.wait(0.01) 
-                moveCar(TargetRP, Vector3.new(0, 1, 0)) 
-                moveCar(TargetRP, Vector3.new(0, -2.25, 5)) 
-                moveCar(TargetRP, Vector3.new(0, 2.25, 0.25)) 
-                moveCar(TargetRP, Vector3.new(-2.25, -1.5, 2.25)) 
-                moveCar(TargetRP, Vector3.new(0, 1.5, 0)) 
-                moveCar(TargetRP, Vector3.new(0, -1.5, 0)) 
-                if PCar and PCar.PrimaryPart then 
-                    local Rotation = CFrame.Angles(math.rad(math.random(-369, 369)), math.rad(math.random(-369, 369)), math.rad(math.random(-369, 369)))
-                    PCar:SetPrimaryPartCFrame(CFrame.new(TargetRP.Position + Vector3.new(0, 1.5, 0)) * Rotation)
-                end
-            end
-            if Spin and Spin.Parent then Spin:Destroy() end
-        end)
-    end
-})
-
-TabTroll:AddButton({
-    Name = "Desligar Fling - Boat",
-    Callback = function()
-        local Player = game.Players.LocalPlayer
-        local Character = Player.Character
-        local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
-        local Vehicles = game.Workspace:FindFirstChild("Vehicles")
-        if not RootPart or not Humanoid then return end
-        Humanoid.PlatformStand = true
-        for _, obj in pairs(RootPart:GetChildren()) do
-            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
-        end
-        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Ca1r"):FireServer("DeleteAllVehicles")
-        task.wait(0.5)
-        local PCar = Vehicles and Vehicles:FindFirstChild(Player.Name.."Car")
-        if PCar and PCar.PrimaryPart then
-            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
-                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
-            end
-        end
-        task.wait(1)
-        local safePos = Vector3.new(0, 100, 0)
-        local bp = Instance.new("BodyPosition", RootPart)
-        bp.Position = safePos
-        bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        local bg = Instance.new("BodyGyro", RootPart)
-        bg.CFrame = RootPart.CFrame
-        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        task.wait(3)
-        bp:Destroy()
-        bg:Destroy()
-        Humanoid.PlatformStand = false
-    end
-})
 
 TabTroll:AddSection({ "Clicks TP" })
 TabTroll:AddButton({
