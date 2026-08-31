@@ -11,6 +11,9 @@ local vuCam = vu9.CurrentCamera
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
+local FlingBallAuto = false
+local headsitActive = false
+local backupTables = { Vehicles = {}, Canoes = {}, Jets = {}, Helis = {} }
 _G.SelectedPlayer = ""
 _G.AntiSit = false
 _G.AntiVoid = false
@@ -60,6 +63,31 @@ local function updateCamera()
             end
         end
     end)
+end
+-- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
+local function GetBall()
+    local folder = vu9:FindFirstChild("WorkspaceCom") and vu9.WorkspaceCom:FindFirstChild("001_SoccerBalls")
+    return folder and folder:FindFirstChild("Soccer" .. vu7.Name)
+end
+
+local function ForcarEquipamento()
+    local character = vu7.Character
+    local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+    local backpack = vu7:FindFirstChild("Backpack")
+    
+    if not (backpack and backpack:FindFirstChild("SoccerBall")) and not (character and character:FindFirstChild("SoccerBall")) then
+        pcall(function() 
+            vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall") 
+        end)
+        task.wait(0.2)
+    end
+    
+    local ball = (backpack and backpack:FindFirstChild("SoccerBall")) or (character and character:FindFirstChild("SoccerBall"))
+    if ball and humanoid then
+        humanoid:EquipTool(ball)
+        task.wait(0.05)
+        pcall(function() ball:Activate() end)
+    end
 end
 
 -- --- FUNÇÃO ANTI-LAG ---
@@ -479,8 +507,104 @@ TabTroll:AddToggle({
         end
     end
 })
+-- TOGGLE DO FLING BALL AUTOMÁTICO REFORÇADO E DINÂMICO
+TabTroll:AddToggle({
+    Name = "Fling Ball Automático",
+    Default = false,
+    Callback = function(state)
+        FlingBallAuto = state
+        if state then
+            local targetPlayer = vu6:FindFirstChild(_G.SelectedPlayer)
+            if not targetPlayer then return end
+            
+            ForcarEquipamento()
+            
+            task.spawn(function()
+                while FlingBallAuto do
+                    local ball = GetBall()
+                    local jogadorSelecionado = vu6:FindFirstChild(_G.SelectedPlayer)
+                    
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBall()
+                    end
 
-                        
+                    if jogadorSelecionado and jogadorSelecionado.Character and ball then
+                        local tchar = jogadorSelecionado.Character
+                        local troot = tchar:FindFirstChild("HumanoidRootPart")
+                        local thum = tchar:FindFirstChild("Humanoid")
+
+                        if troot and thum and thum.Health > 0 then
+                            ball.CanCollide = false
+                            ball.Massless = true
+                            -- Densidade aumentada para colisão de impacto extremo
+                            ball.CustomPhysicalProperties = PhysicalProperties.new(10000, 100, 100, 100, 100)
+
+                            -- Força Linear extrema
+                            local bv = ball:FindFirstChildWhichIsA("BodyVelocity")
+                            if not bv then
+                                bv = Instance.new("BodyVelocity")
+                                bv.Name = "FlingPower"
+                                bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                bv.P = 9e900
+                                bv.Parent = ball
+                            else
+                                bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                            end
+
+                            -- Rotação Spin ultra-rápida para potencializar o Fling
+                            local bav = ball:FindFirstChildWhichIsA("BodyAngularVelocity")
+                            if not bav then
+                                bav = Instance.new("BodyAngularVelocity")
+                                bav.Name = "FlingSpin"
+                                bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                                bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                                bav.P = 9e900
+                                bav.Parent = ball
+                            else
+                                bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                            end
+
+                            -- Velocidades de física direta do motor
+                            ball.AssemblyLinearVelocity = Vector3.new(9e9, 9e9, 9e9)
+                            ball.AssemblyAngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+
+                            vuCam.CameraSubject = thum
+
+                            -- Movimentação contínua e caótica ao redor/no corpo do jogador
+                            local t = tick() * 999999999999
+                            local moveOffset = Vector3.new(
+                                math.sin(t) * 1.5,
+                                math.cos(t * 1.3) * 1.2,
+                                math.cos(t) * 1.5
+                            )
+
+                            local targetPos = troot.Position
+                            if troot.Velocity.Magnitude > 0 then
+                                targetPos = targetPos + (troot.Velocity / 1.2)
+                            end
+
+                            -- Aplica posição com variação contínua + rotação aleatória
+                            ball.CFrame = CFrame.new(targetPos + moveOffset) * CFrame.Angles(
+                                math.rad(math.random(0, 30)),
+                                math.rad(math.random(0, 30)),
+                                math.rad(math.random(0, 30))
+                            )
+                        end
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+
+                updateCamera()
+            end)
+        else
+            updateCamera()
+        end
+    end
+})
+                      
 TabTroll:AddSection({"Couch "})
 TabTroll:AddButton({Name = "Kill", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
