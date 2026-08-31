@@ -11,9 +11,6 @@ local vuCam = vu9.CurrentCamera
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
-local FlingBallAuto = false
-local headsitActive = false
-local backupTables = { Vehicles = {}, Canoes = {}, Jets = {}, Helis = {} }
 _G.SelectedPlayer = ""
 _G.AntiSit = false
 _G.AntiVoid = false
@@ -22,52 +19,10 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
--- Variáveis da Criança (Chasing/Child)
-local playersList = {}
-local chasingplayer = nil
+-- --- NOVAS FUNÇÕES DO FLING BALL AUTOMÁTICO (ADICIONADAS) ---
+local FlingBallAuto = false
 
--- Função para atualizar a lista de players
-local function updatePlayerList()
-    playersList = {}
-    for _, player in pairs(vu6:GetPlayers()) do
-        if player ~= vu7 then
-            table.insert(playersList, player.Name)
-        end
-    end
-    return playersList
-end
-
--- Variáveis do Black Hole
-_G.BlackHoleActive = false
-_G.BH_Strength = 200
-local BH_Attachment = nil
-local BH_Part = nil
-local BH_Connection = nil
-
-local toggles = { LagLaptop = false, LagPhone = false }
-local BombActive = false
-local loopAtivo = false
-local InputID = ""
-
--- 2. FUNÇÕES DE SUPORTE (BACKEND)
--- Função de Câmera
-local function updateCamera()
-    pcall(function()
-        if viewEnabled and _G.SelectedPlayer ~= "" then
-            local target = vu6:FindFirstChild(_G.SelectedPlayer)
-            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = target.Character.Humanoid
-            end
-        else
-            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
-                vuCam.CameraSubject = vu7.Character.Humanoid
-            end
-        end
-    end)
-end
-
--- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
-local function GetBall()
+local function GetBallAutomatico()
     local folder = vu9:FindFirstChild("WorkspaceCom") and vu9.WorkspaceCom:FindFirstChild("001_SoccerBalls")
     return folder and folder:FindFirstChild("Soccer" .. vu7.Name)
 end
@@ -92,7 +47,50 @@ local function ForcarEquipamento()
     end
 end
 
+-- Variáveis da Criança (Chasing/Child)
+local playersList = {}
+local chasingplayer = nil
+
+-- Função para atualizar a lista de players
+local function updatePlayerList()
+    playersList = {}
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= vu7 then
+            table.insert(playersList, player.Name)
+        end
+    end
+    return playersList
+end
+
+-- Variáveis do Black Hole
+_G.BlackHoleActive = false
+_G.BH_Strength = 200
+local BH_Attachment = nil
+local BH_Part = nil
+
+local toggles = { LagLaptop = false, LagPhone = false }
+local BombActive = false
+local loopAtivo = false
+local InputID = ""
+
+-- 2. FUNÇÕES DE SUPORTE (BACKEND)
+local function updateCamera()
+    pcall(function()
+        if viewEnabled then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = target.Character.Humanoid
+            end
+        else
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end)
+end
+
 -- --- FUNÇÃO ANTI-LAG ---
+local backupTables = { Vehicles = {}, Canoes = {}, Jets = {}, Helis = {}, Balls = {} }
 local function AntiFlingLoop(name, getFolderFunc)
     local active = false
     task.spawn(function()
@@ -161,22 +159,78 @@ local function removeHeadsit()
     end
 end
 
--- Função para o Lag (ClickDetector)
 local function clickNormally(object)
     local clickDetector = object:FindFirstChildWhichIsA("ClickDetector")
     if clickDetector then fireclickdetector(clickDetector) end
 end
 
--- Configuração do Black Hole
-local function SetupBlackHole()
-    if not BH_Part then
-        BH_Part = Instance.new("Part")
-        BH_Part.Name = "BH_TargetPart"
-        BH_Part.Anchored = true
-        BH_Part.CanCollide = false
-        BH_Part.Transparency = 1
-        BH_Part.Parent = vu9
-        BH_Attachment = Instance.new("Attachment", BH_Part)
+-- Função para o Fling Ball Original
+local function FlingBall(targetName)
+    local target = game:GetService("Players"):FindFirstChild(targetName)
+    if not target then return end
+    local character = vu7.Character or vu7.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local backpack = vu7:WaitForChild("Backpack")
+    local ServerBalls = vu9.WorkspaceCom:WaitForChild("001_SoccerBalls")
+    
+    local function GetBallInternal()
+        if not backpack:FindFirstChild("SoccerBall") then
+            vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
+        end
+        repeat task.wait() until backpack:FindFirstChild("SoccerBall")
+        backpack.SoccerBall.Parent = character
+        repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. vu7.Name)
+        character.SoccerBall.Parent = backpack
+        return ServerBalls:FindFirstChild("Soccer" .. vu7.Name)
+    end
+
+    local Ball = ServerBalls:FindFirstChild("Soccer" .. vu7.Name) or GetBallInternal()
+    Ball.CanCollide = false
+    Ball.Massless = true
+    Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
+
+    if target ~= vu7 then
+        local tchar = target.Character
+        if tchar and tchar:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("Humanoid") then
+            local troot = tchar.HumanoidRootPart
+            local thum = tchar.Humanoid
+            
+            if Ball:FindFirstChildWhichIsA("BodyVelocity") then
+                Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
+            end
+            
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "FlingPower"
+            bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.P = 9e900
+            bv.Parent = Ball
+            
+            vuCam.CameraSubject = thum
+            
+            local connection
+            connection = vu10.Heartbeat:Connect(function()
+                if not tchar or not tchar:IsDescendantOf(workspace) or thum.Health <= 0 or target.Parent ~= vu6 or troot.Velocity.Magnitude > 1000 then
+                    vuCam.CameraSubject = humanoid
+                    connection:Disconnect()
+                    return
+                end
+                
+                if troot.Velocity.Magnitude > 0 then
+                    local pos_x = troot.Position.X + (troot.Velocity.X / 1.5)
+                    local pos_y = troot.Position.Y + (troot.Velocity.Y / 1.5)
+                    local pos_z = troot.Position.Z + (troot.Velocity.Z / 1.5)
+                    Ball.CFrame = CFrame.new(Vector3.new(pos_x, pos_y, pos_z))
+                    Ball.Orientation += Vector3.new(45, 60, 30)
+                else
+                    for _, v in pairs(tchar:GetChildren()) do
+                        if v:IsA("BasePart") and v.CanCollide and not v.Anchored then
+                            Ball.CFrame = v.CFrame
+                        end
+                    end
+                end
+            end)
+        end
     end
 end
 
@@ -193,53 +247,6 @@ if not getgenv().NetworkBypassed then
     end)
 end
 
--- Forçar partes (Física do Black Hole)
-local function ForcePart(v)
-    if v:IsA("BasePart") and not v.Anchored and not v.Parent:FindFirstChildOfClass("Humanoid") and v.Name ~= "Handle" then
-        for _, x in ipairs(v:GetChildren()) do
-            if x:IsA("BodyMover") or x:IsA("AlignPosition") or x:IsA("Torque") then x:Destroy() end
-        end
-        v.CanCollide = false
-        local torque = Instance.new("Torque", v)
-        torque.Torque = Vector3.new(100000000, 1000000000, 100000000)
-        local att0 = Instance.new("Attachment", v)
-        torque.Attachment0 = att0
-        local alignPos = Instance.new("AlignPosition", v)
-        alignPos.Name = "BH_Force"
-        alignPos.MaxForce = math.huge
-        alignPos.MaxVelocity = math.huge
-        alignPos.Responsiveness = _G.BH_Strength
-        alignPos.Attachment0 = att0
-        alignPos.Attachment1 = BH_Attachment
-    end
-end
-
-local function getPlayerNames()
-    local pNames = {}
-    for _, p in pairs(vu6:GetPlayers()) do 
-        if p ~= vu7 then 
-            table.insert(pNames, p.Name) 
-        end 
-    end
-    return pNames
-end
-
-local function TeleportTo(cframe)
-    if vu7.Character and vu7.Character:FindFirstChild("HumanoidRootPart") then
-        vu7.Character:PivotTo(cframe)
-    end
-end
-
-local function updateMovement()
-    local char = vu7.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.WalkSpeed = walkSpeed
-        char.Humanoid.JumpPower = jumpPower
-        char.Humanoid.UseJumpPower = true
-    end
-    vu9.Gravity = gravity
-end
-
 --  3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
     Title = "Dark x Hub",
@@ -252,7 +259,6 @@ Window:AddMinimizeButton({
     Corner = { CornerRadius = UDim.new(35, 1) },
 })
 
--- Definição das Abas
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
 local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
@@ -314,10 +320,17 @@ Tab1:AddButton({
     end
 })
 -- ====================================================================
--- ABA: TROLL
+-- ABA: TROLL (ONDE O FLING BALL FOI ADICIONADO)
 -- ====================================================================
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
+
+local function getPlayerNames()
+    local pNames = {}
+    for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
+    return pNames
+end
+
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
     Options = getPlayerNames(),
@@ -336,6 +349,97 @@ TabTroll:AddToggle({ Name = "Headsit", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
     if T then if not headsitActive then headsitOnPlayer(T) headsitActive = true else removeHeadsit() headsitActive = false end end 
 end })
+
+-- --- FLING BALL AUTOMÁTICO ADICIONADO AQUI ---
+TabTroll:AddToggle({
+    Name = "Fling Ball Automático",
+    Default = false,
+    Callback = function(state)
+        FlingBallAuto = state
+        if state then
+            local targetPlayer = vu6:FindFirstChild(_G.SelectedPlayer)
+            if not targetPlayer then return end
+            
+            ForcarEquipamento()
+            
+            task.spawn(function()
+                while FlingBallAuto do
+                    local ball = GetBallAutomatico()
+                    local jogadorSelecionado = vu6:FindFirstChild(_G.SelectedPlayer)
+                    
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBallAutomatico()
+                    end
+
+                    if jogadorSelecionado and jogadorSelecionado.Character and ball then
+                        local tchar = jogadorSelecionado.Character
+                        local troot = tchar:FindFirstChild("HumanoidRootPart")
+                        local thum = tchar:FindFirstChild("Humanoid")
+
+                        if troot and thum and thum.Health > 0 then
+                            ball.CanCollide = false
+                            ball.Massless = true
+                            ball.CustomPhysicalProperties = PhysicalProperties.new(10000, 100, 100, 100, 100)
+
+                            local bv = ball:FindFirstChildWhichIsA("BodyVelocity")
+                            if not bv then
+                                bv = Instance.new("BodyVelocity")
+                                bv.Name = "FlingPower"
+                                bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                bv.P = 9e900
+                                bv.Parent = ball
+                            else
+                                bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                            end
+
+                            local bav = ball:FindFirstChildWhichIsA("BodyAngularVelocity")
+                            if not bav then
+                                bav = Instance.new("BodyAngularVelocity")
+                                bav.Name = "FlingSpin"
+                                bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                                bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                                bav.P = 9e900
+                                bav.Parent = ball
+                            else
+                                bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                            end
+
+                            ball.AssemblyLinearVelocity = Vector3.new(9e9, 9e9, 9e9)
+                            ball.AssemblyAngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+
+                            vuCam.CameraSubject = thum
+
+                            local t = tick() * 999999999999
+                            local moveOffset = Vector3.new(
+                                math.sin(t) * 1.5,
+                                math.cos(t * 1.3) * 1.2,
+                                math.cos(t) * 1.5
+                            )
+
+                            local targetPos = troot.Position
+                            if troot.Velocity.Magnitude > 0 then
+                                targetPos = targetPos + (troot.Velocity / 1.2)
+                            end
+
+                            ball.CFrame = CFrame.new(targetPos + moveOffset) * CFrame.Angles(
+                                math.rad(math.random(0, 30)),
+                                math.rad(math.random(0, 30)),
+                                math.rad(math.random(0, 30))
+                            )
+                        end
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+                updateCamera()
+            end)
+        else
+            updateCamera()
+        end
+    end
+})
 
 TabTroll:AddSection({ "Black Hole" })
 TabTroll:AddToggle({
