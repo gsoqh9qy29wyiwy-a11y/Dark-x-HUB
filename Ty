@@ -26,10 +26,10 @@ _G.RainbowBio = false
 local playersList = {}
 local chasingplayer = nil
 
--- Função para atualizar a lista de players (Usada na aba Criança)
+-- Função para atualizar a lista de players
 local function updatePlayerList()
     playersList = {}
-    for _, player in pairs(game.Players:GetPlayers()) do
+    for _, player in pairs(vu6:GetPlayers()) do
         if player ~= vu7 then
             table.insert(playersList, player.Name)
         end
@@ -42,6 +42,7 @@ _G.BlackHoleActive = false
 _G.BH_Strength = 200
 local BH_Attachment = nil
 local BH_Part = nil
+local BH_Connection = nil
 
 local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
@@ -49,10 +50,10 @@ local loopAtivo = false
 local InputID = ""
 
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
--- Função de Câmera (CORREÇÃO PARA O VIEW FUNCIONAR)
+-- Função de Câmera
 local function updateCamera()
     pcall(function()
-        if viewEnabled then
+        if viewEnabled and _G.SelectedPlayer ~= "" then
             local target = vu6:FindFirstChild(_G.SelectedPlayer)
             if target and target.Character and target.Character:FindFirstChild("Humanoid") then
                 vuCam.CameraSubject = target.Character.Humanoid
@@ -64,6 +65,7 @@ local function updateCamera()
         end
     end)
 end
+
 -- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
 local function GetBall()
     local folder = vu9:FindFirstChild("WorkspaceCom") and vu9.WorkspaceCom:FindFirstChild("001_SoccerBalls")
@@ -95,23 +97,23 @@ local function AntiFlingLoop(name, getFolderFunc)
     local active = false
     task.spawn(function()
         while true do
-            if active and LocalPlayer.Character then
+            if active and vu7.Character then
                 local folder = getFolderFunc()
                 if folder then
                     for _, item in ipairs(folder:GetChildren()) do
                         local isMine = false
                         if name == "Vehicles" then
                             for _, seat in ipairs(item:GetDescendants()) do
-                                if (seat:IsA("VehicleSeat") or seat:IsA("Seat")) and seat.Occupant and seat.Occupant.Parent == LocalPlayer.Character then
+                                if (seat:IsA("VehicleSeat") or seat:IsA("Seat")) and seat.Occupant and seat.Occupant.Parent == vu7.Character then
                                     isMine = true
                                     break
                                 end
                             end
                         elseif name == "Canoes" then
                             local owner = item:FindFirstChild("Owner")
-                            isMine = owner and owner.Value == LocalPlayer
+                            isMine = owner and owner.Value == vu7
                         elseif name == "Jets" or name == "Helis" then
-                            isMine = item.Name == LocalPlayer.Name
+                            isMine = item.Name == vu7.Name
                         end
                         if not isMine then
                             table.insert(backupTables[name], item:Clone())
@@ -125,7 +127,6 @@ local function AntiFlingLoop(name, getFolderFunc)
     end)
     return function(state)
         active = state
-        TeleportCarro:MostrarNotificacao(name.." "..(state and "ativado!" or "desativado!"))
         if not state then
             for _, item in ipairs(backupTables[name]) do
                 local parentFolder = getFolderFunc()
@@ -166,76 +167,6 @@ local function clickNormally(object)
     if clickDetector then fireclickdetector(clickDetector) end
 end
 
-local function FlingBall(targetName)
-    local target = game:GetService("Players"):FindFirstChild(targetName)
-    if not target then return end
-    local players = game:GetService("Players")
-    local player = players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    local backpack = player:WaitForChild("Backpack")
-    local ServerBalls = workspace.WorkspaceCom:WaitForChild("001_SoccerBalls")
-    local function GetBall()
-        if not backpack:FindFirstChild("SoccerBall") then
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
-        end
-        repeat task.wait() until backpack:FindFirstChild("SoccerBall")
-        backpack.SoccerBall.Parent = character
-        repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
-        character.SoccerBall.Parent = backpack
-        return ServerBalls:FindFirstChild("Soccer" .. player.Name)
-    end
-
-    local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
-    Ball.CanCollide = false
-    Ball.Massless = true
-    Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
-
-    if target ~= player then
-        local tchar = target.Character
-        if tchar and tchar:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("Humanoid") then
-            local troot = tchar.HumanoidRootPart
-            local thum = tchar.Humanoid
-            
-            if Ball:FindFirstChildWhichIsA("BodyVelocity") then
-                Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
-            end
-            
-            local bv = Instance.new("BodyVelocity")
-            bv.Name = "FlingPower"
-            bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
-            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.P = 9e900
-            bv.Parent = Ball
-            
-            workspace.CurrentCamera.CameraSubject = thum
-            
-            local connection
-            connection = vu10.Heartbeat:Connect(function()
-                if not tchar or not tchar:IsDescendantOf(workspace) or thum.Health <= 0 or target.Parent ~= players or troot.Velocity.Magnitude > 1000 then
-                    workspace.CurrentCamera.CameraSubject = humanoid
-                    connection:Disconnect()
-                    return
-                end
-                
-                if troot.Velocity.Magnitude > 0 then
-                    local pos_x = troot.Position.X + (troot.Velocity.X / 1.5)
-                    local pos_y = troot.Position.Y + (troot.Velocity.Y / 1.5)
-                    local pos_z = troot.Position.Z + (troot.Velocity.Z / 1.5)
-                    Ball.CFrame = CFrame.new(Vector3.new(pos_x, pos_y, pos_z))
-                    Ball.Orientation += Vector3.new(45, 60, 30)
-                else
-                    for _, v in pairs(tchar:GetChildren()) do
-                        if v:IsA("BasePart") and v.CanCollide and not v.Anchored then
-                            Ball.CFrame = v.CFrame
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end
-
 -- Configuração do Black Hole
 local function SetupBlackHole()
     if not BH_Part then
@@ -249,7 +180,7 @@ local function SetupBlackHole()
     end
 end
 
--- Network Bypass (Permite mover peças do mapa)
+-- Network Bypass
 if not getgenv().NetworkBypassed then
     getgenv().NetworkBypassed = true
     task.spawn(function()
@@ -283,52 +214,13 @@ local function ForcePart(v)
     end
 end
 
--- Lógica de Pulso (Entra e Sai do alvo em loop)
-local function PulseLoop(targetPlayer, actionCallback)
-    _G.IsTrapping = true
-    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
-    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-    
-    local connection
-    connection = vu10.Heartbeat:Connect(function()
-        if not _G.IsTrapping or not targetPlayer.Character then 
-            connection:Disconnect() 
-            return 
-        end
-        
-        local THRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local THum = targetPlayer.Character:FindFirstChild("Humanoid")
-        
-        if THRP and THum then
-            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Couch")
-            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
-            
-            local timer = tick() * 14 
-            local dist = math.sin(timer) * 8 -- Movimento de entra e sai
-            
-            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(0, 0.5, dist) * CFrame.Angles(0, timer, 0)
-            vu7.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
-            
-            if THum.Sit then
-                connection:Disconnect()
-                actionCallback(PosOriginal)
-            end
-        end
-    end)
-end
-
-local function FinalReset()
-    _G.IsTrapping = false
-    _G.FlingToggle = false
-    pcall(function()
-        vu7.Character.Humanoid:UnequipTools()
-        vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "ClearAllTools")
-    end)
-end
-
 local function getPlayerNames()
     local pNames = {}
-    for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
+    for _, p in pairs(vu6:GetPlayers()) do 
+        if p ~= vu7 then 
+            table.insert(pNames, p.Name) 
+        end 
+    end
     return pNames
 end
 
