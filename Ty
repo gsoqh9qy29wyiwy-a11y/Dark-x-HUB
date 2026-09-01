@@ -62,11 +62,13 @@ local function updatePlayerList()
     return playersList
 end
 
--- Variáveis do Black Hole
+-- Black Hole
 _G.BlackHoleActive = false
+_G.BH_Orbit_Active = false
 _G.BH_Strength = 200
 local BH_Attachment = nil
 local BH_Part = nil
+local BH_Connection = nil
 
 local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
