@@ -166,7 +166,7 @@ local function clickNormally(object)
     if clickDetector then fireclickdetector(clickDetector) end
 end
 
--- Função para o Fling Ball Original
+-- Função para o Fling Ball Original (Corrigido o 9e900)
 local function FlingBall(targetName)
     local target = game:GetService("Players"):FindFirstChild(targetName)
     if not target then return end
@@ -205,7 +205,7 @@ local function FlingBall(targetName)
             bv.Name = "FlingPower"
             bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
             bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.P = 9e900
+            bv.P = math.huge -- Corrigido de 9e900 para math.huge
             bv.Parent = Ball
             
             vuCam.CameraSubject = thum
@@ -238,7 +238,7 @@ end
 
 -- Configuração do Black Hole
 local function SetupBlackHole()
-    if not BH_Part then
+    if not BH_Part or not BH_Part.Parent then
         BH_Part = Instance.new("Part")
         BH_Part.Name = "BH_TargetPart"
         BH_Part.Anchored = true
@@ -249,35 +249,44 @@ local function SetupBlackHole()
     end
 end
 
--- Network Bypass (Permite mover peças do mapa)
+-- Network Bypass Seguro
 if not getgenv().NetworkBypassed then
     getgenv().NetworkBypassed = true
     task.spawn(function()
         while true do
             pcall(function()
-                sethiddenproperty(vu7, "SimulationRadius", math.huge)
+                if sethiddenproperty then
+                    sethiddenproperty(vu7, "SimulationRadius", math.huge)
+                end
             end)
             vu10.Heartbeat:Wait()
         end
     end)
 end
 
--- Forçar partes (Física do Black Hole)
+-- Forçar partes (Física do Black Hole - Corrigida)
 local function ForcePart(v)
-    if v:IsA("BasePart") and not v.Anchored and not v.Parent:FindFirstChildOfClass("Humanoid") and v.Name ~= "Handle" then
+    if v:IsA("BasePart") and not v.Anchored and not (v.Parent and v.Parent:FindFirstChildOfClass("Humanoid")) and v.Name ~= "Handle" then
+        SetupBlackHole() -- Garante que BH_Attachment existe antes de aplicar
+        
         for _, x in ipairs(v:GetChildren()) do
-            if x:IsA("BodyMover") or x:IsA("AlignPosition") or x:IsA("Torque") then x:Destroy() end
+            if x:IsA("BodyVelocity") or x:IsA("BodyPosition") or x:IsA("BodyGyro") or x:IsA("AlignPosition") or x:IsA("Torque") then 
+                x:Destroy() 
+            end
         end
+        
         v.CanCollide = false
+        
         local torque = Instance.new("Torque", v)
         torque.Torque = Vector3.new(100000000, 1000000000, 100000000)
         local att0 = Instance.new("Attachment", v)
         torque.Attachment0 = att0
+        
         local alignPos = Instance.new("AlignPosition", v)
         alignPos.Name = "BH_Force"
         alignPos.MaxForce = math.huge
         alignPos.MaxVelocity = math.huge
-        alignPos.Responsiveness = _G.BH_Strength
+        alignPos.Responsiveness = _G.BH_Strength or 200
         alignPos.Attachment0 = att0
         alignPos.Attachment1 = BH_Attachment
     end
