@@ -236,7 +236,20 @@ local function FlingBall(targetName)
     end
 end
 
--- Network Bypass
+-- Configuração do Black Hole
+local function SetupBlackHole()
+    if not BH_Part then
+        BH_Part = Instance.new("Part")
+        BH_Part.Name = "BH_TargetPart"
+        BH_Part.Anchored = true
+        BH_Part.CanCollide = false
+        BH_Part.Transparency = 1
+        BH_Part.Parent = vu9
+        BH_Attachment = Instance.new("Attachment", BH_Part)
+    end
+end
+
+-- Network Bypass (Permite mover peças do mapa)
 if not getgenv().NetworkBypassed then
     getgenv().NetworkBypassed = true
     task.spawn(function()
@@ -247,6 +260,92 @@ if not getgenv().NetworkBypassed then
             vu10.Heartbeat:Wait()
         end
     end)
+end
+
+-- Forçar partes (Física do Black Hole)
+local function ForcePart(v)
+    if v:IsA("BasePart") and not v.Anchored and not v.Parent:FindFirstChildOfClass("Humanoid") and v.Name ~= "Handle" then
+        for _, x in ipairs(v:GetChildren()) do
+            if x:IsA("BodyMover") or x:IsA("AlignPosition") or x:IsA("Torque") then x:Destroy() end
+        end
+        v.CanCollide = false
+        local torque = Instance.new("Torque", v)
+        torque.Torque = Vector3.new(100000000, 1000000000, 100000000)
+        local att0 = Instance.new("Attachment", v)
+        torque.Attachment0 = att0
+        local alignPos = Instance.new("AlignPosition", v)
+        alignPos.Name = "BH_Force"
+        alignPos.MaxForce = math.huge
+        alignPos.MaxVelocity = math.huge
+        alignPos.Responsiveness = _G.BH_Strength
+        alignPos.Attachment0 = att0
+        alignPos.Attachment1 = BH_Attachment
+    end
+end
+
+-- Lógica de Pulso (Entra e Sai do alvo em loop)
+local function PulseLoop(targetPlayer, actionCallback)
+    _G.IsTrapping = true
+    local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
+    vu8.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+    
+    local connection
+    connection = vu10.Heartbeat:Connect(function()
+        if not _G.IsTrapping or not targetPlayer.Character then 
+            connection:Disconnect() 
+            return 
+        end
+        
+        local THRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local THum = targetPlayer.Character:FindFirstChild("Humanoid")
+        
+        if THRP and THum then
+            local Tool = vu7.Backpack:FindFirstChild("Couch") or vu7.Character:FindFirstChild("Couch")
+            if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
+            
+            local timer = tick() * 14 
+            local dist = math.sin(timer) * 8 -- Movimento de entra e sai
+            
+            vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(0, 0.5, dist) * CFrame.Angles(0, timer, 0)
+            vu7.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+            
+            if THum.Sit then
+                connection:Disconnect()
+                actionCallback(PosOriginal)
+            end
+        end
+    end)
+end
+
+local function FinalReset()
+    _G.IsTrapping = false
+    _G.FlingToggle = false
+    pcall(function()
+        vu7.Character.Humanoid:UnequipTools()
+        vu8.RE["1Clea1rToo1ls"]:FireServer("PlayerWantsToDeleteTool", "ClearAllTools")
+    end)
+end
+
+local function getPlayerNames()
+    local pNames = {}
+    for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
+    return pNames
+end
+
+local function TeleportTo(cframe)
+    if vu7.Character and vu7.Character:FindFirstChild("HumanoidRootPart") then
+        vu7.Character:PivotTo(cframe)
+    end
+end
+
+local function updateMovement()
+    local char = vu7.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = walkSpeed
+        char.Humanoid.JumpPower = jumpPower
+        char.Humanoid.UseJumpPower = true
+    end
+    vu9.Gravity = gravity
 end
 
 --  3. JANELA PRINCIPAL
