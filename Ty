@@ -458,6 +458,7 @@ local TabAudio = Window:MakeTab({"Audio All", "radio"})
 local TabMusic = Window:MakeTab({"Music", "music"}) 
 local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Skybox", "home"})
+local TabBomb = Window:MakeTab({"Spawn Bomb Visual", "bomb"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
@@ -597,11 +598,11 @@ TabTroll:AddToggle({
 
                             vuCam.CameraSubject = thum
 
-                            local t = tick() * 999999999999
+                            local t = tick() * 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
                             local moveOffset = Vector3.new(
-                                math.sin(t) * 1.5,
-                                math.cos(t * 1.3) * 1.2,
-                                math.cos(t) * 1.5
+                                math.sin(t) * 1.8,
+                                math.cos(t * 1.6) * 1.7,
+                                math.cos(t) * 1.8
                             )
 
                             local targetPos = troot.Position
@@ -610,9 +611,9 @@ TabTroll:AddToggle({
                             end
 
                             ball.CFrame = CFrame.new(targetPos + moveOffset) * CFrame.Angles(
-                                math.rad(math.random(0, 30)),
-                                math.rad(math.random(0, 30)),
-                                math.rad(math.random(0, 30))
+                                math.rad(math.random(0, 960)),
+                                math.rad(math.random(0, 960)),
+                                math.rad(math.random(0, 960))
                             )
                         end
                     end
@@ -5888,6 +5889,42 @@ sunRays.Spread = 0.8
 local blur = Instance.new("BlurEffect", Lighting)
 blur.Size = 0
 end})
+-- ====================================================================
+-- ABA: SPAWN BOMB (NOVA ABA)
+-- ====================================================================
+TabBomb:AddSection({"Gerador de Bombas Visuais"})
+
+TabBomb:AddButton({
+    Name = "💣 Spawn 1 Bomba",
+    Description = "Gera 1 bomba com explosão no seu local",
+    Callback = function()
+        spawnBomb()
+    end
+})
+
+TabBomb:AddButton({
+    Name = "🔥 Spawn 30 Bombas",
+    Description = "Gera 30 bombas ao redor do seu personagem",
+    Callback = function()
+        spawnMassBomb(30)
+    end
+})
+
+TabBomb:AddButton({
+    Name = "💥 Spawn 100 Bombas",
+    Description = "Gera 100 bombas massivas (Cuidado com o lag)",
+    Callback = function()
+        spawnMassBomb(100)
+    end
+})
+
+TabBomb:AddButton({
+    Name = "☢️ Spawn Nuke Gigante",
+    Description = "Gera uma explosão nuclear de grande escala",
+    Callback = function()
+        spawnNuke()
+    end
+})
 -- ====================================================================
 -- ABA: SKY
 -- ====================================================================
