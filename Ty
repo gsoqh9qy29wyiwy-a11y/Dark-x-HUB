@@ -280,7 +280,158 @@ local function ForcePart(v)
         alignPos.Attachment1 = BH_Attachment
     end
 end
+-- ============================================================
+-- FUNÇÕES SPAWN BOMBA
+-- ============================================================
+local function spawnBomb()
+    task.spawn(function()
+        local char = vu7.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local pos = hrp.Position + Vector3.new(0, 2, 0)
+        local bomb = Instance.new("Part")
+        bomb.Size = Vector3.new(2, 2, 2)
+        bomb.Position = pos
+        bomb.Anchored = true
+        bomb.CanCollide = false
+        bomb.Color = Color3.fromRGB(255, 0, 0)
+        bomb.Material = Enum.Material.Neon
+        bomb.Shape = Enum.PartType.Ball
+        bomb.Name = "Bomb"
+        bomb.Parent = vu9
+        
+        local glow = Instance.new("PointLight")
+        glow.Color = Color3.fromRGB(255, 0, 0)
+        glow.Range = 10
+        glow.Brightness = 3
+        glow.Parent = bomb
+        
+        local tween = TweenService:Create(bomb, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+            Size = Vector3.new(2.5, 2.5, 2.5)
+        })
+        tween:Play()
+        
+        task.wait(3)
+        tween:Cancel()
+        
+        local explosion = Instance.new("Explosion")
+        explosion.Position = bomb.Position
+        explosion.BlastRadius = 15
+        explosion.BlastPressure = 50000
+        explosion.ExplosionType = Enum.ExplosionType.NoCraters
+        explosion.Parent = vu9
+        
+        bomb:Destroy()
+    end)
+end
 
+local function spawnMassBomb(count)
+    task.spawn(function()
+        count = count or 30
+        local char = vu7.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local center = hrp.Position
+        
+        for i = 1, count do
+            local angle = math.rad(math.random(0, 360))
+            local radius = math.random(5, 25)
+            local x = center.X + math.cos(angle) * radius
+            local z = center.Z + math.sin(angle) * radius
+            local y = center.Y + math.random(0, 10)
+            
+            local bomb = Instance.new("Part")
+            bomb.Size = Vector3.new(1.5, 1.5, 1.5)
+            bomb.Position = Vector3.new(x, y, z)
+            bomb.Anchored = true
+            bomb.CanCollide = false
+            bomb.Color = Color3.fromRGB(255, math.random(0, 100), 0)
+            bomb.Material = Enum.Material.Neon
+            bomb.Shape = Enum.PartType.Ball
+            bomb.Name = "MassBomb"
+            bomb.Parent = vu9
+            
+            local glow = Instance.new("PointLight")
+            glow.Color = Color3.fromRGB(255, 0, 0)
+            glow.Range = 8
+            glow.Brightness = 2
+            glow.Parent = bomb
+            
+            Debris:AddItem(bomb, 3)
+        end
+        
+        task.wait(3)
+        for i = 1, math.min(count, 35) do
+            local exp = Instance.new("Explosion")
+            exp.Position = Vector3.new(
+                center.X + math.random(-30, 30),
+                center.Y + math.random(0, 20),
+                center.Z + math.random(-30, 30)
+            )
+            exp.BlastRadius = 10
+            exp.BlastPressure = 30000
+            exp.ExplosionType = Enum.ExplosionType.NoCraters
+            exp.Parent = vu9
+            task.wait(0.05)
+        end
+    end)
+end
+
+local function spawnNuke()
+    task.spawn(function()
+        local char = vu7.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local pos = hrp.Position + Vector3.new(0, 10, 0)
+        
+        local bomb = Instance.new("Part")
+        bomb.Size = Vector3.new(10, 10, 10)
+        bomb.Position = pos
+        bomb.Anchored = true
+        bomb.CanCollide = false
+        bomb.Color = Color3.fromRGB(255, 0, 0)
+        bomb.Material = Enum.Material.Neon
+        bomb.Shape = Enum.PartType.Ball
+        bomb.Name = "Nuke"
+        bomb.Parent = vu9
+        
+        local glow = Instance.new("PointLight")
+        glow.Color = Color3.fromRGB(255, 0, 0)
+        glow.Range = 50
+        glow.Brightness = 10
+        glow.Parent = bomb
+        
+        local tween = TweenService:Create(bomb, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Size = Vector3.new(20, 20, 20)
+        })
+        tween:Play()
+        
+        task.wait(3)
+        tween:Cancel()
+        
+        for i = 1, 40 do
+            local exp = Instance.new("Explosion")
+            exp.Position = Vector3.new(
+                pos.X + math.random(-50, 50),
+                pos.Y + math.random(-20, 20),
+                pos.Z + math.random(-50, 50)
+            )
+            exp.BlastRadius = 20
+            exp.BlastPressure = 100000
+            exp.ExplosionType = Enum.ExplosionType.NoCraters
+            exp.Parent = vu9
+            task.wait(0.05)
+        end
+        
+        bomb:Destroy()
+    end)
+end
 --  3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
     Title = "Dark x Hub",
