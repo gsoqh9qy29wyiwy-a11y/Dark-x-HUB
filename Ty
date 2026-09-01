@@ -19,7 +19,7 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
--- --- NOVAS FUNÇÕES DO FLING BALL AUTOMÁTICO (ADICIONADAS) ---
+-- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
 local FlingBallAuto = false
 
 local function GetBallAutomatico()
@@ -47,14 +47,13 @@ local function ForcarEquipamento()
     end
 end
 
--- Variáveis da Criança (Chasing/Child)
+-- Variáveis de Jogadores
 local playersList = {}
 local chasingplayer = nil
 
--- Função para atualizar a lista de players
 local function updatePlayerList()
     playersList = {}
-    for _, player in pairs(game.Players:GetPlayers()) do
+    for _, player in pairs(vu6:GetPlayers()) do
         if player ~= vu7 then
             table.insert(playersList, player.Name)
         end
@@ -62,7 +61,7 @@ local function updatePlayerList()
     return playersList
 end
 
--- Black Hole
+-- Black Hole Variáveis
 _G.BlackHoleActive = false
 _G.BH_Orbit_Active = false
 _G.BH_Strength = 200
@@ -166,7 +165,7 @@ local function clickNormally(object)
     if clickDetector then fireclickdetector(clickDetector) end
 end
 
--- Função para o Fling Ball Original (Corrigido o 9e900)
+-- Função para o Fling Ball Original
 local function FlingBall(targetName)
     local target = game:GetService("Players"):FindFirstChild(targetName)
     if not target then return end
@@ -205,7 +204,7 @@ local function FlingBall(targetName)
             bv.Name = "FlingPower"
             bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
             bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.P = math.huge -- Corrigido de 9e900 para math.huge
+            bv.P = math.huge
             bv.Parent = Ball
             
             vuCam.CameraSubject = thum
@@ -236,7 +235,7 @@ local function FlingBall(targetName)
     end
 end
 
--- Configuração do Black Hole
+-- Configuração Segura do Black Hole
 local function SetupBlackHole()
     if not BH_Part or not BH_Part.Parent then
         BH_Part = Instance.new("Part")
@@ -250,24 +249,26 @@ local function SetupBlackHole()
 end
 
 -- Network Bypass Seguro
-if not getgenv().NetworkBypassed then
-    getgenv().NetworkBypassed = true
-    task.spawn(function()
-        while true do
-            pcall(function()
-                if sethiddenproperty then
-                    sethiddenproperty(vu7, "SimulationRadius", math.huge)
-                end
-            end)
-            vu10.Heartbeat:Wait()
-        end
-    end)
-end
+pcall(function()
+    if getgenv and not getgenv().NetworkBypassed then
+        getgenv().NetworkBypassed = true
+        task.spawn(function()
+            while true do
+                pcall(function()
+                    if sethiddenproperty then
+                        sethiddenproperty(vu7, "SimulationRadius", math.huge)
+                    end
+                end)
+                vu10.Heartbeat:Wait()
+            end
+        end)
+    end
+end)
 
--- Forçar partes (Física do Black Hole - Corrigida)
+-- Forçar partes (Física do Black Hole)
 local function ForcePart(v)
     if v:IsA("BasePart") and not v.Anchored and not (v.Parent and v.Parent:FindFirstChildOfClass("Humanoid")) and v.Name ~= "Handle" then
-        SetupBlackHole() -- Garante que BH_Attachment existe antes de aplicar
+        SetupBlackHole()
         
         for _, x in ipairs(v:GetChildren()) do
             if x:IsA("BodyVelocity") or x:IsA("BodyPosition") or x:IsA("BodyGyro") or x:IsA("AlignPosition") or x:IsA("Torque") then 
@@ -292,7 +293,50 @@ local function ForcePart(v)
     end
 end
 
--- Lógica de Pulso (Entra e Sai do alvo em loop)
+-- Iniciar / Parar o Black Hole
+local function ToggleBlackHole(state)
+    _G.BlackHoleActive = state
+    SetupBlackHole()
+    
+    if state then
+        BH_Connection = vu10.RenderStepped:Connect(function()
+            if not _G.BlackHoleActive then
+                if BH_Connection then BH_Connection:Disconnect() end
+                return
+            end
+            
+            -- Posiciona o centro do buraco negro no jogador ou alvo selecionado
+            local targetChar = vu7.Character
+            if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                local p = vu6:FindFirstChild(_G.SelectedPlayer)
+                if p and p.Character then targetChar = p.Character end
+            end
+            
+            if targetChar and targetChar:FindFirstChild("HumanoidRootPart") and BH_Part then
+                BH_Part.CFrame = targetChar.HumanoidRootPart.CFrame
+            end
+            
+            -- Aplica a força em peças soltas
+            for _, item in ipairs(vu9:GetDescendants()) do
+                if item:IsA("BasePart") and not item.Anchored and not item:FindFirstChild("BH_Force") then
+                    ForcePart(item)
+                end
+            end
+        end)
+    else
+        if BH_Connection then
+            BH_Connection:Disconnect()
+            BH_Connection = nil
+        end
+        if BH_Part then
+            BH_Part:Destroy()
+            BH_Part = nil
+            BH_Attachment = nil
+        end
+    end
+end
+
+-- Lógica de Pulso
 local function PulseLoop(targetPlayer, actionCallback)
     _G.IsTrapping = true
     local PosOriginal = vu7.Character.HumanoidRootPart.CFrame
@@ -313,7 +357,7 @@ local function PulseLoop(targetPlayer, actionCallback)
             if Tool then vu7.Character.Humanoid:EquipTool(Tool) end
             
             local timer = tick() * 14 
-            local dist = math.sin(timer) * 8 -- Movimento de entra e sai
+            local dist = math.sin(timer) * 8
             
             vu7.Character.HumanoidRootPart.CFrame = THRP.CFrame * CFrame.new(0, 0.5, dist) * CFrame.Angles(0, timer, 0)
             vu7.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
@@ -337,7 +381,11 @@ end
 
 local function getPlayerNames()
     local pNames = {}
-    for _, p in pairs(vu6:GetPlayers()) do if p ~= vu7 then table.insert(pNames, p.Name) end end
+    for _, p in pairs(vu6:GetPlayers()) do 
+        if p ~= vu7 then 
+            table.insert(pNames, p.Name) 
+        end 
+    end
     return pNames
 end
 
