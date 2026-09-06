@@ -7,18 +7,12 @@ local Window = redzlib:MakeWindow({
     SaveFolder = "UnifiedHubConfig"
 })
 
--- CONFIGURAÇÃO DO BOTÃO MINIMIZADO (Tamanho 60x60)
 Window:AddMinimizeButton({
-    Button = { 
-        Image = "rbxassetid://113088956809836", 
-        BackgroundTransparency = 0,
-        Size = UDim2.new(0, 60, 0, 60)
-    },
-    Corner = { 
-        CornerRadius = UDim.new(0, 30)
-    },
+    Button = { Image = "rbxassetid://113088956809836", BackgroundTransparency = 0 },
+    Corner = { CornerRadius = UDim.new(0, 30) },
 })
-local TabInfo = Window:MakeTab({"Info","menu"})
+
+
 local TabMain = Window:MakeTab({"Main", "menu"})
 local TabUniversal = Window:MakeTab({"Universal", "globe"})
 local Tabjumpeverysec = Window:MakeTab({"1 Jump Every Sec", "gamepad"})
@@ -182,45 +176,6 @@ local TabWordle = Window:MakeTab({"Wordle", "gamepad"})
 local TabYBA = Window:MakeTab({"YBA", "gamepad"})
 local TabZombieattack = Window:MakeTab({"Zombie Attack", "gamepad"})
 	
-	
-	TabInfo:AddSection({"Informação do Hub"})
-TabInfo:AddDiscordInvite({
-    Name = "Dark x hub",
-    Description = "Servidor oficial",
-    Logo = "rbxassetid://113088956809836",
-    Invite = "https://discord.gg/kHqCk4Bwc",
-})
-local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
-TabInfo:AddParagraph({"Executor", executorName})
-TabInfo:AddSection({"Versão do Hub 1.1"})
-Tab1:AddParagraph({"Criadores", "Carlolx777"})
-
-TabInfo:AddButton({
-    Name = "Copiar @ do Insta",
-    Callback = function()
-        setclipboard("@carlolx7") -- Copia o user
-        
-        -- Opcional: Notificação para avisar que copiou
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Área de Transferência",
-            Text = "Insta @carlolx7 copiado!",
-            Duration = 3
-        })
-    end
-})
-
-TabInfo:AddButton({
-    Name = "Copiar Link do Insta",
-    Callback = function()
-        setclipboard("https://www.instagram.com/carlolx7/") -- Copia o link completo
-        
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Área de Transferência",
-            Text = "Link do Insta copiado!",
-            Duration = 3
-        })
-    end
-})
 	
 TabMain:AddParagraph({
         Title = "EC Hub",
