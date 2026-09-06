@@ -18,7 +18,7 @@ Window:AddMinimizeButton({
         CornerRadius = UDim.new(0, 30)
     },
 })
-local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
+local TabInfo = Window:MakeTab({"Info","meni"})
 local TabMain = Window:MakeTab({"Main", "menu"})
 local TabUniversal = Window:MakeTab({"Universal", "globe"})
 local Tabjumpeverysec = Window:MakeTab({"1 Jump Every Sec", "gamepad"})
@@ -183,19 +183,19 @@ local TabYBA = Window:MakeTab({"YBA", "gamepad"})
 local TabZombieattack = Window:MakeTab({"Zombie Attack", "gamepad"})
 	
 	
-	Tab1:AddSection({"Informação do Hub"})
-Tab1:AddDiscordInvite({
+	TabInfo:AddSection({"Informação do Hub"})
+TabInfo:AddDiscordInvite({
     Name = "Dark x hub",
     Description = "Servidor oficial",
     Logo = "rbxassetid://113088956809836",
     Invite = "https://discord.gg/kHqCk4Bwc",
 })
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
-Tab1:AddParagraph({"Executor", executorName})
-Tab1:AddSection({"Versão do Hub 1.1"})
+TabInfo:AddParagraph({"Executor", executorName})
+TabInfo:AddSection({"Versão do Hub 1.1"})
 Tab1:AddParagraph({"Criadores", "Carlolx777"})
 
-Tab1:AddButton({
+TabInfo:AddButton({
     Name = "Copiar @ do Insta",
     Callback = function()
         setclipboard("@carlolx7") -- Copia o user
@@ -209,7 +209,7 @@ Tab1:AddButton({
     end
 })
 
-Tab1:AddButton({
+TabInfo:AddButton({
     Name = "Copiar Link do Insta",
     Callback = function()
         setclipboard("https://www.instagram.com/carlolx7/") -- Copia o link completo
@@ -3570,10 +3570,5 @@ TabTreasurehuntsim:AddButton({
         end
     })
     
-    Input:OnChanged(function()
-        print("Input updated:", Input.Value)
-    end)
-end
- 
 
  
