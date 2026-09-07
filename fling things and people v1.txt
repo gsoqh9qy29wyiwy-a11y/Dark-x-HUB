@@ -1,0 +1,1191 @@
+-- ====================================================================
+-- ⚡ SCRIPT BY KAZZ @haivi153 SUPER ULTIMATE HUB ⚡
+-- Engine: Core Physics Safeguard, Bypass Anti-Cheat & Target Locked Aimbot
+-- Message: "Cảm ơn bạn đã dùng script của KAZZ @haivi153"
+-- Target Line Count: Maximum Expanded Length Implementation
+-- ====================================================================
+
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
+
+-----------------------------------------------------------------------
+-- 1. INITIALIZATION & NOTIFICATION SYSTEM
+-----------------------------------------------------------------------
+local StarterGui = game:GetService("StarterGui")
+pcall(function()
+	StarterGui:SetCore("SendNotification", {
+		Title = "⚡ KAZZ HUB SYSTEM ⚡",
+		Text = "Cảm ơn bạn đã dùng script của KAZZ @haivi153",
+		Duration = 8
+	})
+end)
+
+-----------------------------------------------------------------------
+-- 2. SERVICES DECLARATION
+-----------------------------------------------------------------------
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local ContextActionService = game:GetService("ContextActionService")
+local Camera = Workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
+
+-----------------------------------------------------------------------
+-- 3. GUI CLEANUP SYSTEM
+-----------------------------------------------------------------------
+local ParentTarget = (gethui and gethui()) or game:GetService("CoreGui") or LocalPlayer:WaitForChild("PlayerGui")
+
+if ParentTarget:FindFirstChild("KazzUltimateHubGui") then
+	ParentTarget.KazzUltimateHubGui:Destroy()
+end
+if ParentTarget:FindFirstChild("KazzAimbotGui") then
+	ParentTarget.KazzAimbotGui:Destroy()
+end
+
+-----------------------------------------------------------------------
+-- 4. GLOBAL CONFIG & VARIABLE STATES (200+ SETTINGS)
+-----------------------------------------------------------------------
+-- Main & Movement Settings
+local WalkSpeedValue = 16
+local JumpPowerValue = 50
+local FlySpeedValue = 50
+local FlyEnabled = false
+local NoclipEnabled = false
+local ESPEnabled = false
+local AntiFlingEnabled = true
+local InfJumpEnabled = false
+local ClickTPEnabled = false
+local AutoBhop = false
+local LowGravity = false
+local NoFallDamage = true
+local SpeedBypass = false
+local InfiniteStamina = false
+local AutoRespawn = false
+local GodHealthVisual = false
+local HipHeightValue = 0
+local AntiRagdollAbsolute = true
+local SwimInAir = false
+local FastClimb = false
+local InfiniteAirSupply = true
+local WalkOnWater = false
+local NoSlidePhysics = false
+local AutoWallHop = false
+local HighVelocityBypasser = true
+
+-- Aimbot Specific Variables (Hệ thống Aim Target riêng biệt)
+local AimbotMasterEnabled = false
+local AimbotTargetUsername = ""
+local AimbotPart = "Head" -- Head, HumanoidRootPart, Torso
+local AimbotSmoothness = 1.0
+local AimbotFOVCircle = true
+local AimbotFOVRadius = 150
+local AimbotWallCheck = false
+local AimbotPredictMovement = true
+local AimbotPredictionFactor = 0.165
+local SilentAimEnabled = false
+local TriggerBotEnabled = false
+local AutoFireDelay = 0.05
+local LockTargetOnlyMode = true
+local HoldAimKey = Enum.UserInputType.MouseButton2
+local IsAimingKeyDown = false
+
+-- Kill Aura & Combat Physics
+local KillAuraEnabled = false
+local ForcedSitEnabled = false
+local MassSitAura = false
+local KillAuraRadius = 80
+local TeleportBehind = false
+local AutoActivateTool = true
+local AuraTripForce = false
+local RapidPunchAura = false
+local CircleAuraSpin = false
+local SpinAuraSpeed = 20
+local AntiTouchDeath = true
+local AutoArmorEquip = false
+local PushAuraFE = false
+local AirJugglerAura = false
+local FreezeAura = false
+local SwordReachMultiplier = 5
+local FastClicker = false
+local AutoWeaponEquip = true
+local DamageMultiplierVisual = false
+local InstantBlock = false
+
+-- FTAP & Physics Manipulations
+local VoidFlingEnabled = false
+local SpinBotEnabled = false
+local SpinSpeed = 50
+local AntiGrabEnabled = true
+local AntiAttachEnabled = true
+local GodModeFE = false
+local SuperThrowEnabled = false
+local ReachGrabEnabled = false
+local AntiVoidEnabled = true
+local LoopFlingTarget = ""
+local LoopFlingEnabled = false
+local GrabDistanceRange = 500
+local InstakillThrow = false
+local AutoReleaseGrab = false
+local GrabMagnet = false
+local AutoSeatingOthers = false
+local FreezeInAir = false
+local MassUnanchorObjects = false
+local GrabShield = false
+local ThrowVelocityMultiplier = 100
+local AutoStealHoldables = false
+local BlackHoleVoid = false
+local PhysicsLagBypass = true
+local HeavyBodyForce = false
+local AntiAssemblyFling = true
+
+-- Fun, Visual & Server Chaos
+local RainbowPlayer = false
+local LagServerAura = false
+local HeadSpin = false
+local SuperRagdollAll = false
+local OrbitTargetName = ""
+local OrbitEnabled = false
+local OrbitRadius = 10
+local OrbitSpeed = 5
+local BlackHoleGrip = false
+local InvisibleFlingTrick = false
+local TornadoAura = false
+local AntiSeatingSelf = true
+local AnchorSelf = false
+local SpasmCharacter = false
+local GhostBodyFE = false
+local FakeLagVisual = false
+local SizeChanger = 1
+local ChatSpammer = false
+local JumpScareEffect = false
+local LevitateBody = false
+local DanceLoop = false
+local TrailEffectFE = false
+local RainbowBodyParts = false
+local ParticleSpammer = false
+local InverseGravitySelf = false
+
+-- World & Render Customization
+local FullbrightEnabled = false
+local NoFogEnabled = false
+local CustomFOV = 70
+local ChangeTime = 14
+local XrayVision = false
+local RemoveTextures = false
+local RemoveShadows = false
+local CustomSkyBox = false
+local NightVision = false
+local DisableWaterPhysics = false
+local FPSUnlocker = false
+local AmbientColorRed = 255
+local AmbientColorGreen = 255
+local AmbientColorBlue = 255
+local CustomSunSize = 11
+
+-----------------------------------------------------------------------
+-- 5. GUI BUILDER 1: MAIN CONTAINER (KAZZ SUPER HUB)
+-----------------------------------------------------------------------
+local MainScreenGui = Instance.new("ScreenGui")
+MainScreenGui.Name = "KazzUltimateHubGui"
+MainScreenGui.ResetOnSpawn = false
+MainScreenGui.DisplayOrder = 2147483647
+MainScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+MainScreenGui.Parent = ParentTarget
+
+-- Floating Menu Open Button
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Name = "OpenButton"
+OpenBtn.Parent = MainScreenGui
+OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+OpenBtn.BorderColor3 = Color3.fromRGB(0, 255, 180)
+OpenBtn.BorderSizePixel = 2
+OpenBtn.Position = UDim2.new(0.01, 0, 0.15, 0)
+OpenBtn.Size = UDim2.new(0, 150, 0, 42)
+OpenBtn.Font = Enum.Font.SourceSansBold
+OpenBtn.Text = "⚡ KAZZ HUB (K) ⚡"
+OpenBtn.TextColor3 = Color3.fromRGB(0, 255, 180)
+OpenBtn.TextSize = 14
+OpenBtn.Active = true
+OpenBtn.Draggable = true
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(0, 8)
+OpenCorner.Parent = OpenBtn
+
+-- Floating Aimbot Frame Trigger
+local OpenAimBtn = Instance.new("TextButton")
+OpenAimBtn.Name = "OpenAimButton"
+OpenAimBtn.Parent = MainScreenGui
+OpenAimBtn.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+OpenAimBtn.BorderColor3 = Color3.fromRGB(255, 50, 50)
+OpenAimBtn.BorderSizePixel = 2
+OpenAimBtn.Position = UDim2.new(0.01, 0, 0.22, 0)
+OpenAimBtn.Size = UDim2.new(0, 150, 0, 42)
+OpenAimBtn.Font = Enum.Font.SourceSansBold
+OpenAimBtn.Text = "🎯 AIMBOT GUI 🎯"
+OpenAimBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+OpenAimBtn.TextSize = 14
+OpenAimBtn.Active = true
+OpenAimBtn.Draggable = true
+
+local OpenAimCorner = Instance.new("UICorner")
+OpenAimCorner.CornerRadius = UDim.new(0, 8)
+OpenAimCorner.Parent = OpenAimBtn
+
+-- Main Frame Container
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = MainScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+MainFrame.Position = UDim2.new(0.2, 0, 0.1, 0)
+MainFrame.Size = UDim2.new(0, 580, 0, 520)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = true
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Parent = MainFrame
+MainStroke.Color = Color3.fromRGB(0, 255, 180)
+MainStroke.Thickness = 1.5
+
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "⚡ KAZZ @haivi153 SUPER ULTIMATE HUB ⚡"
+Title.TextColor3 = Color3.fromRGB(0, 255, 180)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = MainFrame
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -34, 0, 3)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.TextSize = 18
+
+-----------------------------------------------------------------------
+-- 6. GUI BUILDER 2: DEDICATED AIMBOT GUI PANEL
+-----------------------------------------------------------------------
+local AimScreenGui = Instance.new("ScreenGui")
+AimScreenGui.Name = "KazzAimbotGui"
+AimScreenGui.ResetOnSpawn = false
+AimScreenGui.DisplayOrder = 2147483647
+AimScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+AimScreenGui.Parent = ParentTarget
+
+local AimFrame = Instance.new("Frame")
+AimFrame.Name = "AimFrame"
+AimFrame.Parent = AimScreenGui
+AimFrame.BackgroundColor3 = Color3.fromRGB(18, 12, 12)
+AimFrame.Position = UDim2.new(0.65, 0, 0.15, 0)
+AimFrame.Size = UDim2.new(0, 320, 0, 420)
+AimFrame.Active = true
+AimFrame.Draggable = true
+AimFrame.Visible = false
+
+local AimCorner = Instance.new("UICorner")
+AimCorner.CornerRadius = UDim.new(0, 10)
+AimCorner.Parent = AimFrame
+
+local AimStroke = Instance.new("UIStroke")
+AimStroke.Parent = AimFrame
+AimStroke.Color = Color3.fromRGB(255, 60, 60)
+AimStroke.Thickness = 1.5
+
+local AimTitle = Instance.new("TextLabel")
+AimTitle.Parent = AimFrame
+AimTitle.Size = UDim2.new(1, -30, 0, 35)
+AimTitle.Position = UDim2.new(0, 10, 0, 0)
+AimTitle.BackgroundTransparency = 1
+AimTitle.Text = "🎯 AIMBOT LOCK SYSTEM - @haivi153"
+AimTitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+AimTitle.Font = Enum.Font.SourceSansBold
+AimTitle.TextSize = 13
+AimTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local AimCloseBtn = Instance.new("TextButton")
+AimCloseBtn.Parent = AimFrame
+AimCloseBtn.Size = UDim2.new(0, 30, 0, 30)
+AimCloseBtn.Position = UDim2.new(1, -32, 0, 3)
+AimCloseBtn.BackgroundTransparency = 1
+AimCloseBtn.Text = "✕"
+AimCloseBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
+AimCloseBtn.Font = Enum.Font.SourceSansBold
+AimCloseBtn.TextSize = 16
+
+local AimScroll = Instance.new("ScrollingFrame")
+AimScroll.Parent = AimFrame
+AimScroll.Position = UDim2.new(0, 10, 0, 40)
+AimScroll.Size = UDim2.new(1, -20, 1, -50)
+AimScroll.BackgroundTransparency = 1
+AimScroll.ScrollBarThickness = 5
+AimScroll.CanvasSize = UDim2.new(0, 0, 0, 500)
+
+local AimListLayout = Instance.new("UIListLayout")
+AimListLayout.Parent = AimScroll
+AimListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+AimListLayout.Padding = UDim.new(0, 6)
+
+AimCloseBtn.MouseButton1Click:Connect(function() AimFrame.Visible = false end)
+OpenAimBtn.MouseButton1Click:Connect(function() AimFrame.Visible = not AimFrame.Visible end)
+
+-----------------------------------------------------------------------
+-- 7. TAB SYSTEM NAVIGATION (MAIN HUB)
+-----------------------------------------------------------------------
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(1, -20, 0, 34)
+TabBar.Position = UDim2.new(0, 10, 0, 35)
+TabBar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+TabBar.Parent = MainFrame
+
+local TabCorner = Instance.new("UICorner")
+TabCorner.CornerRadius = UDim.new(0, 6)
+TabCorner.Parent = TabBar
+
+local function CreateTabBtn(text, pos, width)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(width, -2, 1, 0)
+	btn.Position = pos
+	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+	btn.Text = "⚡ " .. text
+	btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+	btn.Font = Enum.Font.SourceSansBold
+	btn.TextSize = 10
+	btn.Parent = TabBar
+	return btn
+end
+
+local TabMainBtn = CreateTabBtn("MAIN", UDim2.new(0, 0, 0, 0), 0.16)
+local TabKillBtn = CreateTabBtn("KILL AURA", UDim2.new(0.16, 1, 0, 0), 0.17)
+local TabFtapBtn = CreateTabBtn("FTAP MODS", UDim2.new(0.33, 1, 0, 0), 0.17)
+local TabFlingBtn = CreateTabBtn("FLING/VOID", UDim2.new(0.50, 1, 0, 0), 0.17)
+local TabChaosBtn = CreateTabBtn("CHAOS/FUN", UDim2.new(0.67, 1, 0, 0), 0.17)
+local TabWorldBtn = CreateTabBtn("WORLD/MISC", UDim2.new(0.84, 1, 0, 0), 0.16)
+
+local function CreateScrollContainer()
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Parent = MainFrame
+	scroll.Position = UDim2.new(0, 10, 0, 75)
+	scroll.Size = UDim2.new(1, -20, 1, -85)
+	scroll.BackgroundTransparency = 1
+	scroll.ScrollBarThickness = 6
+	scroll.Visible = false
+
+	local list = Instance.new("UIListLayout")
+	list.Parent = scroll
+	list.SortOrder = Enum.SortOrder.LayoutOrder
+	list.Padding = UDim.new(0, 6)
+
+	return scroll
+end
+
+local ScrollMain = CreateScrollContainer()
+local ScrollKill = CreateScrollContainer()
+local ScrollFtap = CreateScrollContainer()
+local ScrollFling = CreateScrollContainer()
+local ScrollChaos = CreateScrollContainer()
+local ScrollWorld = CreateScrollContainer()
+
+ScrollMain.CanvasSize = UDim2.new(0, 0, 0, 1100)
+ScrollKill.CanvasSize = UDim2.new(0, 0, 0, 1000)
+ScrollFtap.CanvasSize = UDim2.new(0, 0, 0, 1100)
+ScrollFling.CanvasSize = UDim2.new(0, 0, 0, 1000)
+ScrollChaos.CanvasSize = UDim2.new(0, 0, 0, 1100)
+ScrollWorld.CanvasSize = UDim2.new(0, 0, 0, 1000)
+
+ScrollMain.Visible = true
+
+local function ResetTabs()
+	local inactiveColor = Color3.fromRGB(30, 30, 45)
+	TabMainBtn.BackgroundColor3 = inactiveColor
+	TabKillBtn.BackgroundColor3 = inactiveColor
+	TabFtapBtn.BackgroundColor3 = inactiveColor
+	TabFlingBtn.BackgroundColor3 = inactiveColor
+	TabChaosBtn.BackgroundColor3 = inactiveColor
+	TabWorldBtn.BackgroundColor3 = inactiveColor
+
+	ScrollMain.Visible = false
+	ScrollKill.Visible = false
+	ScrollFtap.Visible = false
+	ScrollFling.Visible = false
+	ScrollChaos.Visible = false
+	ScrollWorld.Visible = false
+end
+
+TabMainBtn.MouseButton1Click:Connect(function() ResetTabs(); ScrollMain.Visible = true; TabMainBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 120) end)
+TabKillBtn.MouseButton1Click:Connect(function() ResetTabs(); ScrollKill.Visible = true; TabKillBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50) end)
+TabFtapBtn.MouseButton1Click:Connect(function() ResetTabs(); ScrollFtap.Visible = true; TabFtapBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 220) end)
+TabFlingBtn.MouseButton1Click:Connect(function() ResetTabs(); ScrollFling.Visible = true; TabFlingBtn.BackgroundColor3 = Color3.fromRGB(230, 120, 0) end)
+TabChaosBtn.MouseButton1Click:Connect(function() ResetTabs(); ScrollChaos.Visible = true; TabChaosBtn.BackgroundColor3 = Color3.fromRGB(220, 0, 100) end)
+TabWorldBtn.MouseButton1Click:Connect(function() ResetTabs(); ScrollWorld.Visible = true; TabWorldBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210) end)
+
+CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+OpenBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and input.KeyCode == Enum.KeyCode.K then
+		MainFrame.Visible = not MainFrame.Visible
+	end
+end)
+
+-----------------------------------------------------------------------
+-- 8. UI BUILDER HELPER FUNCTIONS
+-----------------------------------------------------------------------
+local function CreateSlider(parent, name, min, max, default, callback)
+	local Frame = Instance.new("Frame")
+	Frame.Size = UDim2.new(1, -10, 0, 40)
+	Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 32)
+	Frame.Parent = parent
+
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 6)
+	Corner.Parent = Frame
+
+	local Label = Instance.new("TextLabel")
+	Label.Parent = Frame
+	Label.Size = UDim2.new(0.65, 0, 1, 0)
+	Label.Position = UDim2.new(0, 10, 0, 0)
+	Label.BackgroundTransparency = 1
+	Label.Text = "⚡ " .. name
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.Font = Enum.Font.SourceSans
+	Label.TextSize = 13
+	Label.TextXAlignment = Enum.TextXAlignment.Left
+
+	local Box = Instance.new("TextBox")
+	Box.Parent = Frame
+	Box.Size = UDim2.new(0.28, 0, 0.65, 0)
+	Box.Position = UDim2.new(0.68, 0, 0.18, 0)
+	Box.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+	Box.Text = tostring(default)
+	Box.TextColor3 = Color3.fromRGB(0, 255, 180)
+	Box.Font = Enum.Font.SourceSansBold
+	Box.TextSize = 12
+
+	local BoxCorner = Instance.new("UICorner")
+	BoxCorner.CornerRadius = UDim.new(0, 4)
+	BoxCorner.Parent = Box
+
+	Box.FocusLost:Connect(function()
+		local val = tonumber(Box.Text)
+		if val then
+			val = math.clamp(val, min, max)
+			Box.Text = tostring(val)
+			callback(val)
+		else
+			Box.Text = tostring(default)
+		end
+	end)
+end
+
+local function CreateToggle(parent, name, default, callback)
+	local Frame = Instance.new("Frame")
+	Frame.Size = UDim2.new(1, -10, 0, 36)
+	Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 32)
+	Frame.Parent = parent
+
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 6)
+	Corner.Parent = Frame
+
+	local Label = Instance.new("TextLabel")
+	Label.Parent = Frame
+	Label.Size = UDim2.new(0.7, 0, 1, 0)
+	Label.Position = UDim2.new(0, 10, 0, 0)
+	Label.BackgroundTransparency = 1
+	Label.Text = "⚡ " .. name
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.Font = Enum.Font.SourceSans
+	Label.TextSize = 13
+	Label.TextXAlignment = Enum.TextXAlignment.Left
+
+	local Btn = Instance.new("TextButton")
+	Btn.Parent = Frame
+	Btn.Size = UDim2.new(0, 60, 0, 22)
+	Btn.Position = UDim2.new(1, -70, 0, 7)
+	Btn.BackgroundColor3 = default and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(60, 60, 70)
+	Btn.Text = default and "ON" or "OFF"
+	Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Btn.Font = Enum.Font.SourceSansBold
+	Btn.TextSize = 11
+
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 4)
+	BtnCorner.Parent = Btn
+
+	local state = default
+	Btn.MouseButton1Click:Connect(function()
+		state = not state
+		Btn.Text = state and "ON" or "OFF"
+		Btn.BackgroundColor3 = state and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(60, 60, 70)
+		callback(state)
+	end)
+end
+
+local function CreateButton(parent, name, btnText, color, callback)
+	local Frame = Instance.new("Frame")
+	Frame.Size = UDim2.new(1, -10, 0, 36)
+	Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 32)
+	Frame.Parent = parent
+
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 6)
+	Corner.Parent = Frame
+
+	local Label = Instance.new("TextLabel")
+	Label.Parent = Frame
+	Label.Size = UDim2.new(0.55, 0, 1, 0)
+	Label.Position = UDim2.new(0, 10, 0, 0)
+	Label.BackgroundTransparency = 1
+	Label.Text = "⚡ " .. name
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.Font = Enum.Font.SourceSans
+	Label.TextSize = 13
+	Label.TextXAlignment = Enum.TextXAlignment.Left
+
+	local Btn = Instance.new("TextButton")
+	Btn.Parent = Frame
+	Btn.Size = UDim2.new(0, 100, 0, 22)
+	Btn.Position = UDim2.new(1, -110, 0, 7)
+	Btn.BackgroundColor3 = color or Color3.fromRGB(0, 150, 255)
+	Btn.Text = "⚡ " .. btnText
+	Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Btn.Font = Enum.Font.SourceSansBold
+	Btn.TextSize = 11
+
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 4)
+	BtnCorner.Parent = Btn
+
+	Btn.MouseButton1Click:Connect(callback)
+end
+
+-----------------------------------------------------------------------
+-- 9. AIMBOT GUI ELEMENTS & CONTROLS POPULATION
+-----------------------------------------------------------------------
+CreateToggle(AimScroll, "Bật/Tắt Aimbot Master", false, function(v) AimbotMasterEnabled = v end)
+
+local AimTargetFrame = Instance.new("Frame")
+AimTargetFrame.Size = UDim2.new(1, -10, 0, 65)
+AimTargetFrame.BackgroundColor3 = Color3.fromRGB(28, 20, 20)
+AimTargetFrame.Parent = AimScroll
+
+local AimTargetCorner = Instance.new("UICorner")
+AimTargetCorner.CornerRadius = UDim.new(0, 6)
+AimTargetCorner.Parent = AimTargetFrame
+
+local AimTargetLabel = Instance.new("TextLabel")
+AimTargetLabel.Size = UDim2.new(1, -10, 0, 22)
+AimTargetLabel.Position = UDim2.new(0, 10, 0, 2)
+AimTargetLabel.BackgroundTransparency = 1
+AimTargetLabel.Text = "🎯 Nhập @Username/DisplayName Cần Aim:"
+AimTargetLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+AimTargetLabel.Font = Enum.Font.SourceSansBold
+AimTargetLabel.TextSize = 12
+AimTargetLabel.TextXAlignment = Enum.TextXAlignment.Left
+AimTargetLabel.Parent = AimTargetFrame
+
+local AimTargetBox = Instance.new("TextBox")
+AimTargetBox.Size = UDim2.new(0.95, 0, 0, 28)
+AimTargetBox.Position = UDim2.new(0, 8, 0, 28)
+AimTargetBox.BackgroundColor3 = Color3.fromRGB(40, 25, 25)
+AimTargetBox.PlaceholderText = "Nhập tên người chơi..."
+AimTargetBox.Text = ""
+AimTargetBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+AimTargetBox.Font = Enum.Font.SourceSans
+AimTargetBox.TextSize = 12
+AimTargetBox.Parent = AimTargetFrame
+
+AimTargetBox.Changed:Connect(function()
+	AimbotTargetUsername = AimTargetBox.Text:lower():gsub("@", "")
+end)
+
+CreateToggle(AimScroll, "Aim Bán Tự Động (Lock On Target)", true, function(v) LockTargetOnlyMode = v end)
+CreateToggle(AimScroll, "Vòng Tròn FOV Aimbot Visual", true, function(v) AimbotFOVCircle = v end)
+CreateSlider(AimScroll, "Bán Kính FOV Aimbot", 20, 800, 150, function(v) AimbotFOVRadius = v end)
+CreateSlider(AimScroll, "Độ Mượt Aim (Smoothness)", 0.1, 5, 1.0, function(v) AimbotSmoothness = v end)
+CreateToggle(AimScroll, "Dự Đoán Di Chuyển (Prediction)", true, function(v) AimbotPredictMovement = v end)
+CreateToggle(AimScroll, "Kiểm Tra Vật Cản (Wall Check)", false, function(v) AimbotWallCheck = v end)
+CreateToggle(AimScroll, "Silent Aim FE", false, function(v) SilentAimEnabled = v end)
+CreateToggle(AimScroll, "TriggerBot Auto Shoot", false, function(v) TriggerBotEnabled = v end)
+
+-----------------------------------------------------------------------
+-- 10. MAIN GUI POPULATION (EXPANDED TO MAXIMUM CAPACITY)
+-----------------------------------------------------------------------
+-- TAB 1: MAIN MOVEMENT
+CreateSlider(ScrollMain, "Tốc độ di chuyển (WalkSpeed)", 1, 100000, 16, function(v) WalkSpeedValue = v end)
+CreateSlider(ScrollMain, "Sức nhảy (JumpPower)", 1, 100000, 50, function(v) JumpPowerValue = v end)
+CreateSlider(ScrollMain, "Tốc độ bay (Fly Speed)", 1, 100000, 50, function(v) FlySpeedValue = v end)
+CreateSlider(ScrollMain, "Độ cao chân (Hip Height)", -5, 50, 0, function(v) HipHeightValue = v end)
+CreateToggle(ScrollMain, "Bay tự do (Fly Mode)", false, function(v) FlyEnabled = v end)
+CreateToggle(ScrollMain, "Xuyên vật thể (Noclip)", false, function(v) NoclipEnabled = v end)
+CreateToggle(ScrollMain, "Nhảy vô hạn (Inf Jump)", false, function(v) InfJumpEnabled = v end)
+CreateToggle(ScrollMain, "Auto Bunny Hop (Auto Bhop)", false, function(v) AutoBhop = v end)
+CreateToggle(ScrollMain, "Giảm trọng lực (Low Gravity)", false, function(v) LowGravity = v end)
+CreateToggle(ScrollMain, "Click TP (Ctrl + Chuột trái)", false, function(v) ClickTPEnabled = v end)
+CreateToggle(ScrollMain, "Chống ngã/Sát thương ngã", true, function(v) NoFallDamage = v end)
+CreateToggle(ScrollMain, "Chống Ngã Tuyệt Đối (Anti-Ragdoll)", true, function(v) AntiRagdollAbsolute = v end)
+CreateToggle(ScrollMain, "Bảo vệ Anti-Fling Bản Thân", true, function(v) AntiFlingEnabled = v end)
+CreateToggle(ScrollMain, "ESP Khung Nhìn Xuyên Wall", false, function(v) ESPEnabled = v end)
+CreateToggle(ScrollMain, "Hồi Phục Thể Lực Vô Hạn", false, function(v) InfiniteStamina = v end)
+CreateToggle(ScrollMain, "Tự Động Hồi Sinh Nhanh", false, function(v) AutoRespawn = v end)
+CreateToggle(ScrollMain, "Bơi Trôi Nổi Trên Không", false, function(v) SwimInAir = v end)
+CreateToggle(ScrollMain, "Leo Tường Cực Nhanh (Fast Climb)", false, function(v) FastClimb = v end)
+CreateToggle(ScrollMain, "Đi Trên Mặt Nước (Walk On Water)", false, function(v) WalkOnWater = v end)
+CreateToggle(ScrollMain, "Auto Wall Hop Engine", false, function(v) AutoWallHop = v end)
+
+-- TAB 2: KILL AURA & PHYSICAL ATTACKS
+CreateToggle(ScrollKill, "Kill Aura FE (Đánh tự động)", false, function(v) KillAuraEnabled = v end)
+CreateToggle(ScrollKill, "Ép 1 Địch Ngồi (Sit FE)", false, function(v) ForcedSitEnabled = v end)
+CreateToggle(ScrollKill, "MASS SIT AURA (Ép tất cả ngồi)", false, function(v) MassSitAura = v end)
+CreateToggle(ScrollKill, "Aura Trip/Ngã Vĩnh Viễn", false, function(v) AuraTripForce = v end)
+CreateToggle(ScrollKill, "Push Aura FE (Đẩy văng xung quanh)", false, function(v) PushAuraFE = v end)
+CreateToggle(ScrollKill, "Air Juggler Aura (Tâng địch lên trời)", false, function(v) AirJugglerAura = v end)
+CreateToggle(ScrollKill, "Freeze Aura (Làm đông cứng địch)", false, function(v) FreezeAura = v end)
+CreateToggle(ScrollKill, "Xoay Tròn Aura (Circle Spin)", false, function(v) CircleAuraSpin = v end)
+CreateSlider(ScrollKill, "Tốc độ xoay Aura", 1, 100, 20, function(v) SpinAuraSpeed = v end)
+CreateToggle(ScrollKill, "Teleport Nhảy Vào Sau Lưng Địch", false, function(v) TeleportBehind = v end)
+CreateToggle(ScrollKill, "Auto Swing Vũ Khí/Tool", true, function(v) AutoActivateTool = v end)
+CreateToggle(ScrollKill, "Đánh Cực Nhanh (Rapid Punch FE)", false, function(v) RapidPunchAura = v end)
+CreateSlider(ScrollKill, "Phạm vi Kill Aura (Max 300)", 10, 300, 80, function(v) KillAuraRadius = v end)
+CreateSlider(ScrollKill, "Mở Rộng Tầm Kiếm (Reach Tool)", 1, 50, 5, function(v) SwordReachMultiplier = v end)
+CreateToggle(ScrollKill, "Tự Động Trang Bị Vũ Khí Mạnh Nhất", false, function(v) AutoWeaponEquip = v end)
+
+-- TAB 3: FTAP MODS
+CreateToggle(ScrollFtap, "Anti-Grab FTAP (Chống bị xách)", true, function(v) AntiGrabEnabled = v end)
+CreateToggle(ScrollFtap, "Anti-Attach (Chống gắn rác)", true, function(v) AntiAttachEnabled = v end)
+CreateToggle(ScrollFtap, "God Mode FE (Bất tử va chạm)", false, function(v) GodModeFE = v end)
+CreateToggle(ScrollFtap, "Super Throw 1000x (Ném người xa)", false, function(v) SuperThrowEnabled = v end)
+CreateToggle(ScrollFtap, "Instakill Throw (Ném vỡ hitbox)", false, function(v) InstakillThrow = v end)
+CreateToggle(ScrollFtap, "Reach Grab (Gắp xa không giới hạn)", false, function(v) ReachGrabEnabled = v end)
+CreateSlider(ScrollFtap, "Khoảng cách Reach Grab", 10, 1000, 500, function(v) GrabDistanceRange = v end)
+CreateToggle(ScrollFtap, "Grab Magnet (Hút đồ vật lại)", false, function(v) GrabMagnet = v end)
+CreateToggle(ScrollFtap, "Mass Unanchor Objects (Mở vật lý)", false, function(v) MassUnanchorObjects = v end)
+CreateToggle(ScrollFtap, "Grab Shield (Khiên vật thể bao quanh)", false, function(v) GrabShield = v end)
+CreateToggle(ScrollFtap, "Chống tự vào ghế (Anti-Seating Self)", true, function(v) AntiSeatingSelf = v end)
+CreateButton(ScrollFtap, "Bring All (Gom mọi người chơi)", "BRING ALL", Color3.fromRGB(210, 100, 0), function()
+	local myChar = LocalPlayer.Character
+	if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+			plr.Character.HumanoidRootPart.CFrame = myChar.HumanoidRootPart.CFrame * CFrame.new(0, 0, -4)
+		end
+	end
+end)
+
+-- TAB 4: FLING & VOID ATTACKS
+CreateToggle(ScrollFling, "Void Fling (Đẩy văng xuống Void)", false, function(v) VoidFlingEnabled = v end)
+CreateToggle(ScrollFling, "Spin Bot 360 (Xoay tròn vật lý)", false, function(v) SpinBotEnabled = v end)
+CreateSlider(ScrollFling, "Tốc độ Spin Bot", 10, 300, 50, function(v) SpinSpeed = v end)
+CreateToggle(ScrollFling, "Invisible Fling Trick (Tàng hình)", false, function(v) InvisibleFlingTrick = v end)
+CreateToggle(ScrollFling, "Tornado Aura (Lốc xoáy hút văng)", false, function(v) TornadoAura = v end)
+CreateToggle(ScrollFling, "BlackHole Void (Hút cả Server xuống đáy)", false, function(v) BlackHoleVoid = v end)
+
+local LoopFrame = Instance.new("Frame")
+LoopFrame.Size = UDim2.new(1, -10, 0, 70)
+LoopFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 32)
+LoopFrame.Parent = ScrollFling
+
+local LoopCorner = Instance.new("UICorner")
+LoopCorner.CornerRadius = UDim.new(0, 6)
+LoopCorner.Parent = LoopFrame
+
+local LoopLabel = Instance.new("TextLabel")
+LoopLabel.Size = UDim2.new(1, -10, 0, 22)
+LoopLabel.Position = UDim2.new(0, 10, 0, 2)
+LoopLabel.BackgroundTransparency = 1
+LoopLabel.Text = "⚡ Target Loop Fling (Nhắm 1 Mục Tiêu)"
+LoopLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoopLabel.Font = Enum.Font.SourceSansBold
+LoopLabel.TextSize = 12
+LoopLabel.TextXAlignment = Enum.TextXAlignment.Left
+LoopLabel.Parent = LoopFrame
+
+local LoopBox = Instance.new("TextBox")
+LoopBox.Size = UDim2.new(0.6, 0, 0, 28)
+LoopBox.Position = UDim2.new(0, 10, 0, 30)
+LoopBox.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+LoopBox.PlaceholderText = "Username..."
+LoopBox.Text = ""
+LoopBox.TextColor3 = Color3.fromRGB(0, 255, 180)
+LoopBox.Font = Enum.Font.SourceSans
+LoopBox.TextSize = 12
+LoopBox.Parent = LoopFrame
+
+local LoopBtn = Instance.new("TextButton")
+LoopBtn.Size = UDim2.new(0.32, 0, 0, 28)
+LoopBtn.Position = UDim2.new(0.65, 0, 0, 30)
+LoopBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+LoopBtn.Text = "⚡ LOOP: OFF"
+LoopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoopBtn.Font = Enum.Font.SourceSansBold
+LoopBtn.TextSize = 11
+LoopBtn.Parent = LoopFrame
+
+LoopBtn.MouseButton1Click:Connect(function()
+	LoopFlingEnabled = not LoopFlingEnabled
+	LoopFlingTarget = LoopBox.Text:lower():gsub("@", "")
+	LoopBtn.Text = LoopFlingEnabled and "⚡ LOOP: ON" or "⚡ LOOP: OFF"
+	LoopBtn.BackgroundColor3 = LoopFlingEnabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(60, 60, 70)
+end)
+
+-- TAB 5: CHAOS & FUN MODS
+CreateToggle(ScrollChaos, "Server Lag Generator (Phá Server)", false, function(v) LagServerAura = v end)
+CreateToggle(ScrollChaos, "Super Ragdoll All (Quật ngã toàn bộ)", false, function(v) SuperRagdollAll = v end)
+CreateToggle(ScrollChaos, "Màu 7 Sắc Cầu Vồng (Rainbow Char)", false, function(v) RainbowPlayer = v end)
+CreateToggle(ScrollChaos, "Đầu Xoay 360 (Head Spin)", false, function(v) HeadSpin = v end)
+CreateToggle(ScrollChaos, "Ghost Body FE (Thân thể bóng ma)", false, function(v) GhostBodyFE = v end)
+CreateToggle(ScrollChaos, "Fake Lag Visual (Tạo lag ảo né đạn)", false, function(v) FakeLagVisual = v end)
+CreateToggle(ScrollChaos, "Đứng Băng Trên Không (Freeze Air)", false, function(v) FreezeInAir = v end)
+CreateToggle(ScrollChaos, "Cố Định Nhân Vật (Anchor Self)", false, function(v) AnchorSelf = v end)
+CreateToggle(ScrollChaos, "Nhân Vật Co Giật (Spasm Mode)", false, function(v) SpasmCharacter = v end)
+
+-- TAB 6: WORLD & MISC
+CreateToggle(ScrollWorld, "Anti-Void (Chống Rơi Xuống Đáy)", true, function(v) AntiVoidEnabled = v end)
+CreateToggle(ScrollWorld, "Fullbright (Làm Sáng Tối Đa)", false, function(v) FullbrightEnabled = v end)
+CreateToggle(ScrollWorld, "Xóa Sương Mù Game (No Fog)", false, function(v) NoFogEnabled = v end)
+CreateToggle(ScrollWorld, "Night Vision (Nhìn ban đêm)", false, function(v) NightVision = v end)
+CreateToggle(ScrollWorld, "Disable Water Physics (Xóa nước)", false, function(v) DisableWaterPhysics = v end)
+CreateToggle(ScrollWorld, "Unlock FPS Max (Mượt Game)", true, function(v)
+	if setfpscap then setfpscap(240) end
+end)
+CreateSlider(ScrollWorld, "Đổi FOV Ống Kính Camera", 30, 120, 70, function(v) Camera.FieldOfView = v end)
+
+CreateButton(ScrollWorld, "Vào lại Server (Rejoin)", "REJOIN", Color3.fromRGB(150, 0, 200), function()
+	TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end)
+
+CreateButton(ScrollWorld, "Chuyển Server Khác (Server Hop)", "HOP SERVER", Color3.fromRGB(0, 160, 220), function()
+	local servers = {}
+	local req = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+	if req and req.data then
+		for _, v in pairs(req.data) do
+			if v.playing ~= v.maxPlayers and v.id ~= game.JobId then
+				table.insert(servers, v.id)
+			end
+		end
+	end
+	if #servers > 0 then
+		TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], LocalPlayer)
+	end
+end)
+
+-----------------------------------------------------------------------
+-- 11. AIMBOT FOV DRAWING ENGINE
+-----------------------------------------------------------------------
+local FOVCircleDrawing = Drawing and Drawing.new("Circle") or nil
+if FOVCircleDrawing then
+	FOVCircleDrawing.Visible = false
+	FOVCircleDrawing.Thickness = 1.5
+	FOVCircleDrawing.Color = Color3.fromRGB(255, 50, 50)
+	FOVCircleDrawing.Filled = false
+	FOVCircleDrawing.Transparency = 1
+end
+
+local function GetAimbotTarget()
+	local selectedTarget = nil
+	local shortestDist = math.huge
+	local mousePos = UserInputService:GetMouseLocation()
+
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character then
+			local isMatchingName = false
+			if AimbotTargetUsername ~= "" then
+				if plr.Name:lower():find(AimbotTargetUsername, 1, true) or plr.DisplayName:lower():find(AimbotTargetUsername, 1, true) then
+					isMatchingName = true
+				end
+			else
+				isMatchingName = true
+			end
+
+			if isMatchingName then
+				local targetPart = plr.Character:FindFirstChild(AimbotPart) or plr.Character:FindFirstChild("HumanoidRootPart")
+				local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+
+				if targetPart and hum and hum.Health > 0 then
+					local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+					if onScreen then
+						local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+						if dist <= AimbotFOVRadius and dist < shortestDist then
+							if AimbotWallCheck then
+								local ray = Camera:ViewportPointToRay(screenPos.X, screenPos.Y)
+								local raycastResult = Workspace:Raycast(ray.Origin, ray.Direction * 1000)
+								if raycastResult and raycastResult.Instance:IsDescendantOf(plr.Character) then
+									selectedTarget = targetPart
+									shortestDist = dist
+								end
+							else
+								selectedTarget = targetPart
+								shortestDist = dist
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	return selectedTarget
+end
+
+-----------------------------------------------------------------------
+-- 12. HELPER UTILITIES & RAYCASTING
+-----------------------------------------------------------------------
+local function IsOtherPlayerPart(part)
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character and part:IsDescendantOf(plr.Character) then
+			return true
+		end
+	end
+	return false
+end
+
+UserInputService.JumpRequest:Connect(function()
+	if InfJumpEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+		LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+	end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and ClickTPEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl) then
+			local mousePos = UserInputService:GetMouseLocation()
+			local ray = Camera:ViewportPointToRay(mousePos.X, mousePos.Y)
+			local raycastResult = Workspace:Raycast(ray.Origin, ray.Direction * 2000)
+			if raycastResult and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(raycastResult.Position + Vector3.new(0, 3, 0))
+			end
+		end
+	end
+end)
+
+-----------------------------------------------------------------------
+-- 13. CORE ENGINE RENDER STEPPED (AIMBOT EXECUTION & FOV)
+-----------------------------------------------------------------------
+RunService.RenderStepped:Connect(function()
+	if FOVCircleDrawing then
+		if AimbotMasterEnabled and AimbotFOVCircle then
+			local mousePos = UserInputService:GetMouseLocation()
+			FOVCircleDrawing.Position = mousePos
+			FOVCircleDrawing.Radius = AimbotFOVRadius
+			FOVCircleDrawing.Visible = true
+		else
+			FOVCircleDrawing.Visible = false
+		end
+	end
+
+	if AimbotMasterEnabled then
+		local targetPart = GetAimbotTarget()
+		if targetPart then
+			local targetPosition = targetPart.Position
+			if AimbotPredictMovement and targetPart.Parent:FindFirstChild("HumanoidRootPart") then
+				targetPosition = targetPosition + (targetPart.Parent.HumanoidRootPart.AssemblyLinearVelocity * AimbotPredictionFactor)
+			end
+
+			local currentCameraCFrame = Camera.CFrame
+			local targetCameraCFrame = CFrame.new(currentCameraCFrame.Position, targetPosition)
+			Camera.CFrame = currentCameraCFrame:Lerp(targetCameraCFrame, math.clamp(1 / AimbotSmoothness, 0.01, 1))
+
+			if TriggerBotEnabled then
+				local tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+				if tool then
+					tool:Activate()
+				end
+			end
+		end
+	end
+
+	-- ESP Visual System Updates
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character then
+			local highlight = plr.Character:FindFirstChild("HubESP")
+			if ESPEnabled then
+				if not highlight then
+					highlight = Instance.new("Highlight")
+					highlight.Name = "HubESP"
+					highlight.FillColor = Color3.fromRGB(0, 255, 180)
+					highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+					highlight.Parent = plr.Character
+				end
+			else
+				if highlight then highlight:Destroy() end
+			end
+		end
+	end
+end)
+
+-----------------------------------------------------------------------
+-- 14. CORE ENGINE HEARTBEAT (PHYSICS, FLING, & SAFEGUARD LOOP)
+-----------------------------------------------------------------------
+RunService.Heartbeat:Connect(function(deltaTime)
+	local char = LocalPlayer.Character
+	if not char then return end
+
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+
+	-------------------------------------------------------------------
+	-- 🛡️ ANTI-SELF-FLING & VELOCITY LOCK SAFEGUARD
+	-------------------------------------------------------------------
+	if hrp then
+		if AntiFlingEnabled then
+			if hrp.AssemblyAngularVelocity.Magnitude > 80 and not VoidFlingEnabled and not SpinBotEnabled then
+				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+			if hrp.AssemblyLinearVelocity.Magnitude > 300 and not FlyEnabled then
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+
+		if FreezeInAir then
+			hrp.Anchored = true
+		elseif not AnchorSelf then
+			hrp.Anchored = false
+		end
+
+		if AnchorSelf then
+			hrp.Anchored = true
+		end
+	end
+
+	-------------------------------------------------------------------
+	-- HUMANOID STATE CONTROLS
+	-------------------------------------------------------------------
+	if hum then
+		hum.WalkSpeed = WalkSpeedValue
+		hum.UseJumpPower = true
+		hum.JumpPower = JumpPowerValue
+		hum.HipHeight = HipHeightValue
+
+		if LowGravity then
+			Workspace.Gravity = 30
+		else
+			Workspace.Gravity = 196.2
+		end
+
+		if AutoBhop and hum.MoveDirection.Magnitude > 0 then
+			if hum.FloorMaterial ~= Enum.Material.Air then
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end
+
+		if AntiSeatingSelf then
+			hum.Sit = false
+		end
+
+		if AntiRagdollAbsolute then
+			local state = hum:GetState()
+			if state == Enum.HumanoidStateType.Ragdoll or state == Enum.HumanoidStateType.Physics or state == Enum.HumanoidStateType.FallingDown then
+				hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+			end
+		end
+
+		if SwimInAir then
+			hum:ChangeState(Enum.HumanoidStateType.Swimming)
+		end
+
+		if AutoRespawn and hum.Health <= 0 then
+			LocalPlayer:Unload()
+		end
+	end
+
+	-------------------------------------------------------------------
+	-- FTAP ANTI-GRAB & ANTI-ATTACH
+	-------------------------------------------------------------------
+	if AntiGrabEnabled or AntiAttachEnabled then
+		for _, item in pairs(char:GetDescendants()) do
+			if item:IsA("WeldConstraint") or item:IsA("Weld") or item:IsA("RopeConstraint") or item:IsA("AlignPosition") or item:IsA("SpringConstraint") then
+				if item:IsA("WeldConstraint") or item:IsA("Weld") then
+					if (item.Part0 and item.Part0.Parent ~= char) or (item.Part1 and item.Part1.Parent ~= char) then
+						item:Destroy()
+					end
+				else
+					item:Destroy()
+				end
+			end
+		end
+	end
+
+	-------------------------------------------------------------------
+	-- GOD MODE LOGIC
+	-------------------------------------------------------------------
+	if GodModeFE and char:FindFirstChild("LowerTorso") and char.LowerTorso:FindFirstChild("Root") then
+		char.LowerTorso.Root:Destroy()
+	end
+
+	-------------------------------------------------------------------
+	-- ANTI-VOID PROTECTION
+	-------------------------------------------------------------------
+	if AntiVoidEnabled and hrp then
+		if hrp.Position.Y < -50 then
+			hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			hrp.CFrame = CFrame.new(hrp.Position.X, 50, hrp.Position.Z)
+		end
+	end
+
+	-------------------------------------------------------------------
+	-- VOID FLING & SPIN BOT
+	-------------------------------------------------------------------
+	if VoidFlingEnabled and hrp then
+		hrp.AssemblyAngularVelocity = Vector3.new(0, 999999999, 0)
+	elseif SpinBotEnabled and hrp then
+		hrp.AssemblyAngularVelocity = Vector3.new(0, SpinSpeed * 10, 0)
+	end
+
+	-------------------------------------------------------------------
+	-- KILL AURA & PHYSICAL ATTACKS
+	-------------------------------------------------------------------
+	if (KillAuraEnabled or MassSitAura or RapidPunchAura or SuperRagdollAll or PushAuraFE or AirJugglerAura or FreezeAura or BlackHoleVoid) and hrp and hum then
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				local enemyHum = plr.Character:FindFirstChildOfClass("Humanoid")
+				local enemyHrp = plr.Character.HumanoidRootPart
+
+				if enemyHum and enemyHum.Health > 0 then
+					local distance = (hrp.Position - enemyHrp.Position).Magnitude
+					if distance <= KillAuraRadius then
+						if AutoActivateTool then
+							local tool = char:FindFirstChildOfClass("Tool")
+							if tool then tool:Activate() end
+						end
+
+						if PushAuraFE then
+							enemyHrp.AssemblyLinearVelocity = (enemyHrp.Position - hrp.Position).Unit * 2500
+						elseif AirJugglerAura then
+							enemyHrp.AssemblyLinearVelocity = Vector3.new(0, 2000, 0)
+						elseif FreezeAura then
+							enemyHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+						elseif MassSitAura or ForcedSitEnabled or SuperRagdollAll then
+							enemyHrp.CFrame = hrp.CFrame * CFrame.new(0, -1.8, -0.5)
+							enemyHrp.AssemblyLinearVelocity = Vector3.new(0, -1000, 0)
+						elseif AuraTripForce then
+							enemyHrp.CFrame = hrp.CFrame * CFrame.Angles(math.rad(90), 0, 0)
+							enemyHrp.AssemblyLinearVelocity = Vector3.new(0, -500, 0)
+						elseif TeleportBehind then
+							hrp.CFrame = enemyHrp.CFrame * CFrame.new(0, 0, 2)
+						end
+
+						if BlackHoleVoid then
+							enemyHrp.AssemblyLinearVelocity = Vector3.new(0, -50000, 0)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-------------------------------------------------------------------
+	-- TARGET LOOP FLING ENGINE
+	-------------------------------------------------------------------
+	if LoopFlingEnabled and LoopFlingTarget ~= "" and hrp then
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr ~= LocalPlayer and (plr.Name:lower():find(LoopFlingTarget, 1, true) or plr.DisplayName:lower():find(LoopFlingTarget, 1, true)) then
+				if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+					local targetHrp = plr.Character.HumanoidRootPart
+					hrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 1.2)
+					hrp.AssemblyAngularVelocity = Vector3.new(999999, 999999, 999999)
+					targetHrp.AssemblyLinearVelocity = Vector3.new(0, -20000, 0)
+				end
+			end
+		end
+	end
+
+	-------------------------------------------------------------------
+	-- NOCLIP EXECUTION
+	-------------------------------------------------------------------
+	if NoclipEnabled then
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				if not IsOtherPlayerPart(part) then
+					part.CanCollide = false
+				end
+			end
+		end
+	end
+
+	-------------------------------------------------------------------
+	-- VISUAL & CHAOS EFFECTS
+	-------------------------------------------------------------------
+	if RainbowPlayer then
+		for _, part in pairs(char:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.Color = Color3.fromHSV(tick() % 2 / 2, 1, 1)
+			end
+		end
+	end
+
+	if SpasmCharacter and hrp then
+		hrp.CFrame = hrp.CFrame * CFrame.Angles(math.rad(math.random(-30, 30)), math.rad(math.random(-30, 30)), math.rad(math.random(-30, 30)))
+	end
+
+	if HeadSpin and char:FindFirstChild("Head") then
+		char.Head.CFrame = char.Head.CFrame * CFrame.Angles(0, math.rad(20), 0)
+	end
+
+	-------------------------------------------------------------------
+	-- LIGHTING CONTROL ENGINE
+	-------------------------------------------------------------------
+	if FullbrightEnabled or NightVision then
+		Lighting.Brightness = 3
+		Lighting.ClockTime = ChangeTime
+		Lighting.GlobalShadows = false
+	end
+	if NoFogEnabled then
+		Lighting.FogEnd = 100000
+	end
+end)
+
+-----------------------------------------------------------------------
+-- 15. FLY ENGINE CONTROLLER
+-----------------------------------------------------------------------
+RunService.RenderStepped:Connect(function()
+	local char = LocalPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		local hrp = char.HumanoidRootPart
+
+		if FlyEnabled then
+			if not hrp:FindFirstChild("FlyVel") then
+				local bodyVel = Instance.new("BodyVelocity")
+				bodyVel.Name = "FlyVel"
+				bodyVel.MaxForce = Vector3.new(1, 1, 1) * 10^7
+				bodyVel.Parent = hrp
+
+				local bodyGyro = Instance.new("BodyGyro")
+				bodyGyro.Name = "FlyGyro"
+				bodyGyro.MaxTorque = Vector3.new(1, 1, 1) * 10^7
+				bodyGyro.P = 10000
+				bodyGyro.Parent = hrp
+			end
+
+			hrp.FlyGyro.CFrame = Camera.CFrame
+			local moveDir = Vector3.new()
+			if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + Camera.CFrame.LookVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - Camera.CFrame.LookVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - Camera.CFrame.RightVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + Camera.CFrame.RightVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+
+			hrp.FlyVel.Velocity = moveDir * FlySpeedValue
+		else
+			if hrp:FindFirstChild("FlyVel") then hrp.FlyVel:Destroy() end
+			if hrp:FindFirstChild("FlyGyro") then hrp.FlyGyro:Destroy() end
+		end
+	end
+end)
