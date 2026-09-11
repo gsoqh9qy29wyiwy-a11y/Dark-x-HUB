@@ -93,7 +93,7 @@ local function createLoadingScreen()
         task.delay(1.2, function()
             -- Toca som de conclusão
             local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://8486683243"
+            sound.SoundId = "rbxassetid://113088956809836"
             sound.Volume = 0.5
             sound.PlayOnRemove = true
             sound.Parent = workspace
@@ -145,6 +145,8 @@ local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
 _G.SelectedPlayer = ""
 _G.AutoBringCouch = false
+_G.AutoKillCouch = false
+_G.AutoFlingCouch = false
 _G.AntiSit = false
 _G.AntiVoid = false
 _G.AntiFling = false
@@ -346,6 +348,225 @@ local function ExecutarBringCouch(targetPlayer)
     repeat task.wait(0.05) until running == false
 end
 
+-- --- 2. FUNÇÃO KILL COUCH (MATA NO VOID ORIGINAL) ---
+local function ExecutarKillCouch(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character or not vu7.Character then return end
+
+    local character = vu7.Character
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local myHRP = character:FindFirstChild("HumanoidRootPart")
+    local tHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local tHum = targetPlayer.Character:FindFirstChild("Humanoid")
+
+    if not humanoid or not myHRP or not tHRP or not tHum then return end
+
+    local originalCFrame = myHRP.CFrame
+    local pegou = EquiparSofaGarantido()
+    if not pegou then return end
+
+    local running = true
+    local startTime = tick()
+    local killLoop
+
+    local noCollide = vu10.Stepped:Connect(function()
+        if not running then return end
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end)
+
+    killLoop = vu10.Heartbeat:Connect(function()
+        if not running or not targetPlayer.Character or not tHRP or not myHRP then
+            if killLoop then killLoop:Disconnect() end
+            if noCollide then noCollide:Disconnect() end
+            return
+        end
+
+        pcall(function()
+            local targetVel = tHRP.AssemblyLinearVelocity or tHRP.Velocity
+            local isMoving = (tHum.MoveDirection.Magnitude > 0.005) or (targetVel.Magnitude > 3.5)
+
+            local finalPos
+            if isMoving then
+                local pulse = (math.sin(tick() * 9000) + 20) / 800
+                local forwardDistance = pulse * 500.5
+                local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
+                finalPos = frontCFrame.Position
+            else
+                finalPos = tHRP.Position
+            end
+
+            local rotation = CFrame.Angles(
+                math.rad(vu9.DistributedGameTime * 10094000),
+                math.rad(vu9.DistributedGameTime * 19440000),
+                math.rad(vu9.DistributedGameTime * 49900009)
+            )
+
+            myHRP.CFrame = CFrame.new(finalPos) * rotation
+        end)
+
+        if tHum.Sit or (tick() - startTime > 1) then
+            running = false
+            killLoop:Disconnect()
+            noCollide:Disconnect()
+
+            -- Leva o player para a profundidade do Void
+            pcall(function()
+                myHRP.Anchored = true
+                myHRP.CFrame = CFrame.new(Vector3.new(9, -67, 315))
+                myHRP.Anchored = false
+            end)
+
+            task.wait(0.3)
+
+            -- Deleta a tool para derrubar ele no void
+            pcall(function()
+                humanoid:UnequipTools()
+                local clearRemote = vu8:FindFirstChild("RE") and (vu8.RE:FindFirstChild("1Clea1rToo1ls") or vu8.RE:FindFirstChild("1Clea1rTool1s"))
+                if clearRemote then
+                    clearRemote:FireServer("PlayerWantsToDeleteTool", "Couch")
+                end
+            end)
+
+            -- Retorna você com segurança
+            pcall(function()
+                myHRP.Anchored = true
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.CFrame = originalCFrame
+                task.wait(0.2)
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.Anchored = false
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end)
+        end
+    end)
+    
+    repeat task.wait(0.05) until running == false
+end
+
+-- --- 3. FUNÇÃO FLING COUCH (CÓDIGO DE ARREMESSO EXTREMO) ---
+local function ExecutarFlingCouch(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character or not vu7.Character then return end
+
+    local character = vu7.Character
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local myHRP = character:FindFirstChild("HumanoidRootPart")
+    local tHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local tHum = targetPlayer.Character:FindFirstChild("Humanoid")
+
+    if not humanoid or not myHRP or not tHRP or not tHum then return end
+
+    local originalCFrame = myHRP.CFrame
+    local pegou = EquiparSofaGarantido()
+    if not pegou then return end
+
+    local running = true
+    local startTime = tick()
+    local flingLoop
+
+    local noCollide = vu10.Stepped:Connect(function()
+        if not running then return end
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end)
+
+    flingLoop = vu10.Heartbeat:Connect(function()
+        if not running or not targetPlayer.Character or not tHRP or not myHRP then
+            if flingLoop then flingLoop:Disconnect() end
+            if noCollide then noCollide:Disconnect() end
+            return
+        end
+
+        pcall(function()
+            local targetVel = tHRP.AssemblyLinearVelocity or tHRP.Velocity
+            local isMoving = (tHum.MoveDirection.Magnitude > 0.005) or (targetVel.Magnitude > 3.5)
+
+            local finalPos
+            if isMoving then
+                local pulse = (math.sin(tick() * 9000) + 20) / 800
+                local forwardDistance = pulse * 500.5
+                local frontCFrame = tHRP.CFrame * CFrame.new(10, 10, -forwardDistance)
+                finalPos = frontCFrame.Position
+            else
+                finalPos = tHRP.Position
+            end
+
+            local rotation = CFrame.Angles(
+                math.rad(vu9.DistributedGameTime * 1009000000004),
+                math.rad(vu9.DistributedGameTime * 1944000000000),
+                math.rad(vu9.DistributedGameTime * 4990900000000)
+            )
+
+            myHRP.CFrame = CFrame.new(finalPos) * rotation
+        end)
+
+        if tHum.Sit or (tick() - startTime > 1.9) then
+            running = false
+            flingLoop:Disconnect()
+            noCollide:Disconnect()
+
+            -- Aplica super velocidade para fling
+            local walkFlingInstance = Instance.new("BodyVelocity")
+            walkFlingInstance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            walkFlingInstance.Velocity = Vector3.new(0, 9000000000000, 0)
+            walkFlingInstance.Parent = myHRP
+
+            -- Leva para a posição profunda
+            pcall(function()
+                myHRP.Anchored = true
+                myHRP.CFrame = CFrame.new(Vector3.new(-101, -353, -327))
+                myHRP.Anchored = false
+            end)
+
+            -- Rotação de fling super rápida
+            local spinStart = tick()
+            local spinConnection
+            spinConnection = vu10.Heartbeat:Connect(function()
+                if tick() - spinStart >= 1 then
+                    spinConnection:Disconnect()
+                    return
+                end
+                pcall(function()
+                    myHRP.CFrame = myHRP.CFrame * CFrame.Angles(
+                        math.rad(vu9.DistributedGameTime * 69029),
+                        math.rad(vu9.DistributedGameTime * 500933),
+                        math.rad(vu9.DistributedGameTime * 400929)
+                    )
+                end)
+            end)
+
+            task.wait(0.4)
+
+            -- Deleta a tool
+            pcall(function()
+                local clearRemote = vu8:FindFirstChild("RE") and (vu8.RE:FindFirstChild("1Clea1rToo1ls") or vu8.RE:FindFirstChild("1Clea1rTool1s"))
+                if clearRemote then
+                    clearRemote:FireServer("PlayerWantsToDeleteTool", "Couch")
+                end
+            end)
+
+            -- Retorna você ao local original intacto
+            pcall(function()
+                if walkFlingInstance then walkFlingInstance:Destroy() end
+                myHRP.Anchored = true
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.CFrame = originalCFrame
+                task.wait(0.2)
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.Anchored = false
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end)
+        end
+    end)
+    
+    repeat task.wait(0.05) until running == false
+end
+
 -- --- FUNÇÃO ANTI-LAG ---
 local backupTables = { Vehicles = {}, Canoes = {}, Jets = {}, Helis = {}, Balls = {} }
 local function AntiFlingLoop(name, getFolderFunc)
@@ -490,169 +711,7 @@ local function FlingBall(targetName)
         end
     end
 end
--- --- FUNÇÃO GARANTIDA DE PEGAR E EQUIPAR O SOFÁ ---
-local function EquiparSofaGarantido()
-    local character = vu7.Character or vu7.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid", 3)
-    local backpack = vu7:WaitForChild("Backpack", 3)
-    if not humanoid or not backpack then return false end
 
-    -- Se já estiver equipado na mão
-    if character:FindFirstChild("Couch") then return true end
-
-    -- Pede ao servidor caso não esteja no inventário
-    if not backpack:FindFirstChild("Couch") then
-        pcall(function()
-            local toolRemote = vu8:FindFirstChild("RE") and (vu8.RE:FindFirstChild("1Too1l") or vu8.RE:FindFirstChild("1Tool"))
-            if toolRemote then
-                toolRemote:InvokeServer("PickingTools", "Couch")
-            end
-        end)
-        
-        local t0 = tick()
-        repeat
-            task.wait(0.05)
-        until backpack:FindFirstChild("Couch") or (tick() - t0 > 1.5)
-    end
-
-    -- Equipa
-    local couchTool = backpack:FindFirstChild("Couch")
-    if couchTool then
-        humanoid:EquipTool(couchTool)
-        task.wait(0.1)
-        return true
-    end
-
-    return character:FindFirstChild("Couch") ~= nil
-end
-
--- --- FUNÇÃO FLING COUCH COM MOVIMENTAÇÃO INTELIGENTE ---
-local function ExecutarFlingCouch(targetPlayer)
-    if not targetPlayer or not targetPlayer.Character or not vu7.Character then return end
-
-    local character = vu7.Character
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    local myHRP = character:FindFirstChild("HumanoidRootPart")
-    local tHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local tHum = targetPlayer.Character:FindFirstChild("Humanoid")
-
-    if not humanoid or not myHRP or not tHRP or not tHum then return end
-
-    local savedPosition = myHRP.Position
-
-    local pegou = EquiparSofaGarantido()
-    if not pegou then return end
-
-    local running = true
-    local startTime = tick()
-    local flingLoop
-
-    -- Desativa colisão temporariamente
-    local noCollide = vu10.Stepped:Connect(function()
-        if not running then return end
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
-        end
-    end)
-
-    flingLoop = vu10.Heartbeat:Connect(function()
-        if not running or not targetPlayer.Character or not tHRP or not myHRP then
-            if flingLoop then flingLoop:Disconnect() end
-            if noCollide then noCollide:Disconnect() end
-            return
-        end
-
-        pcall(function()
-            -- Detecção de movimento do alvo
-            local targetVel = tHRP.AssemblyLinearVelocity or tHRP.Velocity
-            local isMoving = (tHum.MoveDirection.Magnitude > 0.05) or (targetVel.Magnitude > 3.5)
-
-            local finalPos
-
-            if isMoving then
-                -- MOVIMENTO: Oscila entre frente e dentro do player
-                local pulse = (math.sin(tick() * 95) + 6) / 29
-                local forwardDistance = pulse * 70.5
-                local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
-                finalPos = frontCFrame.Position
-            else
-                -- PARADO: Fica 100% no corpo
-                finalPos = tHRP.Position
-            end
-
-            -- Rotação 3D contínua
-            local rotation = CFrame.Angles(
-                math.rad(vu9.DistributedGameTime * 12000),
-                math.rad(vu9.DistributedGameTime * 15000),
-                math.rad(vu9.DistributedGameTime * 18000)
-            )
-
-            myHRP.CFrame = CFrame.new(finalPos) * rotation
-        end)
-
-        -- Se o alvo sentou no sofá ou passou de 5 segundos
-        if tHum.Sit or (tick() - startTime > 5) or not _G.AutoFlingCouch then
-            running = false
-            flingLoop:Disconnect()
-            noCollide:Disconnect()
-
-            -- Impulso de lançamento
-            local walkFlingInstance = Instance.new("BodyVelocity")
-            walkFlingInstance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            walkFlingInstance.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 10000000000000 + Vector3.new(0, 100000000000, 0)
-            walkFlingInstance.Parent = myHRP
-
-            -- Teleporte para o vácuo
-            pcall(function()
-                myHRP.Anchored = true
-                myHRP.CFrame = CFrame.new(Vector3.new(-59599.73, 2040070.50, -293391.16))
-                myHRP.Anchored = false
-            end)
-
-            -- Giro no vácuo
-            local spinStart = tick()
-            local spinConnection
-            spinConnection = vu10.Heartbeat:Connect(function()
-                if tick() - spinStart >= 0.5 then
-                    spinConnection:Disconnect()
-                    return
-                end
-                pcall(function()
-                    myHRP.CFrame = myHRP.CFrame * CFrame.Angles(
-                        math.rad(vu9.DistributedGameTime * 12000),
-                        math.rad(vu9.DistributedGameTime * 15000),
-                        math.rad(vu9.DistributedGameTime * 18000)
-                    )
-                end)
-            end)
-
-            task.wait(0.5)
-
-            -- Deleta o sofá para soltar o alvo no void
-            pcall(function()
-                local clearRemote = vu8:FindFirstChild("RE") and (vu8.RE:FindFirstChild("1Clea1rToo1ls") or vu8.RE:FindFirstChild("1Clea1rTool1s"))
-                if clearRemote then
-                    clearRemote:FireServer("PlayerWantsToDeleteTool", "Couch")
-                end
-            end)
-
-            -- Retorna à posição salva
-            pcall(function()
-                if walkFlingInstance then walkFlingInstance:Destroy() end
-                myHRP.Anchored = true
-                myHRP.CFrame = CFrame.new(savedPosition + Vector3.new(0, 5, 0))
-                task.wait(0.4)
-                myHRP.Velocity = Vector3.zero
-                myHRP.RotVelocity = Vector3.zero
-                myHRP.Anchored = false
-                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-            end)
-        end
-    end)
-    
-    -- Espera o ciclo terminar antes de permitir o próximo no auto
-    repeat task.wait(0.0) until running == false
-end
 -- Configuração do Black Hole
 local function SetupBlackHole()
     if not BH_Part then
@@ -704,7 +763,7 @@ local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh
 
 --  3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
-    Title = "Dark x Hub",
+    Title = "Dark x Hub {Developer}[Carlolx777]",
     SubTitle = "Brookhaven RP | by Carlolx777",
     SaveFolder = "UnifiedHubConfig"
 })
@@ -929,7 +988,7 @@ TabTroll:AddToggle({
         end
     end
 })
-
+TabTroll:AddSection({ "Black Hole Orbit" })
 TabTroll:AddToggle({
     Name = "Black Hole Orbit",
     Default = false,
@@ -962,7 +1021,81 @@ TabTroll:AddToggle({
         end
     end
 })
-
+TabTroll:AddSection({ "Kill Couch Manual" })
+-- --- SEÇÃO KILL ---
+TabTroll:AddButton({
+    Name = "Kill Couch (1x)",
+    Callback = function()
+        if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                task.spawn(function()
+                    ExecutarKillCouch(target)
+                end)
+            end
+        end
+    end
+})
+TabTroll:AddSection({ "Auto Kill Couch" })
+TabTroll:AddToggle({
+    Name = "Auto Kill Couch",
+    Description = "Elimina o jogador selecionado no Void continuamente em loop",
+    Default = false,
+    Callback = function(state)
+        _G.AutoKillCouch = state
+        if state then
+            task.spawn(function()
+                while _G.AutoKillCouch do
+                    if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                        local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                        if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                            ExecutarKillCouch(target)
+                        end
+                    end
+                    task.wait(0.8)
+                end
+            end)
+        end
+    end
+})
+TabTroll:AddSection({ "Fling Couch Manual" })
+-- --- SEÇÃO FLING ---
+TabTroll:AddButton({
+    Name = "Fling Couch (1x)",
+    Callback = function()
+        if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                task.spawn(function()
+                    ExecutarFlingCouch(target)
+                end)
+            end
+        end
+    end
+})
+TabTroll:AddSection({ "Auto Fling Couch" })
+TabTroll:AddToggle({
+    Name = "Auto Fling Couch",
+    Description = "Arremessa o jogador selecionado com super velocidade e rotação",
+    Default = false,
+    Callback = function(state)
+        _G.AutoFlingCouch = state
+        if state then
+            task.spawn(function()
+                while _G.AutoFlingCouch do
+                    if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                        local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                        if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                            ExecutarFlingCouch(target)
+                        end
+                    end
+                    task.wait(0.9)
+                end
+            end)
+        end
+    end
+})
+TabTroll:AddSection({ "Bring Couch Manual" })
   -- --- SEÇÃO BRING ---
 TabTroll:AddButton({
     Name = "Bring Couch (1x)",
@@ -977,7 +1110,7 @@ TabTroll:AddButton({
         end
     end
 })
-
+TabTroll:AddSection({ "Auto Bring Couch" })
 TabTroll:AddToggle({
     Name = "Auto Bring Couch",
     Description = "Puxa o jogador selecionado continuamente até onde você está",
@@ -1000,8 +1133,8 @@ TabTroll:AddToggle({
     end
 })
 
-TabTroll:AddSection({"Teleportar o alvo para..."}) 
-TabTroll:AddButton({Name = "Spawn", Callback = function()
+TabTroll:AddSection({"Teleportar o alvo para"}) 
+TabTroll:AddButton({Name = "Spawn - Beta", Callback = function()
     local T = vu6:FindFirstChild(_G.SelectedPlayer)
     if not T or not T.Character then return end
     _G.IsTrapping = true
