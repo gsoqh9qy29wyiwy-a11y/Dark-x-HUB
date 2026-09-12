@@ -133,12 +133,17 @@ print("Loading completo! Agora executando o resto do script...")
 -- ... resto do seu código ...
 
 -- 1. SERVIÇOS E VARIÁVEIS INICIAIS
-local vu6 = game:GetService("Players")
-local vu7 = vu6.LocalPlayer
-local vu8 = game:GetService("ReplicatedStorage")
-local vu9 = game:GetService("Workspace")
-local vu10 = game:GetService("RunService")
-local vuCam = vu9.CurrentCamera
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local TextChatService = game:GetService("TextChatService")
+local Camera = Workspace.CurrentCamera
+
+-- Atalhos de compatibilidade
+local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
 
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
@@ -5780,139 +5785,203 @@ game.Players.PlayerRemoving:Connect(function()
 end)
 
 -- ====================================================================
--- ABA: OP
+-- ABA: ADM
 -- ====================================================================
-opTab:AddSection({ "Natural Disasters" })
-opTab:AddButton({
-    Name = "[OP] Tornado - Pirate Ship (Large)",
-    Callback = function()
-local RS = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+-- ====================================================================
+-- SERVIÇOS & VARIÁVEIS GLOBAIS
+-- ====================================================================
+local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
-local Vehicles = workspace:WaitForChild("Vehicles")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local lp = Players.LocalPlayer
 
-local selectedAudioID = 9068077052
-local function playAudio()
-    if not selectedAudioID then
-        return
-    end
+-- Admins com permissão para enviar comandos pelo chat e abrir a UI
+local AdminsAutorizados = {
+    ["Carlolx77"] = true, -- Substitua pelo seu Nick exato
+    [lp.Name] = true
+}
 
-    local args = {
-        [1] = workspace,
-        [2] = selectedAudioID,
-        [3] = 1,
-    }
-
-    for i = 1, 5 do
-        RS.RE:FindFirstChild("1Gu1nSound1s"):FireServer(unpack(args))
-
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://" .. tostring(selectedAudioID)
-        sound.Parent = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-        if sound.Parent then
-            sound:Play()
+-- Função auxiliar para enviar mensagem no chat de forma compatível
+local function EnviarMensagemChat(mensagem)
+    pcall(function()
+        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+            local canal = TextChatService.TextChannels:FindFirstChild("RBXGeneral") 
+                or TextChatService.TextChannels:GetChildren()[1]
+            if canal then canal:SendAsync(mensagem) end
         else
-            break
+            local defaultEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+            if defaultEvents and defaultEvents:FindFirstChild("SayMessageRequest") then
+                defaultEvents.SayMessageRequest:FireServer(mensagem, "All")
+            end
+        end
+    end)
+end
+
+-- ====================================================================
+-- ABA: ADMIN (INTERFACE)
+-- ====================================================================
+TabAdmin:AddSection({ "Painel de Administração" })
+
+TabAdmin:AddButton({
+    Name = "Abrir Painel Admin",
+    Description = "Somente autorizados",
+    Callback = function()
+        if not AdminsAutorizados[lp.Name] then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Acesso Negado",
+                Text = "Você não é um administrador.",
+                Duration = 3
+            })
+            return
         end
 
-        task.wait(1.5)
-        sound:Destroy()
-    end
-end
-
-local function spawnBoat()
-    RootPart.CFrame = CFrame.new(1754, -2, 58)
-    task.wait(0.5)
-    RS:WaitForChild("RE"):FindFirstChild("1Ca1r"):FireServer("PickingBoat", "PirateFree")
-    task.wait(1)
-    return Vehicles:FindFirstChild(Player.Name .. "Car")
-end
-
-local PCar = spawnBoat()
-if not PCar then
-    return
-end
-
-local Seat = PCar:FindFirstChild("Body") and PCar.Body:FindFirstChild("VehicleSeat")
-if not Seat then
-    return
-end
-
-repeat
-    task.wait(0.1)
-    RootPart.CFrame = Seat.CFrame * CFrame.new(0, 1, 0)
-until Humanoid.SeatPart == Seat
-
-task.spawn(playAudio)
-
-task.delay(4, function()
-    if Humanoid.SeatPart then
-        Humanoid.Sit = false
-    end
-    RootPart.CFrame = CFrame.new(0,0,0)
-end)
-
-local RE_Flip = RS:WaitForChild("RE"):WaitForChild("1Player1sCa1r")
-task.spawn(function()
-    while PCar and PCar.Parent do
-        RE_Flip:FireServer("Flip")
-        task.wait(0.5)
-    end
-end)
-
-local waypoints = {
-    Vector3.new(-32, 3, -33),
-    Vector3.new(-64, 3, 60),
-    Vector3.new(21, 3, 50)
- }
-
-local currentIndex = 1
-local nextIndex = 2
-local moveSpeed = 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-local rotationSpeed = math.rad(720)
-local progress = 0
-local currentRotation = 0
-
-local function lerpCFrame(a, b, t)
-    return a:lerp(b, t)
-end
-
-RunService.Heartbeat:Connect(function(dt)
-    if not (PCar and PCar.PrimaryPart) then return end
-
-    local startPos = waypoints[currentIndex]
-    local endPos = waypoints[nextIndex]
-
-    progress += (moveSpeed * dt) / (startPos - endPos).Magnitude
-    if progress >= 1 then
-        progress = 0
-        currentIndex = nextIndex
-        nextIndex = (nextIndex % #waypoints) + 1
-    end
-
-    local newPos = lerpCFrame(CFrame.new(startPos), CFrame.new(endPos), progress).p
-    currentRotation += rotationSpeed * dt
-
-    local cf = CFrame.new(newPos) * CFrame.Angles(0, currentRotation, 0)
-    PCar:SetPrimaryPartCFrame(cf)
-end)
-end
-})
-
-opTab:AddButton({
-    Name = "Cancel Tornado",
-    Callback = function()
-        local success, err = pcall(function()
-            local args = { "DeleteAllVehicles" }
-            game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+        local ok, WindUI = pcall(function()
+            return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
         end)
 
-        if not success then
-        else
+        if not ok or not WindUI then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Erro",
+                Text = "Falha ao carregar WindUI.",
+                Duration = 3
+            })
+            return
+        end
+
+        local AdminWindow = WindUI:CreateWindow({
+            Title = "👾 Dark x hub 👾 | Administrador",
+            Icon = "star",
+            Author = "by Carlolx77",
+            Folder = "DarkXHubAdmin",
+            Size = UDim2.fromOffset(580, 460),
+            Transparent = true,
+            Resizable = false,
+            SideBarWidth = 200,
+            BackgroundImageTransparency = 0.42,
+            HideSearchBar = true,
+            ScrollBarEnabled = true,
+        })
+
+        local Tab = AdminWindow:Tab({ Title = "Comandos", Icon = "shield" })
+        local Sec = Tab:Section({ Title = "Painel de Controle", Icon = "terminal", Opened = true })
+
+        local TargetName = ""
+        local function ObterJogadores()
+            local lista = {}
+            for _, p in ipairs(Players:GetPlayers()) do
+                table.insert(lista, p.Name)
+            end
+            return lista
+        end
+
+        local DropdownPlayer = Sec:Dropdown({
+            Title = "Selecionar Alvo",
+            Values = ObterJogadores(),
+            Value = "",
+            Callback = function(v) TargetName = v end
+        })
+
+        -- Atualiza lista de jogadores dinamicamente no Dropdown
+        Players.PlayerAdded:Connect(function() DropdownPlayer:SetValues(ObterJogadores()) end)
+        Players.PlayerRemoving:Connect(function() DropdownPlayer:SetValues(ObterJogadores()) end)
+
+        local comandos = { "kick", "kill", "killplus", "fling", "freeze", "unfreeze", "jail", "unjail", "verifique" }
+
+        for _, cmd in ipairs(comandos) do
+            Sec:Button({
+                Title = cmd,
+                Desc = "Executa ;" .. cmd,
+                Callback = function()
+                    if cmd == "verifique" then
+                        EnviarMensagemChat(";verifique")
+                    elseif TargetName ~= "" then
+                        EnviarMensagemChat(";" .. cmd .. " " .. TargetName)
+                    else
+                        StarterGui:SetCore("SendNotification", {
+                            Title = "Atenção",
+                            Text = "Selecione um jogador primeiro!",
+                            Duration = 2
+                        })
+                    end
+                end
+            })
         end
     end
 })
+
+-- ====================================================================
+-- SISTEMA DE EXECUÇÃO DE COMANDOS (RECEPÇÃO)
+-- ====================================================================
+local function ProcessarComando(remetente, mensagem)
+    if not AdminsAutorizados[remetente.Name] then return end
+    if string.sub(mensagem, 1, 1) ~= ";" then return end
+
+    local args = string.split(string.sub(mensagem, 2), " ")
+    local comando = string.lower(args[1] or "")
+    local alvoNome = args[2]
+
+    local myChar = lp.Character
+    local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
+    local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+    local ehParaMim = false
+    if alvoNome then
+        alvoNome = string.lower(alvoNome)
+        local meName = string.lower(lp.Name)
+        if alvoNome == "all" or alvoNome == meName or string.find(meName, alvoNome, 1, true) then
+            ehParaMim = true
+        end
+    end
+
+    if comando == "verifique" then
+        EnviarMensagemChat(lp.Name .. " [Dark x Hub Ativo]")
+    elseif ehParaMim then
+        if comando == "kill" and myHum then
+            myHum.Health = 0
+        elseif comando == "killplus" and myChar then
+            myChar:BreakJoints()
+        elseif comando == "kick" then
+            lp:Kick("Removido por um Administrador.")
+        elseif comando == "freeze" and myChar then
+            for _, part in ipairs(myChar:GetDescendants()) do
+                if part:IsA("BasePart") then part.Anchored = true end
+            end
+        elseif comando == "unfreeze" and myChar then
+            for _, part in ipairs(myChar:GetDescendants()) do
+                if part:IsA("BasePart") then part.Anchored = false end
+            end
+        elseif comando == "fling" and myHRP then
+            local bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.Velocity = Vector3.new(math.random(-500, 500), 1000, math.random(-500, 500))
+            bv.Parent = myHRP
+            task.delay(0.5, function() bv:Destroy() end)
+        elseif comando == "jail" and myHRP then
+            myHRP.CFrame = CFrame.new(0, 5000, 0)
+            myHRP.Anchored = true
+        elseif comando == "unjail" and myHRP then
+            myHRP.Anchored = false
+            myHRP.CFrame = CFrame.new(0, 50, 0)
+        end
+    end
+end
+
+-- Escuta mensagens em ambos os sistemas de chat (Legacy e TextChatService)
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+    TextChatService.MessageReceived:Connect(function(textChatMessage)
+        local textSource = textChatMessage.TextSource
+        if textSource then
+            local sender = Players:GetPlayerByUserId(textSource.UserId)
+            if sender then
+                ProcessarComando(sender, textChatMessage.Text)
+            end
+        end
+    end)
+else
+    local function EscutarJogador(player)
+        player.Chatted:Connect(function(msg) ProcessarComando(player, msg) end)
+    end
+    for _, p in ipairs(Players:GetPlayers()) do EscutarJogador(p) end
+    Players.PlayerAdded:Connect(EscutarJogador)
+end
