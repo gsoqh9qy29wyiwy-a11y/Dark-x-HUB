@@ -803,7 +803,7 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local TabSky = Window:MakeTab({"TUBES93", "alert-octagon"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
-local opTab = Window:MakeTab({"OP", "home"})
+local TabAdmin = Window:MakeTab({"Admin", "rbxassetid://10723346959"})
 
 -- ====================================================================
 -- ABA: CREDITS 
@@ -5819,7 +5819,7 @@ local function EnviarMensagemChat(mensagem)
 end
 
 -- ====================================================================
--- ABA: ADMIN (INTERFACE)
+-- ABA: ADMIN (INTERFACE DESIGN REFEITO)
 -- ====================================================================
 TabAdmin:AddSection({ "Painel de Administração" })
 
@@ -5849,22 +5849,27 @@ TabAdmin:AddButton({
             return
         end
 
+        -- Configuração da Janela com Visual Vermelho / Dark identico à foto
         local AdminWindow = WindUI:CreateWindow({
-            Title = "👾 Dark x hub 👾 | Administrador",
-            Icon = "star",
+            Title = "Dark x Hub",
+            Subtitle = "Brookhaven RP | by Carlolx77",
+            Icon = "rbxassetid://10723415693", -- Ícone Dark/Perfil
             Author = "by Carlolx77",
             Folder = "DarkXHubAdmin",
-            Size = UDim2.fromOffset(580, 460),
-            Transparent = true,
+            Size = UDim2.fromOffset(600, 380),
+            Transparent = false,
+            Theme = "Dark",
+            ThemeColor = Color3.fromRGB(180, 0, 0), -- Destaques em Vermelho Escuro
             Resizable = false,
-            SideBarWidth = 200,
-            BackgroundImageTransparency = 0.42,
+            SideBarWidth = 170,
+            BackgroundImageTransparency = 0.5,
             HideSearchBar = true,
-            ScrollBarEnabled = true,
+            ScrollBarEnabled = true
         })
 
-        local Tab = AdminWindow:Tab({ Title = "Comandos", Icon = "shield" })
-        local Sec = Tab:Section({ Title = "Painel de Controle", Icon = "terminal", Opened = true })
+        -- Aba Principal (Estilo Info/Controls da Imagem)
+        local TabComandos = AdminWindow:Tab({ Title = "Controls", Icon = "settings" })
+        local SecAdmin = TabComandos:Section({ Title = "Painel de Administração", Icon = "shield", Opened = true })
 
         local TargetName = ""
         local function ObterJogadores()
@@ -5875,7 +5880,7 @@ TabAdmin:AddButton({
             return lista
         end
 
-        local DropdownPlayer = Sec:Dropdown({
+        local DropdownPlayer = SecAdmin:Dropdown({
             Title = "Selecionar Alvo",
             Values = ObterJogadores(),
             Value = "",
@@ -5889,7 +5894,7 @@ TabAdmin:AddButton({
         local comandos = { "kick", "kill", "killplus", "fling", "freeze", "unfreeze", "jail", "unjail", "verifique" }
 
         for _, cmd in ipairs(comandos) do
-            Sec:Button({
+            SecAdmin:Button({
                 Title = cmd,
                 Desc = "Executa ;" .. cmd,
                 Callback = function()
@@ -5935,14 +5940,14 @@ local function ProcessarComando(remetente, mensagem)
     end
 
     if comando == "verifique" then
-        EnviarMensagemChat(lp.Name .. " [Dark x Hub Ativo]")
+        EnviarMensagemChat(lp.Name .. " [Dark x Hub]")
     elseif ehParaMim then
         if comando == "kill" and myHum then
             myHum.Health = 0
         elseif comando == "killplus" and myChar then
             myChar:BreakJoints()
         elseif comando == "kick" then
-            lp:Kick("Removido por um Administrador.")
+            lp:Kick("Removido por um Administrador ou pelo Dono.")
         elseif comando == "freeze" and myChar then
             for _, part in ipairs(myChar:GetDescendants()) do
                 if part:IsA("BasePart") then part.Anchored = true end
