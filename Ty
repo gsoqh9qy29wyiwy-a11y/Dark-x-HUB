@@ -843,7 +843,12 @@ Tab1:AddButton({
 -- ====================================================================
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
-
+local PlayerDrop = TabTroll:AddDropdown({
+    Name = "Lista de jogadores",
+    Options = getPlayerNames(),
+    Callback = function(v) _G.SelectedPlayer = v end
+})
+TabTroll:AddButton({"Atualizar Lista de jogadores", function() PlayerDrop:Set(getPlayerNames()) end})
 
 TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
 
