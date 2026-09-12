@@ -182,20 +182,23 @@ local function ForcarEquipamento()
     end
 end
 
--- Variáveis da Criança (Chasing/Child)
+-- Lista de Jogadores
 local playersList = {}
 local chasingplayer = nil
 
--- Função para atualizar a lista de players
 local function updatePlayerList()
     playersList = {}
-    for _, player in pairs(game.Players:GetPlayers()) do
+    for _, player in pairs(vu6:GetPlayers()) do
         if player ~= vu7 then
             table.insert(playersList, player.Name)
         end
     end
+    if #playersList == 0 then
+        table.insert(playersList, "Nenhum jogador encontrado")
+    end
     return playersList
 end
+local getPlayerList = updatePlayerList
 
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
@@ -842,28 +845,23 @@ Tab1:AddButton({
 -- ABA: TROLL (ONDE O FLING BALL FOI ADICIONADO)
 -- ====================================================================
 _G.SelectedPlayer = ""
-TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
-    Options = getPlayerList(),
+    Options = updatePlayerList(),
+    Default = "Nenhum jogador encontrado",
     Callback = function(v) 
         _G.SelectedPlayer = v 
-        if v ~= "Nenhum jogador encontrado" then
-            selectedPlayerName = v
-            selectedPlayer = vu6:FindFirstChild(v)
-        else
-            selectedPlayerName = ""
-            selectedPlayer = nil
-        end
     end
 })
 
 TabTroll:AddButton({
     Name = "Atualizar Lista de jogadores", 
     Callback = function() 
-        PlayerDrop:Set(getPlayerList()) 
+        PlayerDrop:Set(updatePlayerList()) 
     end
 })
+
+TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
 TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
 
 TabTroll:AddButton({Name = "Teleporta para o jogador", Callback = function()
