@@ -843,12 +843,7 @@ Tab1:AddButton({
 -- ====================================================================
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
-local PlayerDrop = TabTroll:AddDropdown({
-    Name = "Lista de jogadores",
-    Options = getPlayerNames(),
-    Callback = function(v) _G.SelectedPlayer = v end
-})
-TabTroll:AddButton({"Atualizar Lista de jogadores", function() PlayerDrop:Set(getPlayerNames()) end})
+
 
 TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
 
@@ -926,9 +921,9 @@ TabTroll:AddToggle({
 
                             local t = tick() * 999999999999999
                             local moveOffset = Vector3.new(
-                                math.sin(t) * 1.9,
-                                math.cos(t * 1.6) * 1.7,
-                                math.cos(t) * 1.8
+                                math.sin(t) * 1.7,
+                                math.cos(t * 1.3) * 1.2,
+                                math.cos(t) * 1.6
                             )
 
                             local targetPos = troot.Position
