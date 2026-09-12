@@ -845,11 +845,25 @@ _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
-    Options = getPlayerNames(),
-    Callback = function(v) _G.SelectedPlayer = v end
+    Options = getPlayerList(),
+    Callback = function(v) 
+        _G.SelectedPlayer = v 
+        if v ~= "Nenhum jogador encontrado" then
+            selectedPlayerName = v
+            selectedPlayer = vu6:FindFirstChild(v)
+        else
+            selectedPlayerName = ""
+            selectedPlayer = nil
+        end
+    end
 })
-TabTroll:AddButton({"Atualizar Lista de jogadores", function() PlayerDrop:Set(getPlayerNames()) end})
 
+TabTroll:AddButton({
+    Name = "Atualizar Lista de jogadores", 
+    Callback = function() 
+        PlayerDrop:Set(getPlayerList()) 
+    end
+})
 TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
 
 TabTroll:AddButton({Name = "Teleporta para o jogador", Callback = function()
