@@ -859,6 +859,7 @@ TabTroll:AddButton({
         PlayerDrop:Set(updatePlayerList()) 
     end
 })
+
 TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
 
 TabTroll:AddButton({Name = "Teleporta para o jogador", Callback = function()
