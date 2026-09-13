@@ -6325,26 +6325,22 @@ TabAdmin:AddButton({
             return
         end
 
-        -- Configuração da Janela com Visual Vermelho / Dark identico à foto
-        local AdminWindow = WindUI:CreateWindow({
-            Title = "Dark x Hub",
-            Subtitle = "Brookhaven RP | by Carlolx77",
-            Icon = "rbxassetid://10723415693", -- Ícone Dark/Perfil
+            local AdminWindow = WindUI:CreateWindow({
+            Title = "👾 Dark x hub 👾 | Administrador",
+            Icon = "rbxassetid://113088956809836",
             Author = "by Carlolx77",
             Folder = "DarkXHubAdmin",
-            Size = UDim2.fromOffset(600, 380),
-            Transparent = false,
-            Theme = "Dark",
-            ThemeColor = Color3.fromRGB(180, 0, 0), -- Destaques em Vermelho Escuro
+            Size = UDim2.fromOffset(580, 460),
+            Transparent = true,
             Resizable = false,
-            SideBarWidth = 170,
-            BackgroundImageTransparency = 0.5,
+            SideBarWidth = 200,
+            BackgroundImageTransparency = 0.42,
             HideSearchBar = true,
-            ScrollBarEnabled = true
+            ScrollBarEnabled = true,
         })
 
         -- Aba Principal (Estilo Info/Controls da Imagem)
-        local TabComandos = AdminWindow:Tab({ Title = "Controls", Icon = "settings" })
+        local TabComandos = AdminWindow:Tab({ Title = "House", Icon = "settings" })
         local SecAdmin = TabComandos:Section({ Title = "Painel de Administração", Icon = "shield", Opened = true })
 
         local TargetName = ""
