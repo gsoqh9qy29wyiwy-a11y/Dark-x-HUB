@@ -187,7 +187,6 @@ local function ForcarEquipamento()
     end
 end
 
-
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
 _G.BH_Strength = 200
@@ -215,16 +214,6 @@ local function updateCamera()
     end)
 end
 
--- Função para listar jogadores
-local function getPlayerNames()
-    local pNames = {}
-    for _, p in pairs(Players:GetPlayers()) do 
-        if p ~= LocalPlayer then 
-            table.insert(pNames, p.Name) 
-        end 
-    end
-    return pNames
-end
 
 -- --- FUNÇÃO GARANTIDA DE PEGAR E EQUIPAR O SOFÁ ---
 local function EquiparSofaGarantido()
@@ -844,14 +833,6 @@ Tab1:AddButton({
 -- ABA: TROLL (ONDE O FLING BALL FOI ADICIONADO)
 -- ====================================================================
 _G.SelectedPlayer = ""
-local PlayerDrop = TabTroll:AddDropdown({
-    Name = "Lista de jogadores",
-    Options = updatePlayerList(),
-    Default = "Nenhum jogador encontrado",
-    Callback = function(v) 
-        _G.SelectedPlayer = v 
-    end
-})
 
 TabTroll:AddButton({
     Name = "Atualizar Lista de jogadores", 
