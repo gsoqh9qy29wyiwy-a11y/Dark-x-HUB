@@ -850,6 +850,8 @@ Tab1:AddButton({
 -- ABA: TROLL (ONDE O FLING BALL FOI ADICIONADO)
 -- ====================================================================
 _G.SelectedPlayer = ""
+TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
+
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
     Options = updatePlayerList(),
