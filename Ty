@@ -850,7 +850,6 @@ Tab1:AddButton({
 -- ABA: TROLL (ONDE O FLING BALL FOI ADICIONADO)
 -- ====================================================================
 _G.SelectedPlayer = ""
-TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
     Options = updatePlayerList(),
@@ -5819,7 +5818,7 @@ local function EnviarMensagemChat(mensagem)
 end
 
 -- ====================================================================
--- ABA: ADMIN (INTERFACE DESIGN REFEITO)
+-- ABA: ADMIN (INTERFACE)
 -- ====================================================================
 TabAdmin:AddSection({ "Painel de Administração" })
 
@@ -5849,7 +5848,7 @@ TabAdmin:AddButton({
             return
         end
 
-            local AdminWindow = WindUI:CreateWindow({
+        local AdminWindow = WindUI:CreateWindow({
             Title = "👾 Dark x hub 👾 | Administrador",
             Icon = "rbxassetid://113088956809836",
             Author = "by Carlolx77",
@@ -5863,9 +5862,8 @@ TabAdmin:AddButton({
             ScrollBarEnabled = true,
         })
 
-        -- Aba Principal (Estilo Info/Controls da Imagem)
-        local TabComandos = AdminWindow:Tab({ Title = "House", Icon = "settings" })
-        local SecAdmin = TabComandos:Section({ Title = "Painel de Administração", Icon = "shield", Opened = true })
+        local Tab = AdminWindow:Tab({ Title = "Comandos", Icon = "shield" })
+        local Sec = Tab:Section({ Title = "Painel de Controle", Icon = "terminal", Opened = true })
 
         local TargetName = ""
         local function ObterJogadores()
@@ -5876,7 +5874,7 @@ TabAdmin:AddButton({
             return lista
         end
 
-        local DropdownPlayer = SecAdmin:Dropdown({
+        local DropdownPlayer = Sec:Dropdown({
             Title = "Selecionar Alvo",
             Values = ObterJogadores(),
             Value = "",
@@ -5890,7 +5888,7 @@ TabAdmin:AddButton({
         local comandos = { "kick", "kill", "killplus", "fling", "freeze", "unfreeze", "jail", "unjail", "verifique" }
 
         for _, cmd in ipairs(comandos) do
-            SecAdmin:Button({
+            Sec:Button({
                 Title = cmd,
                 Desc = "Executa ;" .. cmd,
                 Callback = function()
