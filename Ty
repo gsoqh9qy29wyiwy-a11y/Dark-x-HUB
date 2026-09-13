@@ -832,7 +832,6 @@ Tab1:AddButton({
 -- ====================================================================
 -- ABA: TROLL (ONDE O FLING BALL FOI ADICIONADO)
 -- ====================================================================
-_G.SelectedPlayer = ""
 
 TabTroll:AddButton({
     Name = "Atualizar Lista de jogadores", 
