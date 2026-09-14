@@ -1065,7 +1065,7 @@ Description = ("ligue a função primeiro quando a bola estiver na mão clique n
 -- --- FLING BALL AUTOMÁTICO ADICIONADO AQUI ---
 TabTroll:AddToggle({
     Name = "Fling Ball Automático",
-Description = ("Arremessar a bola ni alvo automaticamente sem clicar na tela"),
+Description = ("Arremessar a bola no alvo automaticamente sem clicar na tela"),
     Default = false,
     Callback = function(state)
         FlingBallAuto = state
