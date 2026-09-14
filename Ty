@@ -201,14 +201,13 @@ local function updatePlayerList()
 end
 local getPlayerList = updatePlayerList
 
-
--- Variáveis da Bola Orbitando
-local orbitando = false
-local orbitConn = nil
-local soccerBall = nil
-local originalProperties = nil
-local orbitSpeed = 10   -- Velocidade da órbita
-local orbitRadius = 3   -- Tamanho do raio/círculo
+-- Variáveis do Novo Orbit Ball
+local OrbitSpeed = 15
+local OrbitDistance = 5
+local OrbitHeight = 0
+local OrbitAngle = 0
+local OrbitSelfEnabled = false
+local OrbitTargetEnabled = false
 
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
@@ -1162,102 +1161,124 @@ Description = ("Arremessar a bola no alvo automaticamente sem clicar na tela"),
         end
     end
 })
+
 -- ====================================================================
--- SEÇÃO: BOLA FLING ORBITANDO & SLIDERS
+-- SEÇÃO: ORBITAR BOLA (NOVO SISTEMA COM FLING)
 -- ====================================================================
-TabTroll:AddSection({ "Configurações da Bola Orbitando" })
+TabTroll:AddSection({ "Orbitar Bola" })
 
--- Botão: Bola Fling Orbitando (Liga / Desliga ao clicar)
-TabTroll:AddButton({
-    Name = "Bola Fling Orbitando",
-    Callback = function()
-        if orbitando then
-            orbitando = false
-            if orbitConn then
-                orbitConn:Disconnect()
-                orbitConn = nil
-            end
-            if soccerBall and originalProperties then
-                soccerBall.Anchored = originalProperties.Anchored
-                soccerBall.CanCollide = originalProperties.CanCollide
-                soccerBall.CanTouch = originalProperties.CanTouch
-            end
-            soccerBall = nil
-            originalProperties = nil
-            return
-        end
-
-        if not equipBola() then return end
-        task.wait(0.5)
-
-        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-        local myHRP = character:FindFirstChild("HumanoidRootPart")
-        if not myHRP then return end
-
-        local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
-        local soccerBalls = workspaceCom and workspaceCom:FindFirstChild("001_SoccerBalls")
-        soccerBall = soccerBalls and soccerBalls:FindFirstChild("Soccer" .. LocalPlayer.Name)
-        if not soccerBall then return end
-
-        originalProperties = {
-            Anchored = soccerBall.Anchored,
-            CanCollide = soccerBall.CanCollide,
-            CanTouch = soccerBall.CanTouch
-        }
-        soccerBall.Anchored = false
-        soccerBall.CanCollide = true
-        soccerBall.CanTouch = true
-        pcall(function() soccerBall:SetNetworkOwner(nil) end)
-
-        orbitando = true
-        orbitConn = RunService.Heartbeat:Connect(function()
-            if not orbitando or not soccerBall or not soccerBall.Parent or not myHRP or not myHRP.Parent or not character or not character.Parent then
-                if orbitConn then
-                    orbitConn:Disconnect()
-                    orbitConn = nil
-                end
-                orbitando = false
-                if soccerBall and originalProperties then
-                    soccerBall.Anchored = originalProperties.Anchored
-                    soccerBall.CanCollide = originalProperties.CanCollide
-                    soccerBall.CanTouch = originalProperties.CanTouch
-                end
-                soccerBall = nil
-                originalProperties = nil
-                return
-            end
-            
-            -- Usa os valores dos Sliders dinamicamente
-            local t = tick() * orbitSpeed
-            local radius = orbitRadius
-            local offset = Vector3.new(math.cos(t) * radius, -1, math.sin(t) * radius)
-            soccerBall.CFrame = CFrame.new(myHRP.Position + offset)
-            soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
-        end)
-    end
-})
-
--- Slider 1: Velocidade da Bola
 TabTroll:AddSlider({
     Name = "Velocidade da Bola",
-    MinValue = 1,
+    MinValue = 0,
     MaxValue = 100,
-    Default = 10,
+    Default = 15,
     Increase = 1,
-    Callback = function(value)
-        orbitSpeed = value
+    Callback = function(v)
+        OrbitSpeed = v
     end
 })
 
--- Slider 2: Tamanho do Círculo (Raio)
 TabTroll:AddSlider({
-    Name = "Tamanho do Círculo (Raio)",
+    Name = "Distância da Bola",
     MinValue = 1,
     MaxValue = 50,
-    Default = 3,
+    Default = 5,
     Increase = 1,
-    Callback = function(value)
-        orbitRadius = value
+    Callback = function(v)
+        OrbitDistance = v
+    end
+})
+
+TabTroll:AddSlider({
+    Name = "Altura da Bola",
+    MinValue = -15,
+    MaxValue = 15,
+    Default = 0,
+    Increase = 1,
+    Callback = function(v)
+        OrbitHeight = v
+    end
+})
+
+TabTroll:AddToggle({
+    Name = "Orbitar em Mim",
+    Default = false,
+    Callback = function(state)
+        OrbitSelfEnabled = state
+        if state then 
+            OrbitTargetEnabled = false
+            ForcarEquipamento()
+            task.spawn(function()
+                while OrbitSelfEnabled do
+                    local character = LocalPlayer.Character
+                    local backpack = LocalPlayer:FindFirstChild("Backpack")
+                    if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
+                    local ball = GetBall()
+                    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+                    if ball and hrp then
+                        local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
+                        if part then
+                            part.CanCollide = true
+                            if part.Anchored then part.Anchored = false end
+                            pcall(function() part:SetNetworkOwner(nil) end)
+                            
+                            OrbitAngle = OrbitAngle + (OrbitSpeed / 100)
+                            local ox = math.cos(OrbitAngle) * OrbitDistance
+                            local oz = math.sin(OrbitAngle) * OrbitDistance
+                            part.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+                            part.CFrame = hrp.CFrame * CFrame.new(ox, OrbitHeight, oz)
+                        end
+                    end
+                    RunService.Heartbeat:Wait()
+                end
+            end)
+        end
+    end
+})
+
+TabTroll:AddToggle({
+    Name = "Orbitar no Alvo",
+    Default = false,
+    Callback = function(state)
+        OrbitTargetEnabled = state
+        if state then
+            local targetPlayer = Players:FindFirstChild(_G.SelectedPlayer)
+            if not targetPlayer then 
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Erro",
+                    Text = "Selecione um jogador na lista primeiro!",
+                    Duration = 3
+                })
+                OrbitTargetEnabled = false
+                return 
+            end
+            OrbitSelfEnabled = false
+            ForcarEquipamento()
+            task.spawn(function()
+                while OrbitTargetEnabled do
+                    local target = Players:FindFirstChild(_G.SelectedPlayer)
+                    local backpack = LocalPlayer:FindFirstChild("Backpack")
+                    if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
+                    local ball = GetBall()
+                    if target and target.Character and ball then
+                        local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
+                        local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
+                        if tRoot and part then
+                            part.CanCollide = true
+                            if part.Anchored then part.Anchored = false end
+                            pcall(function() part:SetNetworkOwner(nil) end)
+                            
+                            OrbitAngle = OrbitAngle + (OrbitSpeed / 100)
+                            local ox = math.cos(OrbitAngle) * OrbitDistance
+                            local oz = math.sin(OrbitAngle) * OrbitDistance
+                            part.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+                            part.CFrame = tRoot.CFrame * CFrame.new(ox, OrbitHeight, oz)
+                        end
+                    end
+                    RunService.Heartbeat:Wait()
+                end
+            end)
+        end
     end
 })
 
