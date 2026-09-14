@@ -201,6 +201,15 @@ local function updatePlayerList()
 end
 local getPlayerList = updatePlayerList
 
+
+-- Variáveis da Bola Orbitando
+local orbitando = false
+local orbitConn = nil
+local soccerBall = nil
+local originalProperties = nil
+local orbitSpeed = 10   -- Velocidade da órbita
+local orbitRadius = 3   -- Tamanho do raio/círculo
+
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
 _G.BH_Strength = 200
@@ -1151,6 +1160,104 @@ Description = ("Arremessar a bola no alvo automaticamente sem clicar na tela"),
         else
             updateCamera()
         end
+    end
+})
+-- ====================================================================
+-- SEÇÃO: BOLA FLING ORBITANDO & SLIDERS
+-- ====================================================================
+TabTroll:AddSection({ "Configurações da Bola Orbitando" })
+
+-- Botão: Bola Fling Orbitando (Liga / Desliga ao clicar)
+TabTroll:AddButton({
+    Name = "Bola Fling Orbitando",
+    Callback = function()
+        if orbitando then
+            orbitando = false
+            if orbitConn then
+                orbitConn:Disconnect()
+                orbitConn = nil
+            end
+            if soccerBall and originalProperties then
+                soccerBall.Anchored = originalProperties.Anchored
+                soccerBall.CanCollide = originalProperties.CanCollide
+                soccerBall.CanTouch = originalProperties.CanTouch
+            end
+            soccerBall = nil
+            originalProperties = nil
+            return
+        end
+
+        if not equipBola() then return end
+        task.wait(0.5)
+
+        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local myHRP = character:FindFirstChild("HumanoidRootPart")
+        if not myHRP then return end
+
+        local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
+        local soccerBalls = workspaceCom and workspaceCom:FindFirstChild("001_SoccerBalls")
+        soccerBall = soccerBalls and soccerBalls:FindFirstChild("Soccer" .. LocalPlayer.Name)
+        if not soccerBall then return end
+
+        originalProperties = {
+            Anchored = soccerBall.Anchored,
+            CanCollide = soccerBall.CanCollide,
+            CanTouch = soccerBall.CanTouch
+        }
+        soccerBall.Anchored = false
+        soccerBall.CanCollide = true
+        soccerBall.CanTouch = true
+        pcall(function() soccerBall:SetNetworkOwner(nil) end)
+
+        orbitando = true
+        orbitConn = RunService.Heartbeat:Connect(function()
+            if not orbitando or not soccerBall or not soccerBall.Parent or not myHRP or not myHRP.Parent or not character or not character.Parent then
+                if orbitConn then
+                    orbitConn:Disconnect()
+                    orbitConn = nil
+                end
+                orbitando = false
+                if soccerBall and originalProperties then
+                    soccerBall.Anchored = originalProperties.Anchored
+                    soccerBall.CanCollide = originalProperties.CanCollide
+                    soccerBall.CanTouch = originalProperties.CanTouch
+                end
+                soccerBall = nil
+                originalProperties = nil
+                return
+            end
+            
+            -- Usa os valores dos Sliders dinamicamente
+            local t = tick() * orbitSpeed
+            local radius = orbitRadius
+            local offset = Vector3.new(math.cos(t) * radius, -1, math.sin(t) * radius)
+            soccerBall.CFrame = CFrame.new(myHRP.Position + offset)
+            soccerBall.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
+        end)
+    end
+})
+
+-- Slider 1: Velocidade da Bola
+TabTroll:AddSlider({
+    Name = "Velocidade da Bola",
+    MinValue = 1,
+    MaxValue = 100,
+    Default = 10,
+    Increase = 1,
+    Callback = function(value)
+        orbitSpeed = value
+    end
+})
+
+-- Slider 2: Tamanho do Círculo (Raio)
+TabTroll:AddSlider({
+    Name = "Tamanho do Círculo (Raio)",
+    MinValue = 1,
+    MaxValue = 50,
+    Default = 3,
+    Increase = 1,
+    Callback = function(value)
+        orbitRadius = value
     end
 })
 
