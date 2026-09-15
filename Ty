@@ -208,7 +208,6 @@ local OrbitHeight = 0
 local OrbitAngle = 0
 local OrbitSelfEnabled = false
 local OrbitTargetEnabled = false
-local FlingBallAuto = false
 
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
@@ -237,6 +236,89 @@ local function updateCamera()
     end)
 end
 
+-- --- FUNÇÕES DE BOLA ---
+local function GetBall()
+    local folder = Workspace:FindFirstChild("WorkspaceCom") and Workspace.WorkspaceCom:FindFirstChild("001_SoccerBalls")
+    return folder and folder:FindFirstChild("Soccer" .. LocalPlayer.Name)
+end
+
+local function ForcarEquipamento()
+    local character = LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not (backpack and backpack:FindFirstChild("SoccerBall")) and not (character and character:FindFirstChild("SoccerBall")) then
+        pcall(function() ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall") end)
+        task.wait(0.2)
+    end
+    local ball = backpack and backpack:FindFirstChild("SoccerBall")
+    if ball and humanoid then
+        humanoid:EquipTool(ball)
+        task.wait(0.05)
+        ball:Activate()
+    end
+end
+
+-- Aplica física de Fling e Antigravidade à bola
+local function AplicarFisicaFling(ball)
+    if not ball or not ball:IsA("BasePart") then return end
+    pcall(function()
+        ball.CanCollide = false
+        ball.Massless = true
+        ball.CustomPhysicalProperties = PhysicalProperties.new(10000, 100, 100, 100, 100)
+
+        local bv = ball:FindFirstChild("FlingPower")
+        if not bv then
+            bv = Instance.new("BodyVelocity")
+            bv.Name = "FlingPower"
+            bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.P = 9e900
+            bv.Parent = ball
+        else
+            bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+        end
+
+        local bav = ball:FindFirstChild("FlingSpin")
+        if not bav then
+            bav = Instance.new("BodyAngularVelocity")
+            bav.Name = "FlingSpin"
+            bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+            bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            bav.P = 9e900
+            bav.Parent = ball
+        else
+            bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+        end
+
+        ball.AssemblyLinearVelocity = Vector3.new(9e9, 9e9, 9e9)
+        ball.AssemblyAngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+        ball:SetNetworkOwner(nil)
+    end)
+end
+
+local function LimparFisicaFling(ball)
+    if not ball or not ball:IsA("BasePart") then return end
+    pcall(function()
+        local bv = ball:FindFirstChild("FlingPower")
+        if bv then bv:Destroy() end
+        local bav = ball:FindFirstChild("FlingSpin")
+        if bav then bav:Destroy() end
+        ball.AssemblyLinearVelocity = Vector3.zero
+        ball.AssemblyAngularVelocity = Vector3.zero
+    end)
+end
+
+local function disableCarClient()
+    pcall(function()
+        local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
+        if playerScripts then
+            local carScript = playerScripts:FindFirstChild("CarClient") or playerScripts:FindFirstChild("VehicleClient")
+            if carScript and carScript:IsA("LocalScript") then
+                carScript.Disabled = true
+            end
+        end
+    end)
+end
 
 -- --- FUNÇÃO GARANTIDA DE PEGAR E EQUIPAR O SOFÁ ---
 local function EquiparSofaGarantido()
@@ -1164,14 +1246,14 @@ Description = ("Arremessar a bola no alvo automaticamente sem clicar na tela"),
 })
 
 -- ====================================================================
--- SEÇÃO: SISTEMA DE BOLA FLING & ÓRBITA (CORRIGIDO SEM CAIR NO CHÃO)
+-- SEÇÃO: SISTEMA DE BOLA FLING & ÓRBITA
 -- ====================================================================
 TabTroll:AddSection({ "Sistema de Bola Fling" })
 
 TabTroll:AddSlider({
     Name = "Velocidade da Bola",
     MinValue = 0,
-    MaxValue = 100,
+    MaxValue = 10000000,
     Default = 15,
     Increase = 1,
     Callback = function(v)
@@ -1184,7 +1266,7 @@ TabTroll:AddSlider({
     MinValue = 1,
     MaxValue = 50,
     Default = 5,
-    Increase = 1,
+    Increase = 00.1,
     Callback = function(v)
         OrbitDistance = v
     end
@@ -1201,7 +1283,7 @@ TabTroll:AddSlider({
     end
 })
 
--- Toggle: Orbitar em Mim (Com Física de Levitação/Fling)
+-- Toggle: Orbitar em Mim
 TabTroll:AddToggle({
     Name = "Orbitar em Mim",
     Default = false,
@@ -1218,11 +1300,11 @@ TabTroll:AddToggle({
                     local backpack = LocalPlayer:FindFirstChild("Backpack")
                     if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
                     
-                    local ball = GetBallAutomatico()
+                    local ball = GetBall()
                     if not ball then
                         ForcarEquipamento()
                         task.wait(0.2)
-                        ball = GetBallAutomatico()
+                        ball = GetBall()
                     end
 
                     if ball and hrp then
@@ -1238,70 +1320,11 @@ TabTroll:AddToggle({
                     RunService.Heartbeat:Wait()
                 end
                 
-                local ball = GetBallAutomatico()
+                local ball = GetBall()
                 if ball then LimparFisicaFling(ball) end
             end)
         else
-            local ball = GetBallAutomatico()
-            if ball then LimparFisicaFling(ball) end
-        end
-    end
-})
-
--- Toggle: Orbitar no Alvo (Com Física de Levitação/Fling)
-TabTroll:AddToggle({
-    Name = "Orbitar no Alvo",
-    Default = false,
-    Callback = function(state)
-        OrbitTargetEnabled = state
-        if state then
-            local targetPlayer = Players:FindFirstChild(_G.SelectedPlayer)
-            if not targetPlayer then 
-                SendNotification("Erro", "Selecione um jogador na lista primeiro!", 3)
-                OrbitTargetEnabled = false
-                return 
-            end
-            OrbitSelfEnabled = false
-            FlingBallAuto = false
-            ForcarEquipamento()
-            task.spawn(function()
-                while OrbitTargetEnabled do
-                    local target = Players:FindFirstChild(_G.SelectedPlayer)
-                    local backpack = LocalPlayer:FindFirstChild("Backpack")
-                    if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
-                    
-                    local ball = GetBallAutomatico()
-                    if not ball then
-                        ForcarEquipamento()
-                        task.wait(0.2)
-                        ball = GetBallAutomatico()
-                    end
-
-                    if target and target.Character and ball then
-                        local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
-                        local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
-                        if tRoot and part then
-                            AplicarFisicaFling(part)
-                            OrbitAngle = OrbitAngle + (OrbitSpeed / 100)
-                            local ox = math.cos(OrbitAngle) * OrbitDistance
-                            local oz = math.sin(OrbitAngle) * OrbitDistance
-                            
-                            local targetPos = tRoot.Position
-                            if tRoot.AssemblyLinearVelocity and tRoot.AssemblyLinearVelocity.Magnitude > 0.5 then
-                                targetPos = targetPos + (tRoot.AssemblyLinearVelocity / 1.5)
-                            end
-
-                            part.CFrame = CFrame.new(targetPos) * CFrame.Angles(0, OrbitAngle, 0) * CFrame.new(ox, OrbitHeight, oz)
-                        end
-                    end
-                    RunService.Heartbeat:Wait()
-                end
-                
-                local ball = GetBallAutomatico()
-                if ball then LimparFisicaFling(ball) end
-            end)
-        else
-            local ball = GetBallAutomatico()
+            local ball = GetBall()
             if ball then LimparFisicaFling(ball) end
         end
     end
