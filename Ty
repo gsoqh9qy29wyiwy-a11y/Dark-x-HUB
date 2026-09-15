@@ -201,13 +201,14 @@ local function updatePlayerList()
 end
 local getPlayerList = updatePlayerList
 
--- Variáveis do Novo Orbit Ball
+-- Variáveis da Bola (Orbit e Fling)
 local OrbitSpeed = 15
 local OrbitDistance = 5
 local OrbitHeight = 0
 local OrbitAngle = 0
 local OrbitSelfEnabled = false
 local OrbitTargetEnabled = false
+local FlingBallAuto = false
 
 -- Variáveis do Black Hole
 _G.BlackHoleActive = false
@@ -1163,9 +1164,9 @@ Description = ("Arremessar a bola no alvo automaticamente sem clicar na tela"),
 })
 
 -- ====================================================================
--- SEÇÃO: ORBITAR BOLA (NOVO SISTEMA COM FLING)
+-- SEÇÃO: SISTEMA DE BOLA FLING & ÓRBITA (CORRIGIDO SEM CAIR NO CHÃO)
 -- ====================================================================
-TabTroll:AddSection({ "Orbitar Bola" })
+TabTroll:AddSection({ "Sistema de Bola Fling" })
 
 TabTroll:AddSlider({
     Name = "Velocidade da Bola",
@@ -1200,6 +1201,7 @@ TabTroll:AddSlider({
     end
 })
 
+-- Toggle: Orbitar em Mim (Com Física de Levitação/Fling)
 TabTroll:AddToggle({
     Name = "Orbitar em Mim",
     Default = false,
@@ -1207,35 +1209,46 @@ TabTroll:AddToggle({
         OrbitSelfEnabled = state
         if state then 
             OrbitTargetEnabled = false
+            FlingBallAuto = false
             ForcarEquipamento()
             task.spawn(function()
                 while OrbitSelfEnabled do
                     local character = LocalPlayer.Character
+                    local hrp = character and character:FindFirstChild("HumanoidRootPart")
                     local backpack = LocalPlayer:FindFirstChild("Backpack")
                     if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
-                    local ball = GetBall()
-                    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+                    
+                    local ball = GetBallAutomatico()
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBallAutomatico()
+                    end
+
                     if ball and hrp then
                         local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
                         if part then
-                            part.CanCollide = true
-                            if part.Anchored then part.Anchored = false end
-                            pcall(function() part:SetNetworkOwner(nil) end)
-                            
+                            AplicarFisicaFling(part)
                             OrbitAngle = OrbitAngle + (OrbitSpeed / 100)
                             local ox = math.cos(OrbitAngle) * OrbitDistance
                             local oz = math.sin(OrbitAngle) * OrbitDistance
-                            part.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
                             part.CFrame = hrp.CFrame * CFrame.new(ox, OrbitHeight, oz)
                         end
                     end
                     RunService.Heartbeat:Wait()
                 end
+                
+                local ball = GetBallAutomatico()
+                if ball then LimparFisicaFling(ball) end
             end)
+        else
+            local ball = GetBallAutomatico()
+            if ball then LimparFisicaFling(ball) end
         end
     end
 })
 
+-- Toggle: Orbitar no Alvo (Com Física de Levitação/Fling)
 TabTroll:AddToggle({
     Name = "Orbitar no Alvo",
     Default = false,
@@ -1244,40 +1257,52 @@ TabTroll:AddToggle({
         if state then
             local targetPlayer = Players:FindFirstChild(_G.SelectedPlayer)
             if not targetPlayer then 
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Erro",
-                    Text = "Selecione um jogador na lista primeiro!",
-                    Duration = 3
-                })
+                SendNotification("Erro", "Selecione um jogador na lista primeiro!", 3)
                 OrbitTargetEnabled = false
                 return 
             end
             OrbitSelfEnabled = false
+            FlingBallAuto = false
             ForcarEquipamento()
             task.spawn(function()
                 while OrbitTargetEnabled do
                     local target = Players:FindFirstChild(_G.SelectedPlayer)
                     local backpack = LocalPlayer:FindFirstChild("Backpack")
                     if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
-                    local ball = GetBall()
+                    
+                    local ball = GetBallAutomatico()
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBallAutomatico()
+                    end
+
                     if target and target.Character and ball then
                         local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
                         local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
                         if tRoot and part then
-                            part.CanCollide = true
-                            if part.Anchored then part.Anchored = false end
-                            pcall(function() part:SetNetworkOwner(nil) end)
-                            
+                            AplicarFisicaFling(part)
                             OrbitAngle = OrbitAngle + (OrbitSpeed / 100)
                             local ox = math.cos(OrbitAngle) * OrbitDistance
                             local oz = math.sin(OrbitAngle) * OrbitDistance
-                            part.AssemblyLinearVelocity = Vector3.new(9999, 9999, 9999)
-                            part.CFrame = tRoot.CFrame * CFrame.new(ox, OrbitHeight, oz)
+                            
+                            local targetPos = tRoot.Position
+                            if tRoot.AssemblyLinearVelocity and tRoot.AssemblyLinearVelocity.Magnitude > 0.5 then
+                                targetPos = targetPos + (tRoot.AssemblyLinearVelocity / 1.5)
+                            end
+
+                            part.CFrame = CFrame.new(targetPos) * CFrame.Angles(0, OrbitAngle, 0) * CFrame.new(ox, OrbitHeight, oz)
                         end
                     end
                     RunService.Heartbeat:Wait()
                 end
+                
+                local ball = GetBallAutomatico()
+                if ball then LimparFisicaFling(ball) end
             end)
+        else
+            local ball = GetBallAutomatico()
+            if ball then LimparFisicaFling(ball) end
         end
     end
 })
