@@ -1329,6 +1329,64 @@ TabTroll:AddToggle({
         end
     end
 })
+-- Toggle: Orbitar no Alvo
+TabTroll:AddToggle({
+    Name = "Orbitar no Alvo",
+    Default = false,
+    Callback = function(state)
+        OrbitTargetEnabled = state
+        if state then
+            local targetPlayer = Players:FindFirstChild(_G.SelectedPlayer)
+            if not targetPlayer then 
+                SendNotification("Erro", "Selecione um jogador na lista primeiro!", 3)
+                OrbitTargetEnabled = false
+                return 
+            end
+            OrbitSelfEnabled = false
+            FlingBallAuto = false
+            ForcarEquipamento()
+            task.spawn(function()
+                while OrbitTargetEnabled do
+                    local target = Players:FindFirstChild(_G.SelectedPlayer)
+                    local backpack = LocalPlayer:FindFirstChild("Backpack")
+                    if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
+                    
+                    local ball = GetBall()
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBall()
+                    end
+
+                    if target and target.Character and ball then
+                        local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
+                        local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
+                        if tRoot and part then
+                            AplicarFisicaFling(part)
+                            OrbitAngle = OrbitAngle + (OrbitSpeed / 100)
+                            local ox = math.cos(OrbitAngle) * OrbitDistance
+                            local oz = math.sin(OrbitAngle) * OrbitDistance
+                            
+                            local targetPos = tRoot.Position
+                            if tRoot.AssemblyLinearVelocity and tRoot.AssemblyLinearVelocity.Magnitude > 0.5 then
+                                targetPos = targetPos + (tRoot.AssemblyLinearVelocity / 1.5)
+                            end
+
+                            part.CFrame = CFrame.new(targetPos) * CFrame.Angles(0, OrbitAngle, 0) * CFrame.new(ox, OrbitHeight, oz)
+                        end
+                    end
+                    RunService.Heartbeat:Wait()
+                end
+                
+                local ball = GetBall()
+                if ball then LimparFisicaFling(ball) end
+            end)
+        else
+            local ball = GetBall()
+            if ball then LimparFisicaFling(ball) end
+        end
+    end
+})
 
 TabTroll:AddSection({ "Clicks TP" })
 TabTroll:AddButton({
