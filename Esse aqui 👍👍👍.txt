@@ -1,5 +1,5 @@
 -- Carregar RedzLib corretamente
-local RedzLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))() 
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
 
 -- Serviços
 local Players = game:GetService("Players")
