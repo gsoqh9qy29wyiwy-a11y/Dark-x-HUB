@@ -563,9 +563,9 @@ local function ExecutarKillCouch(targetPlayer)
             end
 
             local rotation = CFrame.Angles(
-                math.rad(vu9.DistributedGameTime * 10094000),
-                math.rad(vu9.DistributedGameTime * 19440000),
-                math.rad(vu9.DistributedGameTime * 49900009)
+                math.rad(vu9.DistributedGameTime * 100000940000000000),
+                math.rad(vu9.DistributedGameTime * 1940000004000000000),
+                math.rad(vu9.DistributedGameTime * 4990000000000000009)
             )
 
             myHRP.CFrame = CFrame.new(finalPos) * rotation
@@ -652,8 +652,8 @@ local function ExecutarFlingCouch(targetPlayer)
 
             local finalPos
             if isMoving then
-                local pulse = (math.sin(tick() * 9000) + 20) / 800
-                local forwardDistance = pulse * 500.5
+                local pulse = (math.sin(tick() * 9000) + 20) / 999
+                local forwardDistance = pulse * 900.5
                 local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
                 finalPos = frontCFrame.Position
             else
@@ -661,9 +661,9 @@ local function ExecutarFlingCouch(targetPlayer)
             end
 
             local rotation = CFrame.Angles(
-                math.rad(vu9.DistributedGameTime * 1009000000004),
-                math.rad(vu9.DistributedGameTime * 1944000000000),
-                math.rad(vu9.DistributedGameTime * 4990900000000)
+                math.rad(vu9.DistributedGameTime * 1000090000000004),
+                math.rad(vu9.DistributedGameTime * 1940400000000000),
+                math.rad(vu9.DistributedGameTime * 4990090000000000)
             )
 
             myHRP.CFrame = CFrame.new(finalPos) * rotation
@@ -677,7 +677,7 @@ local function ExecutarFlingCouch(targetPlayer)
             -- Aplica super velocidade para fling
             local walkFlingInstance = Instance.new("BodyVelocity")
             walkFlingInstance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            walkFlingInstance.Velocity = Vector3.new(0, 9000000000000, 0)
+            walkFlingInstance.Velocity = Vector3.new(0, 999999999999999999999999999999999999999999999999999999, 0)
             walkFlingInstance.Parent = myHRP
 
             -- Leva para a posição profunda
@@ -1086,7 +1086,7 @@ TabTroll:AddToggle({
                 while _G.BH_Orbit_Active do
                     local T = vu6:FindFirstChild(_G.SelectedPlayer)
                     if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                        angle = angle + 10000000
+                        angle = angle + 10000000000
                         local t = tick() * 1
                         local radius = 7
                         local orbit = CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(radius, math.sin(t)*2, 3)
@@ -1214,7 +1214,6 @@ TabTroll:AddToggle({
 })
 
 
-
 TabTroll:AddSection({ "Fling Ball" })
 TabTroll:AddToggle({
     Name = "Fling Ball",
@@ -1286,11 +1285,11 @@ Description = ("Arremessar a bola no alvo automaticamente sem clicar na tela"),
 
                             vuCam.CameraSubject = thum
 
-                            local t = tick() * 999999999999999999999999999999999999999999
+                            local t = tick() * 9999999999999999999999999999999999999999999999
                             local moveOffset = Vector3.new(
-                                math.sin(t) * 1.9,
-                                math.cos(t * 1.9) * 1.9,
-                                math.cos(t) * 1.9
+                                math.sin(t) * 2.9,
+                                math.cos(t * 2.9) * 2.9,
+                                math.cos(t) * 2.9
                             )
 
                             local targetPos = troot.Position
