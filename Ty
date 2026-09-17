@@ -187,20 +187,29 @@ local function ForcarEquipamento()
     end
 end
 
-local function updatePlayerList()
-    playersList = {}
-    for _, player in pairs(vu6:GetPlayers()) do
-        if player ~= vu7 then
-            table.insert(playersList, player.Name)
-        end
-    end
-    if #playersList == 0 then
-        table.insert(playersList, "...")
-    end
-    return playersList
-end
-local getPlayerList = updatePlayerList
+-- Variáveis do Sistema de Props
+local PropMovementMode = "Nenhum"
+local jogadorSelecionadoProp = nil
+local selecionarTodosProps = false
+local espionandoProps = false
+local PropsActive = false
+local WaveSpeed = 0.2
+local ColorSpread = 0.05
+local ModoAvancadoAtivo = false
 
+local ConfigsProps = {
+    Orbita       = { Speed = 2, Distance = 10,  Height = 2 },
+    Caotico      = { Speed = 2, Distance = 8,   Height = 2 },
+    Furacao      = { Speed = 2, Distance = 5,   Height = 4 },
+    Alinhamento  = { Speed = 2, Distance = 3.5, Height = 2 }, 
+    Estrela      = { Speed = 2, Distance = 5,   Height = 15 }, 
+    Portal       = { Speed = 2, Distance = 5,   Height = 4 },
+    Aura         = { Speed = 3, Distance = 4,   Height = 1 }, 
+    Tremor       = { Speed = 2, Distance = 8,   Height = 2 }
+}
+
+local meusPropsCache = {}
+local MeuPropNome = "Prop" .. vu7.Name
 
 -- Variáveis da Bola (Orbit e Fling)
 local OrbitSpeed = 15
@@ -221,6 +230,45 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
+
+-- ====================================================================
+-- 2. FUNÇÕES AUXILIARES E BACKEND
+-- ====================================================================
+
+local function SendNotification(title, text, duration)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = duration or 3
+        })
+    end)
+end
+
+local function updatePlayerList()
+    playersList = {}
+    for _, player in pairs(vu6:GetPlayers()) do
+        if player ~= vu7 then
+            table.insert(playersList, player.Name)
+        end
+    end
+    if #playersList == 0 then
+        table.insert(playersList, "...")
+    end
+    return playersList
+end
+local getPlayerList = updatePlayerList
+
+local function ObterListaNomesProps()
+    local lista = {"...", "Todos"}
+    for _, player in ipairs(vu6:GetPlayers()) do
+        if player ~= vu7 then
+            table.insert(lista, player.Name)
+        end
+    end
+    return lista
+end
+
 -- 2. FUNÇÕES DE SUPORTE (BACKEND)
 local function updateCamera()
     pcall(function()
@@ -236,6 +284,26 @@ local function updateCamera()
         end
     end)
 end
+
+local function AtualizarCacheProps()
+    local workspaceCom = vu9:FindFirstChild("WorkspaceCom")
+    if not workspaceCom then return end
+    
+    local novosProps = {}
+    for _, cat in ipairs(workspaceCom:GetChildren()) do
+        for _, item in ipairs(cat:GetChildren()) do
+            if item.Name == MeuPropNome and item:FindFirstChild("SetCurrentCFrame") then
+                table.insert(novosProps, item)
+            end
+        end
+    end
+    meusPropsCache = novosProps
+end
+
+local function AlgumModoPropAtivo()
+    return (PropMovementMode ~= "Nenhum" or PropsActive or ModoAvancadoAtivo)
+end
+
 
 -- --- FUNÇÕES DE BOLA ---
 local function GetBall()
