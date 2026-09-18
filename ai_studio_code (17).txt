@@ -1578,15 +1578,24 @@ local ChildTab = Window:MakeTab({"Criança", "baby"})
 -- ====================================================================
 -- ABA: PROPS
 -- ====================================================================
-PropsTab:AddSection({"Lista de Jogadores"})
+local ultimoNomeSelecionadoProp = nil
 
 local DropdownJogadoresProps = PropsTab:AddDropdown({
     Name = "Selecionar Jogador",
     Options = ObterListaNomesProps(),
-    Default = "...",
+    Default = "Eu",
     Callback = function(opcao)
         local nomeSelecionado = type(opcao) == "table" and opcao[1] or opcao
+        
+        -- Se o callback vier nulo/vazio mas o jogador selecionado ainda estiver no servidor, mantemos ele
+        if (not nomeSelecionado or nomeSelecionado == "...") and ultimoNomeSelecionadoProp then
+            if vu6:FindFirstChild(ultimoNomeSelecionadoProp) or ultimoNomeSelecionadoProp == "Todos" then
+                nomeSelecionado = ultimoNomeSelecionadoProp
+            end
+        end
+
         if nomeSelecionado and nomeSelecionado ~= "..." then
+            ultimoNomeSelecionadoProp = nomeSelecionado
             if nomeSelecionado == "Todos" then
                 selecionarTodosProps = true
                 jogadorSelecionadoProp = nil
@@ -1594,6 +1603,7 @@ local DropdownJogadoresProps = PropsTab:AddDropdown({
                 selecionarTodosProps = false
                 jogadorSelecionadoProp = vu6:FindFirstChild(nomeSelecionado)
             end
+
             if espionandoProps and jogadorSelecionadoProp and jogadorSelecionadoProp.Character then  
                 local hum = jogadorSelecionadoProp.Character:FindFirstChildWhichIsA("Humanoid")
                 if hum then vuCam.CameraSubject = hum end  
@@ -1601,6 +1611,7 @@ local DropdownJogadoresProps = PropsTab:AddDropdown({
         else
             jogadorSelecionadoProp = nil
             selecionarTodosProps = false
+            ultimoNomeSelecionadoProp = nil
         end  
     end
 })
@@ -2331,27 +2342,60 @@ task.spawn(function()
     end
 end)
 
--- Atualização Automática de Jogadores
+-- Atualização de Jogadores sem resetar a seleção ativa
 vu6.PlayerAdded:Connect(function()
     task.wait(0.5)
     pcall(function()
-        PlayerDrop:Set(getPlayerList())
-        DropdownJogadoresProps:Set(ObterListaNomesProps())
-        if adminPlayerDropdownRef then adminPlayerDropdownRef.UpdateOptions(getPlayerList()) end
+        local listaNormal = getPlayerList()
+        local listaProps = ObterListaNomesProps()
+
+        PlayerDrop:Set(listaNormal)
+        DropdownJogadoresProps:Set(listaProps)
+
+        -- Se você já tinha alguém selecionado, força a seleção a continuar ativa
+        if _G.SelectedPlayer and vu6:FindFirstChild(_G.SelectedPlayer) then
+            pcall(function() PlayerDrop:Set(_G.SelectedPlayer) end)
+        end
+        if ultimoNomeSelecionadoProp and (vu6:FindFirstChild(ultimoNomeSelecionadoProp) or ultimoNomeSelecionadoProp == "Todos") then
+            pcall(function() DropdownJogadoresProps:Set(ultimoNomeSelecionadoProp) end)
+        end
+
+        if adminPlayerDropdownRef then adminPlayerDropdownRef.UpdateOptions(listaNormal) end
     end)
 end)
 
 vu6.PlayerRemoving:Connect(function(player)
     if Jajail[player] then Jajail[player]:Destroy(); Jajail[player] = nil end
     if MagGelion[player] then MagGelion[player] = nil end
+    
+    -- Se quem saiu foi o player selecionado, aí sim reseta
+    if _G.SelectedPlayer == player.Name then
+        _G.SelectedPlayer = ""
+    end
+    if ultimoNomeSelecionadoProp == player.Name then
+        ultimoNomeSelecionadoProp = nil
+        jogadorSelecionadoProp = nil
+    end
+
     task.wait(0.5)
     pcall(function()
-        PlayerDrop:Set(getPlayerList())
-        DropdownJogadoresProps:Set(ObterListaNomesProps())
-        if adminPlayerDropdownRef then adminPlayerDropdownRef.UpdateOptions(getPlayerList()) end
+        local listaNormal = getPlayerList()
+        local listaProps = ObterListaNomesProps()
+
+        PlayerDrop:Set(listaNormal)
+        DropdownJogadoresProps:Set(listaProps)
+
+        if _G.SelectedPlayer ~= "" and vu6:FindFirstChild(_G.SelectedPlayer) then
+            pcall(function() PlayerDrop:Set(_G.SelectedPlayer) end)
+        end
+        if ultimoNomeSelecionadoProp and (vu6:FindFirstChild(ultimoNomeSelecionadoProp) or ultimoNomeSelecionadoProp == "Todos") then
+            pcall(function() DropdownJogadoresProps:Set(ultimoNomeSelecionadoProp) end)
+        end
+
+        if adminPlayerDropdownRef then adminPlayerDropdownRef.UpdateOptions(listaNormal) end
     end)
 end)
-
+        
 -- Loop RGB do Nome/Bio e Anti-Void
 local hue = 0
 vu10.Heartbeat:Connect(function()
