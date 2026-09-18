@@ -187,6 +187,30 @@ local function ForcarEquipamento()
     end
 end
 
+-- Variáveis do Sistema de Props
+local PropMovementMode = "Nenhum"
+local jogadorSelecionadoProp = nil
+local selecionarTodosProps = false
+local espionandoProps = false
+local PropsActive = false
+local WaveSpeed = 0.2
+local ColorSpread = 0.05
+local ModoAvancadoAtivo = false
+
+local ConfigsProps = {
+    Orbita       = { Speed = 2, Distance = 10,  Height = 2 },
+    Caotico      = { Speed = 2, Distance = 8,   Height = 2 },
+    Furacao      = { Speed = 2, Distance = 5,   Height = 4 },
+    Alinhamento  = { Speed = 2, Distance = 3.5, Height = 2 }, 
+    Estrela      = { Speed = 2, Distance = 5,   Height = 15 }, 
+    Portal       = { Speed = 2, Distance = 5,   Height = 4 },
+    Aura         = { Speed = 3, Distance = 4,   Height = 1 }, 
+    Tremor       = { Speed = 2, Distance = 8,   Height = 2 }
+}
+
+local meusPropsCache = {}
+local MeuPropNome = "Prop" .. vu7.Name
+
 -- Variáveis da Bola (Orbit e Fling)
 local OrbitSpeed = 15
 local OrbitDistance = 5
