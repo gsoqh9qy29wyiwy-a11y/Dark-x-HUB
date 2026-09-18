@@ -394,8 +394,8 @@ local function ExecutarBringCouch(targetPlayer)
 
             local finalPos
             if isMoving then
-                local pulse = (math.sin(tick() * 909000) + 990) / 900
-                local forwardDistance = pulse * 59900.5
+                local pulse = (math.sin(tick() * 90) + 20) / 90
+                local forwardDistance = pulse * 59.5
                 local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
                 finalPos = frontCFrame.Position
             else
@@ -486,8 +486,8 @@ local function ExecutarKillCouch(targetPlayer)
 
             local finalPos
             if isMoving then
-                local pulse = (math.sin(tick() * 9000) + 9000) / 9000
-                local forwardDistance = pulse * 900.5
+                local pulse = (math.sin(tick() * 90) + 20) / 90
+                local forwardDistance = pulse * 90.5
                 local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
                 finalPos = frontCFrame.Position
             else
@@ -495,15 +495,15 @@ local function ExecutarKillCouch(targetPlayer)
             end
 
             local rotation = CFrame.Angles(
-                math.rad(vu9.DistributedGameTime * 1000009400000000000000),
-                math.rad(vu9.DistributedGameTime * 1940000004000000000000),
-                math.rad(vu9.DistributedGameTime * 49900000000000000000009)
+                math.rad(vu9.DistributedGameTime * 100000940000000),
+                math.rad(vu9.DistributedGameTime * 1940004000000000),
+                math.rad(vu9.DistributedGameTime * 499000000000000009)
             )
 
             myHRP.CFrame = CFrame.new(finalPos) * rotation
         end)
 
-        if tHum.Sit or (tick() - startTime > 1) then
+        if tHum.Sit or (tick() - startTime > 0.9) then
             running = false
             killLoop:Disconnect()
             noCollide:Disconnect()
@@ -584,8 +584,8 @@ local function ExecutarFlingCouch(targetPlayer)
 
             local finalPos
             if isMoving then
-                local pulse = (math.sin(tick() * 9000) + 20) / 999
-                local forwardDistance = pulse * 900.5
+                local pulse = (math.sin(tick() * 90) + 20) / 90
+                local forwardDistance = pulse * 50.5
                 local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
                 finalPos = frontCFrame.Position
             else
@@ -609,7 +609,7 @@ local function ExecutarFlingCouch(targetPlayer)
             -- Aplica super velocidade para fling
             local walkFlingInstance = Instance.new("BodyVelocity")
             walkFlingInstance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            walkFlingInstance.Velocity = Vector3.new(0, 999999999999999999999999, 0)
+            walkFlingInstance.Velocity = Vector3.new(990, 99999999999999999999, 990)
             walkFlingInstance.Parent = myHRP
 
             -- Leva para a posição profunda
@@ -844,7 +844,7 @@ local function ForcePart(v)
         end
         v.CanCollide = false
         local torque = Instance.new("Torque", v)
-        torque.Torque = Vector3.new(90000000000000, 900000000000000, 90000000000000)
+        torque.Torque = Vector3.new(90000, 90000, 90000)
         local att0 = Instance.new("Attachment", v)
         torque.Attachment0 = att0
         local alignPos = Instance.new("AlignPosition", v)
@@ -1018,7 +1018,7 @@ TabTroll:AddToggle({
                 while _G.BH_Orbit_Active do
                     local T = vu6:FindFirstChild(_G.SelectedPlayer)
                     if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
-                        angle = angle + 10000000000
+                        angle = angle + 1000000000
                         local t = tick() * 1
                         local radius = 7
                         local orbit = CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(radius, math.sin(t)*2, 3)
