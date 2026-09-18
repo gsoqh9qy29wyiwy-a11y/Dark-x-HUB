@@ -206,7 +206,6 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
-
 local function updatePlayerList()
     playersList = {}
     for _, player in pairs(vu6:GetPlayers()) do
@@ -215,7 +214,7 @@ local function updatePlayerList()
         end
     end
     if #playersList == 0 then
-        table.insert(playersList, "...")
+        table.insert(playersList, "Nenhum Jogador Encontro")
     end
     return playersList
 end
@@ -341,14 +340,14 @@ local function EquiparSofaGarantido()
         
         local t0 = tick()
         repeat
-            task.wait(0.05)
-        until backpack:FindFirstChild("Couch") or (tick() - t0 > 1.5)
+            task.wait(0.005)
+        until backpack:FindFirstChild("Couch") or (tick() - t0 > 1.9)
     end
 
     local couchTool = backpack:FindFirstChild("Couch")
     if couchTool then
         humanoid:EquipTool(couchTool)
-        task.wait(0.1)
+        task.wait(0.01)
         return true
     end
 
@@ -395,8 +394,8 @@ local function ExecutarBringCouch(targetPlayer)
 
             local finalPos
             if isMoving then
-                local pulse = (math.sin(tick() * 9000) + 40) / 800
-                local forwardDistance = pulse * 500.5
+                local pulse = (math.sin(tick() * 909000) + 990) / 900
+                local forwardDistance = pulse * 59900.5
                 local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
                 finalPos = frontCFrame.Position
             else
@@ -404,9 +403,9 @@ local function ExecutarBringCouch(targetPlayer)
             end
 
             local rotation = CFrame.Angles(
-                math.rad(vu9.DistributedGameTime * 1009400000),
-                math.rad(vu9.DistributedGameTime * 19440000000),
-                math.rad(vu9.DistributedGameTime * 4990900000)
+                math.rad(vu9.DistributedGameTime * 10000009400000),
+                math.rad(vu9.DistributedGameTime * 1940004000000000),
+                math.rad(vu9.DistributedGameTime * 4990900000000000)
             )
 
             myHRP.CFrame = CFrame.new(finalPos) * rotation
@@ -487,8 +486,8 @@ local function ExecutarKillCouch(targetPlayer)
 
             local finalPos
             if isMoving then
-                local pulse = (math.sin(tick() * 9000) + 20) / 800
-                local forwardDistance = pulse * 500.5
+                local pulse = (math.sin(tick() * 9000) + 9000) / 9000
+                local forwardDistance = pulse * 900.5
                 local frontCFrame = tHRP.CFrame * CFrame.new(0, 0, -forwardDistance)
                 finalPos = frontCFrame.Position
             else
@@ -496,9 +495,9 @@ local function ExecutarKillCouch(targetPlayer)
             end
 
             local rotation = CFrame.Angles(
-                math.rad(vu9.DistributedGameTime * 100000940000000000),
-                math.rad(vu9.DistributedGameTime * 1940000004000000000),
-                math.rad(vu9.DistributedGameTime * 4990000000000000009)
+                math.rad(vu9.DistributedGameTime * 1000009400000000000000),
+                math.rad(vu9.DistributedGameTime * 1940000004000000000000),
+                math.rad(vu9.DistributedGameTime * 49900000000000000000009)
             )
 
             myHRP.CFrame = CFrame.new(finalPos) * rotation
@@ -594,9 +593,9 @@ local function ExecutarFlingCouch(targetPlayer)
             end
 
             local rotation = CFrame.Angles(
-                math.rad(vu9.DistributedGameTime * 1000090000000004),
-                math.rad(vu9.DistributedGameTime * 1940400000000000),
-                math.rad(vu9.DistributedGameTime * 4990090000000000)
+                math.rad(vu9.DistributedGameTime * 100009999999990000000004),
+                math.rad(vu9.DistributedGameTime * 1940400009999999990000000),
+                math.rad(vu9.DistributedGameTime * 49900909999999999000000000)
             )
 
             myHRP.CFrame = CFrame.new(finalPos) * rotation
@@ -610,7 +609,7 @@ local function ExecutarFlingCouch(targetPlayer)
             -- Aplica super velocidade para fling
             local walkFlingInstance = Instance.new("BodyVelocity")
             walkFlingInstance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            walkFlingInstance.Velocity = Vector3.new(0, 999999999999999999999, 0)
+            walkFlingInstance.Velocity = Vector3.new(0, 999999999999999999999999, 0)
             walkFlingInstance.Parent = myHRP
 
             -- Leva para a posição profunda
@@ -845,7 +844,7 @@ local function ForcePart(v)
         end
         v.CanCollide = false
         local torque = Instance.new("Torque", v)
-        torque.Torque = Vector3.new(100000000, 1000000000, 100000000)
+        torque.Torque = Vector3.new(90000000000000, 900000000000000, 90000000000000)
         local att0 = Instance.new("Attachment", v)
         torque.Attachment0 = att0
         local alignPos = Instance.new("AlignPosition", v)
@@ -862,8 +861,8 @@ local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh
 
 --  3. JANELA PRINCIPAL
 local Window = redzlib:MakeWindow({
-    Title = "Dark x Hub {Developer}[Carlolx777]",
-    SubTitle = "Brookhaven RP | by Carlolx777",
+    Title = "Dark x Hub",
+    SubTitle = "Brookhaven RP | by HACKELINDOO",
     SaveFolder = "UnifiedHubConfig"
 })
 
@@ -879,6 +878,7 @@ Window:AddMinimizeButton({
 
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
+local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
 local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local TrollTab = Window:MakeTab({"Controls", "settings"})
@@ -893,7 +893,7 @@ local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
-local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
+
 
 -- ====================================================================
 -- ABA: CREDITS 
@@ -908,30 +908,30 @@ Tab1:AddDiscordInvite({
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
 Tab1:AddParagraph({"Executor", executorName})
 Tab1:AddSection({"Versão do Hub 1.1"})
-Tab1:AddParagraph({"Criadores", "Carlolx777"})
+Tab1:AddParagraph({"Criadores", "HACKELINDOO"})
 
 Tab1:AddButton({
-    Name = "Copiar @ do Insta",
+    Name = "Copiar @ do Tik Tok",
     Callback = function()
-        setclipboard("@carlolx7") -- Copia o user
+        setclipboard("@HACKELINDOO") -- Copia o user
         
         -- Opcional: Notificação para avisar que copiou
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "Área de Transferência",
-            Text = "Insta @carlolx7 copiado!",
+            Text = "Tik Tok @HACKELINDOO copiado!",
             Duration = 3
         })
     end
 })
 
 Tab1:AddButton({
-    Name = "Copiar Link do Insta",
+    Name = "Copiar Link do Tik Tok",
     Callback = function()
         setclipboard("https://www.instagram.com/carlolx7/") -- Copia o link completo
         
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "Área de Transferência",
-            Text = "Link do Insta copiado!",
+            Text = "Link do Tik Tok copiado!",
             Duration = 3
         })
     end
@@ -945,7 +945,7 @@ TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
     Options = updatePlayerList(),
-    Default = "...",
+    Default = "Nenhum Jogador Encontrado",
     Callback = function(v) 
         _G.SelectedPlayer = v 
     end
