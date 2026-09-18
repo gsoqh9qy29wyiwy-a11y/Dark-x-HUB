@@ -220,15 +220,19 @@ local function SendNotification(title, text, duration)
     end)
 end
 
-local function getPlayerList()
-    local list = {}
+local function updatePlayerList()
+    playersList = {}
     for _, player in pairs(vu6:GetPlayers()) do
         if player ~= vu7 then
-            table.insert(list, player.Name)
+            table.insert(playersList, player.Name)
         end
     end
-    return list
+    if #playersList == 0 then
+        table.insert(playersList, "...")
+    end
+    return playersList
 end
+local getPlayerList = updatePlayerList
 
 local function ObterListaNomesProps()
     local lista = {"...", "Todos"}
@@ -1389,11 +1393,10 @@ end)
 _G.SelectedPlayer = ""
 TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 
-_G.SelectedPlayer = ""
-TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 local PlayerDrop = TabTroll:AddDropdown({
     Name = "Lista de jogadores",
-    Options = getPlayerList(),
+    Options = updatePlayerList(),
+    Default = "...",
     Callback = function(v) 
         _G.SelectedPlayer = v 
     end
@@ -1402,7 +1405,7 @@ local PlayerDrop = TabTroll:AddDropdown({
 TabTroll:AddButton({
     Name = "Atualizar Lista de jogadores", 
     Callback = function() 
-        PlayerDrop:Set(getPlayerList()) 
+        PlayerDrop:Set(updatePlayerList()) 
     end
 })
 
