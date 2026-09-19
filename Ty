@@ -130,7 +130,29 @@ local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage,
 -- ====================================================================
 -- 2. VARIÁVEIS DO SISTEMA DE PROPS (Integrado após vu7)
 -- ====================================================================
+local PropMovementMode = "Nenhum"
+local jogadorSelecionado = nil
+local selecionarTodos = false
+local espionando = false
+local PropsActive = false
+local WaveSpeed = 0.2
+local ColorSpread = 0.05
+local ModoAvancadoAtivo = false
 
+local ConfigsProps = {
+    Orbita       = { Speed = 2, Distance = 10,  Height = 2 },
+    Caotico      = { Speed = 2, Distance = 8,   Height = 2 },
+    Furacao      = { Speed = 2, Distance = 5,   Height = 4 },
+    Alinhamento  = { Speed = 2, Distance = 3.5, Height = 2 }, 
+    Estrela      = { Speed = 2, Distance = 5,   Height = 15 }, 
+    Portal       = { Speed = 2, Distance = 5,   Height = 4 },
+    Aura         = { Speed = 3, Distance = 4,   Height = 1 }, 
+    Tremor       = { Speed = 2, Distance = 8,   Height = 2 }
+}
+local Configs = ConfigsProps -- Alias para compatibilidade
+
+local meusPropsCache = {}
+local MeuPropNome = "Prop" .. vu7.Name
 
 -- ====================================================================
 -- 3. VARIÁVEIS DE CONTROLE GERAIS
@@ -195,10 +217,12 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
+-- Referências de UI
+local PlayerDrop = nil
+local playerDropdownRef = nil
 -- ====================================================================
 -- 4. FUNÇÕES AUXILIARES E BACKEND
 -- ====================================================================
-
 local function SendNotification(title, text, duration)
     pcall(function()
         StarterGui:SetCore("SendNotification", {
@@ -222,6 +246,7 @@ local function updatePlayerList()
     return playersList
 end
 local getPlayerList = updatePlayerList
+local getPlayerNames = updatePlayerList
 
 local function ObterListaNomesProps()
     local lista = {"...", "Todos"}
@@ -232,6 +257,7 @@ local function ObterListaNomesProps()
     end
     return lista
 end
+local ObterListaNomes = ObterListaNomesProps
 
 local function updateCamera()
     pcall(function()
@@ -266,6 +292,7 @@ end
 local function AlgumModoPropAtivo()
     return (PropMovementMode ~= "Nenhum" or PropsActive or ModoAvancadoAtivo)
 end
+local AlgumModoAtivo = AlgumModoPropAtivo
 
 -- --- FUNÇÕES DE BOLA ---
 local function GetBall()
