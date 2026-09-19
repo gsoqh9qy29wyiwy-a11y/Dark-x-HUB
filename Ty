@@ -112,7 +112,9 @@ end
 local loadingPromise = createLoadingScreen()
 waitForPromise(loadingPromise)
 
+-- ====================================================================
 -- 1. SERVIÇOS E VARIÁVEIS INICIAIS
+-- ====================================================================
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -125,7 +127,35 @@ local Camera = Workspace.CurrentCamera
 -- Atalhos de compatibilidade
 local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
 
--- Variáveis de Controle
+-- ====================================================================
+-- 2. VARIÁVEIS DO SISTEMA DE PROPS (Integrado após vu7)
+-- ====================================================================
+local PropMovementMode = "Nenhum"
+local jogadorSelecionadoProp = nil
+local selecionarTodosProps = false
+local espionandoProps = false
+local PropsActive = false
+local WaveSpeed = 0.2
+local ColorSpread = 0.05
+local ModoAvancadoAtivo = false
+
+local ConfigsProps = {
+    Orbita       = { Speed = 2, Distance = 10,  Height = 2 },
+    Caotico      = { Speed = 2, Distance = 8,   Height = 2 },
+    Furacao      = { Speed = 2, Distance = 5,   Height = 4 },
+    Alinhamento  = { Speed = 2, Distance = 3.5, Height = 2 }, 
+    Estrela      = { Speed = 2, Distance = 5,   Height = 15 }, 
+    Portal       = { Speed = 2, Distance = 5,   Height = 4 },
+    Aura         = { Speed = 3, Distance = 4,   Height = 1 }, 
+    Tremor       = { Speed = 2, Distance = 8,   Height = 2 }
+}
+
+local meusPropsCache = {}
+local MeuPropNome = "Prop" .. vu7.Name
+
+-- ====================================================================
+-- 3. VARIÁVEIS DE CONTROLE GERAIS
+-- ====================================================================
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
 _G.SelectedPlayer = ""
@@ -139,7 +169,7 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
--- --- NOVAS FUNÇÕES DO FLING BALL AUTOMÁTICO (ADICIONADAS) ---
+-- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
 local FlingBallAuto = false
 
 local function GetBallAutomatico()
@@ -167,7 +197,6 @@ local function ForcarEquipamento()
     end
 end
 
-
 -- Variáveis da Bola (Orbit e Fling)
 local OrbitSpeed = 15
 local OrbitDistance = 5
@@ -188,7 +217,7 @@ local loopAtivo = false
 local InputID = ""
 
 -- ====================================================================
--- 2. FUNÇÕES AUXILIARES E BACKEND
+-- 4. FUNÇÕES AUXILIARES E BACKEND
 -- ====================================================================
 
 local function SendNotification(title, text, duration)
@@ -202,7 +231,7 @@ local function SendNotification(title, text, duration)
 end
 
 local function updatePlayerList()
-    playersList = {}
+    local playersList = {}
     for _, player in pairs(vu6:GetPlayers()) do
         if player ~= vu7 then
             table.insert(playersList, player.Name)
