@@ -870,7 +870,7 @@ Window:AddMinimizeButton({
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
 local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
-local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
+local HouseTab = Window:MakeTab({"Casas", "home"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local TrollTab = Window:MakeTab({"Controls", "settings"})
 local Tab3 = Window:MakeTab({"Avatar", "shirt"})
@@ -1851,11 +1851,12 @@ PropsTab:AddButton({
 -- ====================================================================
 -- ABA: CASAS 
 -- ====================================================================
-local SelectHouse = nil
-local HouseDropdown = nil
-local NoclipDoor = nil
+-- Variáveis globais
 local isUnbanActive = false
+local SelectHouse = nil
+local NoclipDoor = nil
 
+-- Função para obter lista de casas
 local function getHouseList()
     local Tabela = {}
     local lots = workspace:FindFirstChild("001_Lots")
@@ -1868,57 +1869,76 @@ local function getHouseList()
     end
     return Tabela
 end
-CasasTab:AddSection({"Selecione uma Casa"})
+
+-- Dropdown para selecionar casas
 pcall(function()
-    HouseDropdown = CasasTab:AddDropdown({
+    HouseTab:AddDropdown({
         Name = "Selecione a Casa",
-        Descriptio = "Lista de casas",
         Options = getHouseList(),
         Default = "...",
         Callback = function(Value)
             SelectHouse = Value
+            if NoclipDoor then
+                NoclipDoor:Set(false)
+            end
             print("Casa selecionada: " .. tostring(Value))
         end
     })
 end)
 
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Atualizar Lista de Casas",
-        Description = "Atualizar Lista de casas",
-        Callback = function()
-            local novaLista = getHouseList()
-            if HouseDropdown then
-                pcall(function()
-                    HouseDropdown:Set(novaLista)
-                end)
+-- Função para atualizar a lista de casas
+local function DropdownHouseUpdate()
+    local Tabela = getHouseList()
+    print("DropdownHouseUpdate called. Houses found:", #Tabela)
+    pcall(function()
+        HouseTab:ClearDropdown("Selecione a Casa") -- Tentar limpar dropdown, se suportado
+        HouseTab:AddDropdown({
+            Name = "Selecione a Casa",
+            Options = Tabela,
+            Default = "...",
+            Callback = function(Value)
+                SelectHouse = Value
+                if NoclipDoor then
+                    NoclipDoor:Set(false)
+                end
             end
-            print("✅ Lista de casas atualizada!")
+        })
+    end)
+end
+
+-- Inicializar dropdown
+pcall(DropdownHouseUpdate)
+
+-- Botão para atualizar lista de casas
+pcall(function()
+    HouseTab:AddButton({
+        Name = "Atualizar Lista de Casas",
+        Callback = function()
+            print("Atualizar Lista de Casas button clicked.")
+            pcall(DropdownHouseUpdate)
         end
     })
 end)
 
--- Teleportar para casa
+-- Botão para teleportar para casa
 pcall(function()
-    CasasTab:AddButton({
+    HouseTab:AddButton({
         Name = "Teleportar para Casa",
-        Description = "Teleporta para casa selecionada",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
             if House and game.Players.LocalPlayer.Character then
                 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
             else
-                print("Casa no encontrada: " .. tostring(SelectHouse))
+                print("Casa não encontrada: " .. tostring(SelectHouse))
             end
         end
     })
 end)
 
--- Teleportar para cofre
+-- Botão para teleportar para cofre
 pcall(function()
-    CasasTab:AddButton({
+    HouseTab:AddButton({
         Name = "Teleportar para Cofre",
-        Description = "algumas casa não tem Cofre",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
             if House and House:FindFirstChild("HousePickedByPlayer") and game.Players.LocalPlayer.Character then
@@ -1926,21 +1946,20 @@ pcall(function()
                 if safe then
                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position)
                 else
-                    print("Cofre no encontrado na casa: " .. tostring(SelectHouse))
+                    print("Cofre não encontrado na casa: " .. tostring(SelectHouse))
                 end
             else
-                print("Casa no encontrada: " .. tostring(SelectHouse))
+                print("Casa não encontrada: " .. tostring(SelectHouse))
             end
         end
     })
 end)
 
-
 -- Toggle para atravessar porta
 pcall(function()
-    NoclipDoor = CasasTab:AddToggle({
+    NoclipDoor = HouseTab:AddToggle({
         Name = "Atravessar Porta da Casa",
-        Description = "faz vc atravessar a porta da casa selecionada",
+        Description = "",
         Default = false,
         Callback = function(Value)
             pcall(function()
@@ -1963,9 +1982,9 @@ end)
 
 -- Toggle para tocar campainha
 pcall(function()
-    CasasTab:AddToggle({
+    HouseTab:AddToggle({
         Name = "Tocar Campainha",
-        Description = "ative isso quando vc estiver perto da casa selecionada",
+        Description = "",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorbellValue = Value
@@ -1989,9 +2008,9 @@ end)
 
 -- Toggle para bater na porta
 pcall(function()
-    CasasTab:AddToggle({
+    HouseTab:AddToggle({
         Name = "Bater na Porta",
-        Description = "ative isso quando vc estiver perto da casa selecionada",
+        Description = "",
         Default = false,
         Callback = function(Value)
             getgenv().ChaosHubAutoSpawnDoorValue = Value
@@ -2012,70 +2031,135 @@ pcall(function()
         end
     })
 end)
+pcall(function()
+    HouseTab:AddSection({ Name = "Teleporte Para Casas" })
+end)
 
--- Remove Banimento 
-CasasTab:AddButton({Name = "Remover Banimento", Description = "Remover o banimento da casa manualmente", Callback = function() pcall(function() vu2:removeBanHouses() end) end})
+-- Lista de casas para teletransporte
+local casas = {
+    ["Casa 1"] = Vector3.new(260.29, 4.37, 209.32),
+    ["Casa 2"] = Vector3.new(234.49, 4.37, 228.00),
+    ["Casa 3"] = Vector3.new(262.79, 21.37, 210.84),
+    ["Casa 4"] = Vector3.new(229.60, 21.37, 225.40),
+    ["Casa 5"] = Vector3.new(173.44, 21.37, 228.11),
+    ["Casa 6"] = Vector3.new(-43, 21, -137),
+    ["Casa 7"] = Vector3.new(-40, 36, -137),
+    ["Casa 11"] = Vector3.new(-21, 40, 436),
+    ["Casa 12"] = Vector3.new(155, 37, 433),
+    ["Casa 13"] = Vector3.new(255, 35, 431),
+    ["Casa 14"] = Vector3.new(254, 38, 394),
+    ["Casa 15"] = Vector3.new(148, 39, 387),
+    ["Casa 16"] = Vector3.new(-17, 42, 395),
+    ["Casa 17"] = Vector3.new(-189, 37, -247),
+    ["Casa 18"] = Vector3.new(-354, 37, -244),
+    ["Casa 19"] = Vector3.new(-456, 36, -245),
+    ["Casa 20"] = Vector3.new(-453, 38, -295),
+    ["Casa 21"] = Vector3.new(-356, 38, -294),
+    ["Casa 22"] = Vector3.new(-187, 37, -295),
+    ["Casa 23"] = Vector3.new(-410, 68, -447),
+    ["Casa 24"] = Vector3.new(-348, 69, -496),
+    ["Casa 28"] = Vector3.new(-103, 12, 1087),
+    ["Casa 29"] = Vector3.new(-730, 6, 808),
+    ["Casa 30"] = Vector3.new(-245, 7, 822),
+    ["Casa 31"] = Vector3.new(639, 76, -361),
+    ["Casa 32"] = Vector3.new(-908, 6, -361),
+    ["Casa 33"] = Vector3.new(-111, 70, -417),
+    ["Casa 34"] = Vector3.new(230, 38, 569),
+    ["Casa 35"] = Vector3.new(-30, 13, 2209)
+}
 
-CasasTab:AddToggle({Name = "Auto Remover Ban", Description = "Remover o banimento da casa automaticamente", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
+-- Criar lista de nomes de casas ordenada
+local casasNomes = {}
+for nome, _ in pairs(casas) do
+    table.insert(casasNomes, nome)
+end
 
--- Botão para remover ban de todas as casas
-CasasTab:AddButton({
-    Name = "Remover Ban de Todas as Casas Manual",
-    Description = "Tenta remover o ban de todas as casas ",
-    Callback = function()
-        local successCount = 0
-        local failCount = 0
-        for i = 1, 37 do
-            local bannedBlockName = "BannedBlock" .. i
-            local bannedBlock = Workspace:FindFirstChild(bannedBlockName, true)
-            if bannedBlock then
-                local success, _ = pcall(function()
-                    bannedBlock:Destroy()
-                end)
-                if success then
-                    successCount = successCount + 1
-                else
-                    failCount = failCount + 1
-                end
+table.sort(casasNomes, function(a, b)
+    local numA = tonumber(a:match("%d+")) or 0
+    local numB = tonumber(b:match("%d+")) or 0
+    return numA < numB
+end)
+
+-- Dropdown para teletransporte
+pcall(function()
+    HouseTab:AddDropdown({
+        Name = "Selecionar Casa",
+        Options = casasNomes,
+        Callback = function(casaSelecionada)
+            local player = game.Players.LocalPlayer
+            if player and player.Character then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(casas[casaSelecionada])
             end
         end
-        for _, house in pairs(Workspace:GetDescendants()) do
-            if house.Name:match("BannedBlock") then
-                local success, _ = pcall(function()
-                    house:Destroy()
-                end)
-                if success then
-                    successCount = successCount + 1
-                else
-                    failCount = failCount + 1
-                end
+    })
+end)
+
+-- Label após dropdown
+pcall(function()
+    HouseTab:AddLabel("Teleporte para a Casa que Quiser")
+end)
+
+-- Seção para Auto Unban
+pcall(function()
+    HouseTab:AddSection({ Name = "Auto Unban" })
+end)
+
+-- Toggle para Auto Unban
+pcall(function()
+    HouseTab:AddToggle({
+        Name = "Auto Unban",
+        Default = false,
+        Callback = function(state)
+            isUnbanActive = state
+            if isUnbanActive then
+                print("Auto Unban Activated")
+                spawn(startAutoUnban)
+            else
+                print("Auto Unban Deactivated")
             end
         end
-        if successCount > 0 then
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Sucesso",
-                Text = "Bans removidos de " .. successCount .. " casas!",
-                Duration = 5
-            })
+    })
+end)
+
+-- Label após Auto Unban
+pcall(function()
+    HouseTab:AddLabel("Te desbane automaticamente das Casas")
+end)
+
+-- Seção para Casa RGB
+pcall(function()
+    HouseTab:AddSection({ Name = "Casa RGB" })
+end)
+
+-- Toggle para Casa RGB
+pcall(function()
+    HouseTab:AddToggle({
+        Name = "Casa RGB",
+        Default = false,
+        Callback = function(state)
+            toggleHouseRGB(state)
         end
-        if failCount > 0 then
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Aviso",
-                Text = "Falha ao remover bans de " .. failCount .. " casas.",
-                Duration = 5
-            })
-        end
-        if successCount == 0 and failCount == 0 then
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Aviso",
-                Text = "Nenhum ban encontrado para remover.",
-                Duration = 5
-            })
-        end
+    })
+end)
+
+-- Label após Casa RGB
+pcall(function()
+    HouseTab:AddLabel("Deixa a sua casa RGB")
+end)
+
+-- Função para Auto Unban
+function startAutoUnban()
+    while isUnbanActive do
+        pcall(function()
+            for _, v in pairs(game:GetService("Workspace"):WaitForChild("001_Lots"):GetDescendants()) do
+                if v.Name:match("^BannedBlock%d+$") then
+                    v:Destroy()
+                end
+            end
+        end)
+        task.wait(1)
     end
-})
-
-
+end
 -- ====================================================================
 -- ABA: TELEPORTES 
 -- ====================================================================
