@@ -870,7 +870,7 @@ Window:AddMinimizeButton({
 local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://13364900349"})
 local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
-local HouseTab = Window:MakeTab({"Casas", "home"})
+local CasasTab = Window:MakeTab({"Casas", "home"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local TrollTab = Window:MakeTab({"Controls", "settings"})
 local Tab3 = Window:MakeTab({"Avatar", "shirt"})
@@ -1851,12 +1851,12 @@ PropsTab:AddButton({
 -- ====================================================================
 -- ABA: CASAS 
 -- ====================================================================
--- Variáveis globais
-local isUnbanActive = false
 local SelectHouse = nil
-local NoclipDoor = nil
+local HouseDropdown = nil
+local isUnbanActive = false
+local autoUnbanEnabled = false
+local autoUnbanThread = nil
 
--- Função para obter lista de casas
 local function getHouseList()
     local Tabela = {}
     local lots = workspace:FindFirstChild("001_Lots")
@@ -1869,76 +1869,57 @@ local function getHouseList()
     end
     return Tabela
 end
-
--- Dropdown para selecionar casas
+CasasTab:AddSection({"Selecione uma Casa"})
 pcall(function()
-    HouseTab:AddDropdown({
+    HouseDropdown = CasasTab:AddDropdown({
         Name = "Selecione a Casa",
+        Descriptio = "Lista de casas",
         Options = getHouseList(),
         Default = "...",
         Callback = function(Value)
             SelectHouse = Value
-            if NoclipDoor then
-                NoclipDoor:Set(false)
-            end
             print("Casa selecionada: " .. tostring(Value))
         end
     })
 end)
 
--- Função para atualizar a lista de casas
-local function DropdownHouseUpdate()
-    local Tabela = getHouseList()
-    print("DropdownHouseUpdate called. Houses found:", #Tabela)
-    pcall(function()
-        HouseTab:ClearDropdown("Selecione a Casa") -- Tentar limpar dropdown, se suportado
-        HouseTab:AddDropdown({
-            Name = "Selecione a Casa",
-            Options = Tabela,
-            Default = "...",
-            Callback = function(Value)
-                SelectHouse = Value
-                if NoclipDoor then
-                    NoclipDoor:Set(false)
-                end
-            end
-        })
-    end)
-end
-
--- Inicializar dropdown
-pcall(DropdownHouseUpdate)
-
--- Botão para atualizar lista de casas
 pcall(function()
-    HouseTab:AddButton({
+    CasasTab:AddButton({
         Name = "Atualizar Lista de Casas",
+        Description = "Atualizar Lista de casas",
         Callback = function()
-            print("Atualizar Lista de Casas button clicked.")
-            pcall(DropdownHouseUpdate)
+            local novaLista = getHouseList()
+            if HouseDropdown then
+                pcall(function()
+                    HouseDropdown:Set(novaLista)
+                end)
+            end
+            print("✅ Lista de casas atualizada!")
         end
     })
 end)
 
--- Botão para teleportar para casa
+-- Teleportar para casa
 pcall(function()
-    HouseTab:AddButton({
+    CasasTab:AddButton({
         Name = "Teleportar para Casa",
+        Description = "Teleporta para casa selecionada",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
             if House and game.Players.LocalPlayer.Character then
                 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
             else
-                print("Casa não encontrada: " .. tostring(SelectHouse))
+                print("Casa no encontrada: " .. tostring(SelectHouse))
             end
         end
     })
 end)
 
--- Botão para teleportar para cofre
+-- Teleportar para cofre
 pcall(function()
-    HouseTab:AddButton({
+    CasasTab:AddButton({
         Name = "Teleportar para Cofre",
+        Description = "algumas casa não tem Cofre",
         Callback = function()
             local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
             if House and House:FindFirstChild("HousePickedByPlayer") and game.Players.LocalPlayer.Character then
@@ -1946,93 +1927,37 @@ pcall(function()
                 if safe then
                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position)
                 else
-                    print("Cofre não encontrado na casa: " .. tostring(SelectHouse))
+                    print("Cofre no encontrado na casa: " .. tostring(SelectHouse))
                 end
             else
-                print("Casa não encontrada: " .. tostring(SelectHouse))
+                print("Casa no encontrada: " .. tostring(SelectHouse))
             end
         end
     })
 end)
-
--- Toggle para atravessar porta
-pcall(function()
-    NoclipDoor = HouseTab:AddToggle({
-        Name = "Atravessar Porta da Casa",
-        Description = "",
-        Default = false,
-        Callback = function(Value)
-            pcall(function()
-                local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-                if House and House:FindFirstChild("HousePickedByPlayer") then
-                    local housepickedbyplayer = House.HousePickedByPlayer
-                    local doors = housepickedbyplayer.HouseModel:FindFirstChild("001_HouseDoors")
-                    if doors and doors:FindFirstChild("HouseDoorFront") then
-                        for _, Base in ipairs(doors.HouseDoorFront:GetChildren()) do
-                            if Base:IsA("BasePart") then
-                                Base.CanCollide = not Value
-                            end
+CasasTab:AddToggle({
+    Name = "Atravessar parede",
+    Default = false,
+    Callback = function(Value)
+        getgenv().Noclip = Value
+        local conn
+        conn = game:GetService("RunService").Stepped:Connect(function()
+            if getgenv().Noclip then
+                local p = game.Players.LocalPlayer
+                if p.Character then
+                    for _, part in pairs(p.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
                         end
                     end
                 end
-            end)
-        end
-    })
-end)
-
--- Toggle para tocar campainha
+            end
+        end)
+        if Value then getgenv().NoclipConn = conn else conn:Disconnect() end
+    end
+})
 pcall(function()
-    HouseTab:AddToggle({
-        Name = "Tocar Campainha",
-        Description = "",
-        Default = false,
-        Callback = function(Value)
-            getgenv().ChaosHubAutoSpawnDoorbellValue = Value
-            spawn(function()
-                while getgenv().ChaosHubAutoSpawnDoorbellValue do
-                    local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-                    if House and House:FindFirstChild("HousePickedByPlayer") then
-                        local doorbell = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_DoorBell")
-                        if doorbell and doorbell:FindFirstChild("TouchBell") then
-                            pcall(function()
-                                fireclickdetector(doorbell.TouchBell.ClickDetector)
-                            end)
-                        end
-                    end
-                    task.wait(0.5)
-                end
-            end)
-        end
-    })
-end)
-
--- Toggle para bater na porta
-pcall(function()
-    HouseTab:AddToggle({
-        Name = "Bater na Porta",
-        Description = "",
-        Default = false,
-        Callback = function(Value)
-            getgenv().ChaosHubAutoSpawnDoorValue = Value
-            spawn(function()
-                while getgenv().ChaosHubAutoSpawnDoorValue do
-                    local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-                    if House and House:FindFirstChild("HousePickedByPlayer") then
-                        local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
-                        if doors and doors:FindFirstChild("HouseDoorFront") and doors.HouseDoorFront:FindFirstChild("Knock") then
-                            pcall(function()
-                                fireclickdetector(doors.HouseDoorFront.Knock.TouchBell.ClickDetector)
-                            end)
-                        end
-                    end
-                    task.wait(0.5)
-                end
-            end)
-        end
-    })
-end)
-pcall(function()
-    HouseTab:AddSection({ Name = "Teleporte Para Casas" })
+    CasasTab:AddSection({ Name = "Teleporte Para Casas" })
 end)
 
 -- Lista de casas para teletransporte
@@ -2082,7 +2007,7 @@ end)
 
 -- Dropdown para teletransporte
 pcall(function()
-    HouseTab:AddDropdown({
+    CasasTab:AddDropdown({
         Name = "Selecionar Casa",
         Options = casasNomes,
         Callback = function(casaSelecionada)
@@ -2096,70 +2021,131 @@ end)
 
 -- Label após dropdown
 pcall(function()
-    HouseTab:AddLabel("Teleporte para a Casa que Quiser")
+    CasasTab:AddLabel("Teleporte para a Casa que Quiser")
 end)
 
--- Seção para Auto Unban
+Seção para Auto Unban
 pcall(function()
-    HouseTab:AddSection({ Name = "Auto Unban" })
+    CasasTab:AddSection({ Name = "Auto Unban" })
 end)
 
--- Toggle para Auto Unban
-pcall(function()
-    HouseTab:AddToggle({
-        Name = "Auto Unban",
-        Default = false,
-        Callback = function(state)
-            isUnbanActive = state
-            if isUnbanActive then
-                print("Auto Unban Activated")
-                spawn(startAutoUnban)
-            else
-                print("Auto Unban Deactivated")
-            end
-        end
-    })
-end)
-
--- Label após Auto Unban
-pcall(function()
-    HouseTab:AddLabel("Te desbane automaticamente das Casas")
-end)
-
--- Seção para Casa RGB
-pcall(function()
-    HouseTab:AddSection({ Name = "Casa RGB" })
-end)
-
--- Toggle para Casa RGB
-pcall(function()
-    HouseTab:AddToggle({
-        Name = "Casa RGB",
-        Default = false,
-        Callback = function(state)
-            toggleHouseRGB(state)
-        end
-    })
-end)
-
--- Label após Casa RGB
-pcall(function()
-    HouseTab:AddLabel("Deixa a sua casa RGB")
-end)
-
--- Função para Auto Unban
-function startAutoUnban()
-    while isUnbanActive do
-        pcall(function()
-            for _, v in pairs(game:GetService("Workspace"):WaitForChild("001_Lots"):GetDescendants()) do
-                if v.Name:match("^BannedBlock%d+$") then
-                    v:Destroy()
+-- Botão para remover ban de todas as casas
+CasasTab:AddButton({
+    Name = "Remover Ban de Todas as Casas Manual",
+    Description = "Tenta remover o ban de todas as casas ",
+    Callback = function()
+        local successCount = 0
+        local failCount = 0
+        for i = 1, 37 do
+            local bannedBlockName = "BannedBlock" .. i
+            local bannedBlock = Workspace:FindFirstChild(bannedBlockName, true)
+            if bannedBlock then
+                local success, _ = pcall(function()
+                    bannedBlock:Destroy()
+                end)
+                if success then
+                    successCount = successCount + 1
+                else
+                    failCount = failCount + 1
                 end
             end
-        end)
-        task.wait(1)
+        end
+        for _, house in pairs(Workspace:GetDescendants()) do
+            if house.Name:match("BannedBlock") then
+                local success, _ = pcall(function()
+                    house:Destroy()
+                end)
+                if success then
+                    successCount = successCount + 1
+                else
+                    failCount = failCount + 1
+                end
+            end
+        end
+        if successCount > 0 then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Sucesso",
+                Text = "Bans removidos de " .. successCount .. " casas!",
+                Duration = 5
+            })
+        end
+        if failCount > 0 then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Aviso",
+                Text = "Falha ao remover bans de " .. failCount .. " casas.",
+                Duration = 5
+            })
+        end
+        if successCount == 0 and failCount == 0 then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Aviso",
+                Text = "Nenhum ban encontrado para remover.",
+                Duration = 5
+            })
+        end
     end
-end
+})
+
+Seção para Auto Unban
+pcall(function()
+    CasasTab:AddSection({ Name = "Auto Unban" })
+end)
+
+CasasTab:AddToggle({
+    Name = "Auto Unban Casas",
+    Default = false,
+    Callback = function(Value)
+        autoUnbanEnabled = Value
+
+        if autoUnbanEnabled then
+            -- Inicia a verificação contínua em segundo plano
+            autoUnbanThread = task.spawn(function()
+                while autoUnbanEnabled do
+                    -- 1. Varredura direta pelos nomes padrão (BannedBlock1 a 37)
+                    for i = 1, 37 do
+                        if not autoUnbanEnabled then break end
+                        
+                        local bannedBlockName = "BannedBlock" .. i
+                        local bannedBlock = workspace:FindFirstChild(bannedBlockName, true)
+                        
+                        if bannedBlock then
+                            pcall(function()
+                                bannedBlock:Destroy()
+                            end)
+                        end
+                    end
+
+                    -- 2. Varredura por padrão de nome em partes que possam ter sido criadas dinamicamente
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if not autoUnbanEnabled then break end
+                        
+                        if obj.Name:match("BannedBlock") then
+                            pcall(function()
+                                obj:Destroy()
+                            end)
+                        end
+                    end
+
+                    -- Intervalo entre as checagens para evitar sobrecarga de processamento (lag)
+                    task.wait(2)
+                end
+            end)
+
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Auto Unban",
+                Text = "Auto unban ativado!",
+                Duration = 3
+            })
+        else
+            -- Quando desativado, o loop encerra na próxima verificação de autoUnbanEnabled
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Auto Unban",
+                Text = "Auto unban desativado.",
+                Duration = 3
+            })
+        end
+    end
+})
 -- ====================================================================
 -- ABA: TELEPORTES 
 -- ====================================================================
