@@ -1840,7 +1840,7 @@ end
 -- ====================================================================
 PropsTab:AddSection({"Script PROPS"})
 
-Tabscript:AddButton({
+PropsTab:AddButton({
     Name = "Props Script",
     Description = "Brookhaven 🏡",
     Callback = function()
@@ -2126,6 +2126,7 @@ TabTP:AddButton({
 TabTP:AddSection({"Gerenciamento de Servidor"})
 TabTP:AddButton({
     Name = "Server Hop",
+Description = "Entrar no Um servidor com Uma pessoa",
     Callback = function()
         local PlaceID = game.PlaceId
         local success, response = pcall(function() return game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100') end)
@@ -2143,6 +2144,7 @@ TabTP:AddButton({
 
 TabTP:AddButton({
     Name = "Rejoin",
+Description = "Entrar no Mesmo Servidor",
     Callback = function() game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, vu7) end
 })
 
