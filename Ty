@@ -1853,9 +1853,8 @@ PropsTab:AddButton({
 -- ====================================================================
 local SelectHouse = nil
 local HouseDropdown = nil
+local NoclipDoor = nil
 local isUnbanActive = false
-local autoUnbanEnabled = false
-local autoUnbanThread = nil
 
 local function getHouseList()
     local Tabela = {}
@@ -1935,99 +1934,89 @@ pcall(function()
         end
     })
 end)
-CasasTab:AddToggle({
-    Name = "Atravessar parede",
-    Default = false,
-    Callback = function(Value)
-        getgenv().Noclip = Value
-        local conn
-        conn = game:GetService("RunService").Stepped:Connect(function()
-            if getgenv().Noclip then
-                local p = game.Players.LocalPlayer
-                if p.Character then
-                    for _, part in pairs(p.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
+
+
+-- Toggle para atravessar porta
+pcall(function()
+    NoclipDoor = CasasTab:AddToggle({
+        Name = "Atravessar Porta da Casa",
+        Description = "faz vc atravessar a porta da casa selecionada",
+        Default = false,
+        Callback = function(Value)
+            pcall(function()
+                local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+                if House and House:FindFirstChild("HousePickedByPlayer") then
+                    local housepickedbyplayer = House.HousePickedByPlayer
+                    local doors = housepickedbyplayer.HouseModel:FindFirstChild("001_HouseDoors")
+                    if doors and doors:FindFirstChild("HouseDoorFront") then
+                        for _, Base in ipairs(doors.HouseDoorFront:GetChildren()) do
+                            if Base:IsA("BasePart") then
+                                Base.CanCollide = not Value
+                            end
                         end
                     end
                 end
-            end
-        end)
-        if Value then getgenv().NoclipConn = conn else conn:Disconnect() end
-    end
-})
-pcall(function()
-    CasasTab:AddSection({ Name = "Teleporte Para Casas" })
-end)
-
--- Lista de casas para teletransporte
-local casas = {
-    ["Casa 1"] = Vector3.new(260.29, 4.37, 209.32),
-    ["Casa 2"] = Vector3.new(234.49, 4.37, 228.00),
-    ["Casa 3"] = Vector3.new(262.79, 21.37, 210.84),
-    ["Casa 4"] = Vector3.new(229.60, 21.37, 225.40),
-    ["Casa 5"] = Vector3.new(173.44, 21.37, 228.11),
-    ["Casa 6"] = Vector3.new(-43, 21, -137),
-    ["Casa 7"] = Vector3.new(-40, 36, -137),
-    ["Casa 11"] = Vector3.new(-21, 40, 436),
-    ["Casa 12"] = Vector3.new(155, 37, 433),
-    ["Casa 13"] = Vector3.new(255, 35, 431),
-    ["Casa 14"] = Vector3.new(254, 38, 394),
-    ["Casa 15"] = Vector3.new(148, 39, 387),
-    ["Casa 16"] = Vector3.new(-17, 42, 395),
-    ["Casa 17"] = Vector3.new(-189, 37, -247),
-    ["Casa 18"] = Vector3.new(-354, 37, -244),
-    ["Casa 19"] = Vector3.new(-456, 36, -245),
-    ["Casa 20"] = Vector3.new(-453, 38, -295),
-    ["Casa 21"] = Vector3.new(-356, 38, -294),
-    ["Casa 22"] = Vector3.new(-187, 37, -295),
-    ["Casa 23"] = Vector3.new(-410, 68, -447),
-    ["Casa 24"] = Vector3.new(-348, 69, -496),
-    ["Casa 28"] = Vector3.new(-103, 12, 1087),
-    ["Casa 29"] = Vector3.new(-730, 6, 808),
-    ["Casa 30"] = Vector3.new(-245, 7, 822),
-    ["Casa 31"] = Vector3.new(639, 76, -361),
-    ["Casa 32"] = Vector3.new(-908, 6, -361),
-    ["Casa 33"] = Vector3.new(-111, 70, -417),
-    ["Casa 34"] = Vector3.new(230, 38, 569),
-    ["Casa 35"] = Vector3.new(-30, 13, 2209)
-}
-
--- Criar lista de nomes de casas ordenada
-local casasNomes = {}
-for nome, _ in pairs(casas) do
-    table.insert(casasNomes, nome)
-end
-
-table.sort(casasNomes, function(a, b)
-    local numA = tonumber(a:match("%d+")) or 0
-    local numB = tonumber(b:match("%d+")) or 0
-    return numA < numB
-end)
-
--- Dropdown para teletransporte
-pcall(function()
-    CasasTab:AddDropdown({
-        Name = "Selecionar Casa",
-        Options = casasNomes,
-        Callback = function(casaSelecionada)
-            local player = game.Players.LocalPlayer
-            if player and player.Character then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(casas[casaSelecionada])
-            end
+            end)
         end
     })
 end)
 
--- Label após dropdown
+-- Toggle para tocar campainha
 pcall(function()
-    CasasTab:AddLabel("Teleporte para a Casa que Quiser")
+    CasasTab:AddToggle({
+        Name = "Tocar Campainha",
+        Description = "ative isso quando vc estiver perto da casa selecionada",
+        Default = false,
+        Callback = function(Value)
+            getgenv().ChaosHubAutoSpawnDoorbellValue = Value
+            spawn(function()
+                while getgenv().ChaosHubAutoSpawnDoorbellValue do
+                    local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+                    if House and House:FindFirstChild("HousePickedByPlayer") then
+                        local doorbell = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_DoorBell")
+                        if doorbell and doorbell:FindFirstChild("TouchBell") then
+                            pcall(function()
+                                fireclickdetector(doorbell.TouchBell.ClickDetector)
+                            end)
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        end
+    })
 end)
 
-Seção para Auto Unban
+-- Toggle para bater na porta
 pcall(function()
-    CasasTab:AddSection({ Name = "Auto Unban" })
+    CasasTab:AddToggle({
+        Name = "Bater na Porta",
+        Description = "ative isso quando vc estiver perto da casa selecionada",
+        Default = false,
+        Callback = function(Value)
+            getgenv().ChaosHubAutoSpawnDoorValue = Value
+            spawn(function()
+                while getgenv().ChaosHubAutoSpawnDoorValue do
+                    local House = workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+                    if House and House:FindFirstChild("HousePickedByPlayer") then
+                        local doors = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_HouseDoors")
+                        if doors and doors:FindFirstChild("HouseDoorFront") and doors.HouseDoorFront:FindFirstChild("Knock") then
+                            pcall(function()
+                                fireclickdetector(doors.HouseDoorFront.Knock.TouchBell.ClickDetector)
+                            end)
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        end
+    })
 end)
+
+-- Remove Banimento 
+CasasTab:AddButton({Name = "Remover Banimento", Description = "Remover o banimento da casa manualmente", Callback = function() pcall(function() vu2:removeBanHouses() end) end})
+
+CasasTab:AddToggle({Name = "Auto Remover Ban", Description = "Remover o banimento da casa automaticamente", Callback = function(s) pcall(function() vu2:autoRemoveBanHouses(s) end) end})
 
 -- Botão para remover ban de todas as casas
 CasasTab:AddButton({
@@ -2084,69 +2073,7 @@ CasasTab:AddButton({
             })
         end
     end
-})
-
-Seção para Auto Unban
-pcall(function()
-    CasasTab:AddSection({ Name = "Auto Unban" })
-end)
-
-CasasTab:AddToggle({
-    Name = "Auto Unban Casas",
-    Default = false,
-    Callback = function(Value)
-        autoUnbanEnabled = Value
-
-        if autoUnbanEnabled then
-            -- Inicia a verificação contínua em segundo plano
-            autoUnbanThread = task.spawn(function()
-                while autoUnbanEnabled do
-                    -- 1. Varredura direta pelos nomes padrão (BannedBlock1 a 37)
-                    for i = 1, 37 do
-                        if not autoUnbanEnabled then break end
-                        
-                        local bannedBlockName = "BannedBlock" .. i
-                        local bannedBlock = workspace:FindFirstChild(bannedBlockName, true)
-                        
-                        if bannedBlock then
-                            pcall(function()
-                                bannedBlock:Destroy()
-                            end)
-                        end
-                    end
-
-                    -- 2. Varredura por padrão de nome em partes que possam ter sido criadas dinamicamente
-                    for _, obj in ipairs(workspace:GetDescendants()) do
-                        if not autoUnbanEnabled then break end
-                        
-                        if obj.Name:match("BannedBlock") then
-                            pcall(function()
-                                obj:Destroy()
-                            end)
-                        end
-                    end
-
-                    -- Intervalo entre as checagens para evitar sobrecarga de processamento (lag)
-                    task.wait(2)
-                end
-            end)
-
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Auto Unban",
-                Text = "Auto unban ativado!",
-                Duration = 3
-            })
-        else
-            -- Quando desativado, o loop encerra na próxima verificação de autoUnbanEnabled
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Auto Unban",
-                Text = "Auto unban desativado.",
-                Duration = 3
-            })
-        end
-    end
-})
--- ====================================================================
+})-- ====================================================================
 -- ABA: TELEPORTES 
 -- ====================================================================
 local teleportButtons = {
