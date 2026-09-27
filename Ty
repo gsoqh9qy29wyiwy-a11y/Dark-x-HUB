@@ -171,6 +171,36 @@ local function ForcarEquipamento()
     end
 end
 
+local chasingplayer = nil
+local parteSelecionada = "HumanoidRootPart"
+
+-- Tabelas de configuração
+local nomesRP = {
+    "oi kkkk", "Sou Seu filho", "Armaria", "Tenho Dono: Lucas", "Estoy loco", 
+    "XALALALAL", "ANALFABETO", "Criança", "Web namoro", "Veia", "DARK X HUB", 
+    "KITA!!!!", "MÃEEEE", "PAIII", "BANCOPAN", "Calada", "Tenho Dona: Lolyta", "Uso Hack"
+}
+
+local parteMapeada = {
+    ["Cabeça"] = "Head",
+    ["Peito Superior"] = "UpperTorso",
+    ["Barriga Inferior"] = "LowerTorso",
+    ["Frente do Corpo"] = "HumanoidRootPart",
+    ["Frente"] = "HumanoidRootPart",
+    ["Traseiro"] = "HumanoidRootPart"
+}
+
+-- Funções auxiliares
+local function ObterListaJogadores()
+    local lista = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(lista, player.Name)
+        end
+    end
+    return lista
+end
+
 -- Variáveis da Bola (Orbit e Fling)
 local OrbitSpeed = 15
 local OrbitDistance = 5
@@ -205,7 +235,7 @@ local function updatePlayerList()
         end
     end
     if #playersList == 0 then
-        table.insert(playersList, "...")
+        table.insert(playersList, "Nenhum Jogador no Servidor")
     end
     return playersList
 end
