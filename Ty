@@ -913,6 +913,7 @@ local TabMusic = Window:MakeTab({"Music", "music"})
 local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({"Player", "home"})
+local ChildTab = Window:MakeTab({"Criança", "baby"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
 
 -- ====================================================================
@@ -5806,6 +5807,153 @@ Tab2:AddSlider({
        InfiniteJumpEnabled = Value
     end
  })
+-- ==========================================
+-- ELEMENTOS DA INTERFACE
+-- ==========================================
+ChildTab:AddSection({ Name = "Pirralhos Trolagem <filho>" })
+
+-- Dropdown de Jogadores
+local playerDropdown = ChildTab:AddDropdown({
+    Name = "Escolher Jogador",
+    Options = ObterListaJogadores(),
+    Default = "Nenhum",
+    Callback = function(selected)
+        local nome = type(selected) == "table" and selected[1] or selected
+        chasingplayer = Players:FindFirstChild(nome) and nome or nil
+    end
+})
+-- Toggle para Visualizar/Espectar Jogador
+ChildTab:AddToggle({
+    Name = "Visualizar Jogador",
+    Default = false,
+    Callback = function(value)
+        local function UpdateCamera()
+            local targetPlayer = value and chasingplayer and Players:FindFirstChild(chasingplayer)
+            local subject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+            
+            if targetPlayer and targetPlayer.Character then
+                local targetHum = targetPlayer.Character:FindFirstChild("Humanoid")
+                if targetHum then subject = targetHum end
+            end
+            
+            if subject then 
+                Camera.CameraSubject = subject 
+            end
+        end
+
+        if value then
+            if not getgenv().CameraConnection then
+                getgenv().CameraConnection = RunService.Heartbeat:Connect(UpdateCamera)
+            end
+        else
+            if getgenv().CameraConnection then
+                getgenv().CameraConnection:Disconnect()
+                getgenv().CameraConnection = nil
+            end
+            UpdateCamera()
+        end
+    end
+})
+
+-- Botão para Atualizar a Lista de Jogadores
+ChildTab:AddButton({
+    Name = "Atualizar Jogadores",
+    Callback = function()
+        if playerDropdown and playerDropdown.Set then
+            playerDropdown:Set(ObterListaJogadores())
+        elseif playerDropdown and playerDropdown.Refresh then
+            playerDropdown:Refresh(ObterListaJogadores())
+        end
+    end
+})
+
+-- Dropdown de Nomes RP
+ChildTab:AddDropdown({
+    Name = "Selecionar Nome RP",
+    Options = nomesRP,
+    Default = nomesRP[1],
+    Callback = function(nomeEscolhido)
+        local valor = type(nomeEscolhido) == "table" and nomeEscolhido[1] or nomeEscolhido
+        local evento = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1RPNam1eTex1t")
+        if evento then 
+            evento:FireServer("RolePlayFollow", valor) 
+        end
+    end
+})
+
+-- Dropdown da Parte do Corpo
+ChildTab:AddDropdown({
+    Name = "Parte do Corpo",
+    Options = {"Cabeça", "Peito Superior", "Barriga Inferior", "Frente do Corpo", "Frente", "Traseiro"},
+    Default = "Frente do Corpo",
+    Callback = function(opcao)
+        local valor = type(opcao) == "table" and opcao[1] or opcao
+        parteSelecionada = parteMapeada[valor] or "HumanoidRootPart"
+    end
+})
+
+
+-- Botão para Anexar/Enviar o Pirralho
+ChildTab:AddButton({
+    Name = "Enviar Pirralho",
+    Callback = function()
+        if not chasingplayer then 
+            warn("Nenhum jogador selecionado!") 
+            return 
+        end
+        
+        local targetChar = Workspace:FindFirstChild(chasingplayer)
+        if not targetChar then 
+            warn("Jogador alvo não encontrado no Workspace.") 
+            return 
+        end
+
+        local myCharFolder = Workspace:FindFirstChild(LocalPlayer.Name)
+        if not myCharFolder or not myCharFolder:FindFirstChild("FollowCharacter") then
+            local spawnEvent = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Bab1yFollo1w")
+            if spawnEvent then
+                spawnEvent:FireServer("CharacterFollowSpawnPlayer", "BabyBoy")
+                task.wait(0.5)
+                myCharFolder = Workspace:FindFirstChild(LocalPlayer.Name)
+            end
+        end
+
+        local pirralho = myCharFolder and myCharFolder:FindFirstChild("FollowCharacter")
+        local parteAlvo = targetChar:FindFirstChild(parteSelecionada)
+
+        if pirralho and parteAlvo then
+            pirralho.Parent = targetChar
+            local torso = pirralho:FindFirstChild("Torso") or pirralho:FindFirstChild("HumanoidRootPart")
+            
+            if torso then
+                local bg = torso:FindFirstChild("BodyGyro") or Instance.new("BodyGyro", torso)
+                local bp = torso:FindFirstChild("BodyPosition") or Instance.new("BodyPosition", torso)
+                
+                bg.MaxTorque = Vector3.new(400000, 400000, 400000)
+                bp.MaxForce = Vector3.new(400000, 400000, 400000)
+
+                if getgenv().FollowLoop then 
+                    getgenv().FollowLoop:Disconnect() 
+                end
+
+                getgenv().FollowLoop = RunService.Heartbeat:Connect(function()
+                    if pirralho and torso and parteAlvo and parteAlvo.Parent then
+                        bp.Position = parteAlvo.Position
+                        bg.CFrame = parteAlvo.CFrame
+                    else
+                        if getgenv().FollowLoop then
+                            getgenv().FollowLoop:Disconnect()
+                            getgenv().FollowLoop = nil
+                        end
+                    end
+                end)
+            end
+        else
+            warn("Parte alvo ou FollowCharacter não encontrados.")
+        end
+    end
+})
+
 -- ==========================================
 -- ABA: ADMINISTRADOR 
 -- ==========================================
