@@ -2,22 +2,23 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
--- ====================================================================
--- TELA DE LOADING INICIAL
--- ====================================================================
+-- Função que cria a tela de loading e retorna uma promise
 local function createLoadingScreen()
     local promise = {}
     promise.completed = false
     promise.connection = nil
     
+    -- Remove GUI antiga se existir
     pcall(function()
         if CoreGui:FindFirstChild("LoadingScreen") then
             CoreGui.LoadingScreen:Destroy()
         end
     end)
 
+    -- Cria a UI de carregamento
     local gui = Instance.new("ScreenGui")
     gui.Name = "LoadingScreen"
     gui.IgnoreGuiInset = true
@@ -25,93 +26,351 @@ local function createLoadingScreen()
     gui.Parent = CoreGui
     pcall(function() syn.protect_gui(gui) end)
 
+    -- Frame principal com gradiente azul
     local frame = Instance.new("Frame")
     frame.BackgroundColor3 = Color3.new(0, 0, 0)
-    frame.BackgroundTransparency = 0.0
     frame.Size = UDim2.new(1, 0, 1, 0)
     frame.Parent = gui
 
-    local image = Instance.new("ImageLabel")
-    image.Size = UDim2.new(0, 300, 0, 300)
-    image.Position = UDim2.new(0.5, -150, 0.35, -150)
-    image.BackgroundTransparency = 1
-    image.Image = "rbxassetid://131153193945220"
-    image.Parent = frame
+    -- Gradiente azul escuro para o fundo
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 20, 40)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 10, 25))
+    })
+    gradient.Rotation = 45
+    gradient.Parent = frame
 
-    local nameText = Instance.new("TextLabel")
-    nameText.Size = UDim2.new(1, 0, 0, 60)
-    nameText.Position = UDim2.new(0, 0, 0.65, 0)
-    nameText.TextColor3 = Color3.fromRGB(255, 0, 0)
-    nameText.TextStrokeTransparency = 0.3
-    nameText.BackgroundTransparency = 1
-    nameText.Font = Enum.Font.FredokaOne
-    nameText.TextScaled = true
-    nameText.Text = "Verificando usuário: "..lp.Name.." (Conta: "..tostring(lp.AccountAge).." dias)"
-    nameText.Parent = frame
+    -- Container central para o conteúdo
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.8, 0, 0.6, 0)
+    container.Position = UDim2.new(0.1, 0, 0.2, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = frame
 
+    -- Título "Demon Hub" com efeito brilhante
+    local titleText = Instance.new("TextLabel")
+    titleText.Size = UDim2.new(1, 0, 0.3, 0)
+    titleText.Position = UDim2.new(0, 0, 0.1, 0)
+    titleText.TextColor3 = Color3.fromRGB(359, 0, 0)
+    titleText.TextStrokeTransparency = 0.3
+    titleText.TextStrokeColor3 = Color3.fromRGB(359, 0, 0)
+    titleText.BackgroundTransparency = 1
+    titleText.Font = Enum.Font.GothamBold
+    titleText.TextScaled = true
+    titleText.Text = "Dark x Hub"
+    titleText.TextSize = 32
+    titleText.ZIndex = 3
+    titleText.Parent = container
+
+    -- Efeito de brilho no título
+    spawn(function()
+        while titleText and titleText.Parent do
+            local tween = TweenService:Create(
+                titleText,
+                TweenInfo.new(3.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 0, true),
+                {TextColor3 = Color3.fromRGB(30, 0, 0)}
+            )
+            tween:Play()
+            task.wait(1.5)
+        end
+    end)
+
+    -- Porcentagem
+    local percentText = Instance.new("TextLabel")
+    percentText.Size = UDim2.new(1, 0, 0.2, 0)
+    percentText.Position = UDim2.new(0, 0, 0.4, 0)
+    percentText.TextColor3 = Color3.fromRGB(359, 0, 0)
+    percentText.TextStrokeTransparency = 0.5
+    percentText.TextStrokeColor3 = Color3.fromRGB(359, 0, 0)
+    percentText.BackgroundTransparency = 1
+    percentText.Font = Enum.Font.GothamBold
+    percentText.TextScaled = true
+    percentText.Text = "0%"
+    percentText.TextSize = 24
+    percentText.ZIndex = 3
+    percentText.Parent = container
+
+    -- Barra de progresso background (com cantos arredondados)
     local barBG = Instance.new("Frame")
-    barBG.Size = UDim2.new(0.6, 0, 0.03, 0)
-    barBG.Position = UDim2.new(0.2, 0, 0.8, 0)
-    barBG.BackgroundColor3 = Color3.new(0, 0, 0)
-    barBG.BorderSizePixel = 9
-    barBG.Parent = frame
+    barBG.Size = UDim2.new(1, 0, 0.08, 0)
+    barBG.Position = UDim2.new(0, 0, 0.65, 0)
+    barBG.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    barBG.BorderSizePixel = 0
+    barBG.BackgroundTransparency = 0.3
+    barBG.ZIndex = 2
+    
+    -- Corner para arredondar o fundo
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0.5, 0)
+    bgCorner.Parent = barBG
+    
+    barBG.Parent = container
 
+    -- Barra de progresso (com cantos arredondados)
     local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(0, 0, 1, 0)
-    bar.BackgroundColor3 = Color3.new(255, 0, 0)
-    bar.BorderSizePixel = 9
+    bar.Size = UDim2.new(0, 0, 1, 0) -- Começa em 0
+    bar.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
+    bar.BorderSizePixel = 0
+    bar.ZIndex = 3
+    
+    -- Corner para arredondar a barra
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(0.5, 0)
+    barCorner.Parent = bar
+    
+    -- Gradiente na barra
+    local barGradient = Instance.new("UIGradient")
+    barGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 200, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 200, 255))
+    })
+    barGradient.Parent = bar
+   
     bar.Parent = barBG
 
-    local tween = TweenService:Create(
-        bar,
-        TweenInfo.new(4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        {Size = UDim2.new(1, 0, 1, 0)}
-    )
-    tween:Play()
+    -- Texto do usuário
+    local userText = Instance.new("TextLabel")
+    userText.Size = UDim2.new(1, 0, 0.15, 0)
+    userText.Position = UDim2.new(0, 0, 0.8, 0)
+    userText.TextColor3 = Color3.fromRGB(359, 0, 0)
+    userText.BackgroundTransparency = 1
+    userText.Font = Enum.Font.Gotham
+    userText.TextScaled = true
+    userText.Text = "Carregando: "..lp.Name.." ("..tostring(lp.AccountAge).." dias)"
+    userText.TextSize = 14
+    userText.ZIndex = 3
+    userText.Parent = container
 
-    local function cleanup()
-        if gui then gui:Destroy() end
-        if promise.connection then promise.connection:Disconnect() end
+    -- Sistema de Partículas Vemelhos Melhorado
+    local function createParticles()
+        local particlesFolder = Instance.new("Folder")
+        particlesFolder.Name = "Particles"
+        particlesFolder.Parent = frame
+
+        -- Partículas pequenas
+        for i = 1, 20 do
+            local particle = Instance.new("Frame")
+            particle.Size = UDim2.new(0, math.random(3, 8), 0, math.random(3, 8))
+            particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+            particle.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
+            particle.BackgroundTransparency = 0.8
+            particle.BorderSizePixel = 0
+            particle.ZIndex = 1
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = particle
+            
+            particle.Parent = particlesFolder
+
+            -- Animação da partícula
+            spawn(function()
+                while particle and particle.Parent do
+                    local targetPos = UDim2.new(math.random(), 0, math.random(), 0)
+                    local tweenInfo = TweenInfo.new(
+                        math.random(3, 6),
+                        Enum.EasingStyle.Quad,
+                        Enum.EasingDirection.InOut
+                    )
+                    
+                    local tween = TweenService:Create(particle, tweenInfo, {
+                        Position = targetPos,
+                        BackgroundTransparency = math.random(0.5, 0.9),
+                        Size = UDim2.new(0, math.random(2, 10), 0, math.random(2, 10))
+                    })
+                    tween:Play()
+                    
+                    task.wait(math.random(2, 4))
+                end
+            end)
+        end
+
+        -- Partículas médias
+        for i = 1, 10 do
+            local mediumParticle = Instance.new("Frame")
+            mediumParticle.Size = UDim2.new(0, math.random(10, 20), 0, math.random(10, 20))
+            mediumParticle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+            mediumParticle.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
+            mediumParticle.BackgroundTransparency = 0.6
+            mediumParticle.BorderSizePixel = 0
+            mediumParticle.ZIndex = 1
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = mediumParticle
+            
+            mediumParticle.Parent = particlesFolder
+
+            -- Animação da partícula média
+            spawn(function()
+                while mediumParticle and mediumParticle.Parent do
+                    local targetPos = UDim2.new(math.random(), 0, math.random(), 0)
+                    local tweenInfo = TweenInfo.new(
+                        math.random(4, 8),
+                        Enum.EasingStyle.Circular,
+                        Enum.EasingDirection.InOut
+                    )
+                    
+                    local tween = TweenService:Create(mediumParticle, tweenInfo, {
+                        Position = targetPos,
+                        BackgroundTransparency = math.random(0.3, 0.7),
+                        Rotation = math.random(-360, 360)
+                    })
+                    tween:Play()
+                    
+                    task.wait(math.random(3, 6))
+                end
+            end)
+        end
+
+        -- Partículas especiais (estrelas)
+        for i = 1, 5 do
+            local star = Instance.new("Frame")
+            star.Size = UDim2.new(0, 4, 0, 4)
+            star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+            star.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
+            star.BackgroundTransparency = 0.9
+            star.BorderSizePixel = 0
+            star.ZIndex = 2
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = star
+            
+            star.Parent = particlesFolder
+
+            -- Animação de brilho da estrela
+            spawn(function()
+                while star and star.Parent do
+                    local tweenInfo = TweenInfo.new(
+                        0.8,
+                        Enum.EasingStyle.Quad,
+                        Enum.EasingDirection.InOut,
+                        0,
+                        true
+                    )
+                    
+                    local tween = TweenService:Create(star, tweenInfo, {
+                        BackgroundTransparency = 0.4,
+                        Size = UDim2.new(0, 6, 0, 6)
+                    })
+                    tween:Play()
+                    
+                    task.wait(1.6)
+                end
+            end)
+        end
     end
 
-    promise.connection = tween.Completed:Connect(function()
-        TweenService:Create(frame, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(barBG, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(bar, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(image, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 1}):Play()
-        TweenService:Create(nameText, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+    -- Criar partículas
+    createParticles()
+
+    -- Variáveis para controle do loading
+    local currentPercent = 0
+    local targetPercent = 100
+    local loadingTime = 4 -- 4 segundos para carregar até 100%
+    local startTime = tick()
+    
+    -- Função para atualizar o loading
+    local function updateLoading()
+        local elapsed = tick() - startTime
+        local progress = math.min(elapsed / loadingTime, 1)
         
-        task.delay(1.2, function()
-            local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://113088956809836"
-            sound.Volume = 0.5
-            sound.PlayOnRemove = true
-            sound.Parent = workspace
-            sound:Destroy()
+        currentPercent = math.floor(progress * 100)
+        percentText.Text = currentPercent .. "%"
+        bar.Size = UDim2.new(progress, 0, 1, 0)
+        
+        return progress >= 1
+    end
+
+    -- Conexão para atualizar o loading
+    local heartbeatConnection
+    heartbeatConnection = RunService.Heartbeat:Connect(function()
+        local finished = updateLoading()
+        
+        if finished then
+            heartbeatConnection:Disconnect()
             
-            StarterGui:SetCore("SendNotification", {
-                Title = "Dark x Hub",
-                Text = "Bem-vindo à Dark x Hub",
-                Duration = 4
+            -- Fade out suave de toda a UI
+            local fadeTween = TweenService:Create(frame, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 1
             })
+            fadeTween:Play()
             
-            promise.completed = true
-            cleanup()
-        end)
+            -- Aguarda o fade out terminar e executa as ações finais
+            fadeTween.Completed:Connect(function()
+                percentText.Text = "100%"
+                wait(0.4)
+                
+                -- Toca som de conclusão
+                local sound = Instance.new("Sound")
+                sound.SoundId = "rbxassetid://8486683243"
+                sound.Volume = 0.5
+                sound.PlayOnRemove = true
+                sound.Parent = workspace
+                sound:Destroy()
+                
+                game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+                [1] = "RolePlayName",
+                [2] = "[ Dark User ]"
+                }))
+                
+                -- Define a bio do jogador
+                game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+                    [1] = "RolePlayBio",
+                    [2] = "Criador: Carlolx777",
+                }))
+                
+                -- Exibe a notificação de boas-vindas
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Dark x Hub",
+                    Text = "Bem-vindo ao Derk x Hub!",
+                    Duration = 4
+                })
+                
+                -- Marca como concluído e limpa
+                promise.completed = true
+                if gui then
+                    gui:Destroy()
+                end
+            end)
+        end
     end)
+
+    -- Função para limpar a UI
+    local function cleanup()
+        if heartbeatConnection then
+            heartbeatConnection:Disconnect()
+        end
+        if gui then
+            gui:Destroy()
+        end
+        if promise.connection then
+            promise.connection:Disconnect()
+        end
+    end
+
+    -- Configura a promise para limpeza
+    promise.cleanup = cleanup
     
     return promise
 end
 
+-- Função para esperar até que a promise seja resolvida
 local function waitForPromise(promise)
     while not promise.completed do
         task.wait()
     end
 end
 
+-- Uso:
 local loadingPromise = createLoadingScreen()
+
+-- Aqui você coloca o código que deve esperar até que o loading termine
 waitForPromise(loadingPromise)
 
+print("Loading completo! Agora executando o resto do script...")
 -- ====================================================================
 -- 1. SERVIÇOS E VARIÁVEIS INICIAIS
 -- ====================================================================
