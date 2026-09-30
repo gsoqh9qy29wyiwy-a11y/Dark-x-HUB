@@ -1173,7 +1173,6 @@ local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
-local TabAdmin = Window:MakeTab({"Admin👑", "home"})
 
 -- ====================================================================
 -- ABA: CREDITS 
