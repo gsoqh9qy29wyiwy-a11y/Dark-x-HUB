@@ -5152,70 +5152,6 @@ TabRGB:AddToggle({
     end
 })
 
-TabRGB:AddSection({ "RGB Avatar" })
-
-local colors = { "Bright red", "Lime green", "Bright blue", "Bright yellow", "Bright cyan", "Hot pink", "Royal purple" }
-local rgbEnabled = false
-
-local function changeColor(color)
-    local args = { color }
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeBodyColor"):FireServer(unpack(args))
-end
-
-local function toggleRGBCharacter(enabled)
-    rgbEnabled = enabled
-    if rgbEnabled then
-        while rgbEnabled do
-            for _, color in ipairs(colors) do
-                if not rgbEnabled then return end
-                changeColor(color)
-                wait(0.5)
-            end
-        end
-    end
-end
-
-TabRGB:AddToggle({
-    Name = "RGB Character",
-    Description = "Makes your character RGB",
-    Default = false,
-    Callback = function(value)
-        toggleRGBCharacter(value)
-    end
-})
-
-
-TabRGB:AddSection({ "RGB Hair" })
-local hairColors = {
-    Color3.new(1, 1, 0), Color3.new(0, 0, 1), Color3.new(1, 0, 1), Color3.new(1, 1, 1),
-    Color3.new(0, 1, 0), Color3.new(0.5, 0, 1), Color3.new(1, 0.647, 0), Color3.new(0, 1, 1)
-}
-local isActive = false
-
-
-local function changeHairColor()
-    local i = 1
-    while isActive do
-        if not isActive then break end
-        local args = { [1] = "ChangeHairColor2", [2] = hairColors[i] }
-        game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Max1y"):FireServer(unpack(args))
-        wait(0.1)
-        i = i % #hairColors + 1
-    end
-end
-
-
-TabRGB:AddToggle({
-    Name = "RGB Hair",
-    Description = "Makes your hair RGB",
-    Default = false,
-    Callback = function(value)
-        isActive = value
-        if isActive then
-            changeHairColor()
-        end
-    end
-})
 
 local Section = TabRGB:AddSection({"veiculos e casa "})
 
@@ -6353,9 +6289,9 @@ end
 -- ====================================================================
 -- ABA: ADMIN (INTERFACE)
 -- ====================================================================
-TabAdmi:AddSection({ "Painel de Administração" })
+TabAdmin:AddSection({ "Painel de Administração" })
 
-TabAdmi:AddButton({
+TabAdmin:AddButton({
     Name = "Abrir Painel Admin",
     Description = "Somente autorizados",
     Callback = function()
