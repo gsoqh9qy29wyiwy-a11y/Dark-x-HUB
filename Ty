@@ -1173,6 +1173,7 @@ local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({"Player", "home"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
+local TabAdmin = Window:MakeTab({"Admin👑", "home"})
 
 -- ====================================================================
 -- ABA: CREDITS 
@@ -6328,9 +6329,9 @@ end
 -- ====================================================================
 -- ABA: ADMIN (INTERFACE)
 -- ====================================================================
-TabAdmin:AddSection({ "Painel de Administração" })
+TabAdmi:AddSection({ "Painel de Administração" })
 
-TabAdmin:AddButton({
+TabAdmi:AddButton({
     Name = "Abrir Painel Admin",
     Description = "Somente autorizados",
     Callback = function()
