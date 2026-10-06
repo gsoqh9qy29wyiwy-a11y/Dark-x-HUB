@@ -2127,37 +2127,6 @@ end
 })
 
 
-TrollTab:AddSection({ "RGB Avatar" })
-
-local colors = { "Bright red", "Lime green", "Bright blue", "Bright yellow", "Bright cyan", "Hot pink", "Royal purple" }
-local rgbEnabled = false
-
-local function changeColor(color)
-    local args = { color }
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeBodyColor"):FireServer(unpack(args))
-end
-
-local function toggleRGBCharacter(enabled)
-    rgbEnabled = enabled
-    if rgbEnabled then
-        while rgbEnabled do
-            for _, color in ipairs(colors) do
-                if not rgbEnabled then return end
-                changeColor(color)
-                wait(0.5)
-            end
-        end
-    end
-end
-
-TrollTab:AddToggle({
-    Name = "RGB Character",
-    Description = "Makes your character RGB",
-    Default = false,
-    Callback = function(value)
-        toggleRGBCharacter(value)
-    end
-})
 
 
 -- ====================================================================
@@ -4724,27 +4693,36 @@ TabRGB:AddToggle({
     end
 })
 
-local ToggleCorpo = TabRGB:AddToggle({
-    Name = "RGB Corpo",
-    Description = "RGB  no corpo",
-    Default = false
-})
-ToggleCorpo:Callback(function(Value)
-    getgenv().rgbCorpo = Value
-    task.spawn(function()
-        while getgenv().rgbCorpo do
-            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-            if remote and remote:FindFirstChild("ChangeBodyColor") then
-                pcall(function()
-                    remote.ChangeBodyColor:FireServer({
-                        BrickColor.new(getRainbowColor(rgbSpeed))
-                    })
-                end)
+local colors = { "Bright red", "Lime green", "Bright blue", "Bright yellow", "Bright cyan", "Hot pink", "Royal purple" }
+local rgbEnabled = false
+
+local function changeColor(color)
+    local args = { color }
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeBodyColor"):FireServer(unpack(args))
+end
+
+local function toggleRGBCharacter(enabled)
+    rgbEnabled = enabled
+    if rgbEnabled then
+        while rgbEnabled do
+            for _, color in ipairs(colors) do
+                if not rgbEnabled then return end
+                changeColor(color)
+                wait(0.5)
             end
-            task.wait(0.1)
         end
-    end)
-end)
+    end
+end
+
+TabRGB:AddToggle({
+    Name = "RGB Corpo",
+    Description = "Deixa seu corpo RGB",
+    Default = false,
+    Callback = function(value)
+        toggleRGBCharacter(value)
+    end
+})
+
 
 
 local ToggleCabelo = TabRGB:AddToggle({
