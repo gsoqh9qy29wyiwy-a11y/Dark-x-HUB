@@ -386,11 +386,23 @@ local Camera = Workspace.CurrentCamera
 -- Atalhos de compatibilidade
 local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
 
--- ====================================================================
--- 3. VARIÁVEIS DE CONTROLE GERAIS
--- ====================================================================
+-- Variáveis de Controle e Configurações
+local CoordenadasFling = Vector3.new(-881615241216, 881615241216, -881615241216)
+local meusPropsCache = {}
+local PropMovementMode = "Nenhum"
+local ModoAvancadoAtivo = false
+local ModoKillAtivo = false
+local ModoFlingAtivo = false
+local selecionarTodosProps = false
+local jogadorSelecionadoProp = nil
+local espionandoProps = false
+local PropsActive = false
+local WaveSpeed = 0.25
+local ColorSpread = 0.05
+
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
+
 _G.SelectedPlayer = ""
 _G.AutoBringCouch = false
 _G.AutoKillCouch = false
@@ -401,6 +413,8 @@ _G.AntiFling = false
 _G.AntiLag = false 
 _G.RGBName = false
 _G.RainbowBio = false
+_G.BlackHoleActive = false
+_G.BH_Strength = 200
 
 -- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
 local FlingBallAuto = false
@@ -468,20 +482,65 @@ local OrbitAngle = 0
 local OrbitSelfEnabled = false
 local OrbitTargetEnabled = false
 
--- Variáveis do Black Hole
-_G.BlackHoleActive = false
-_G.BH_Strength = 200
 local BH_Attachment = nil
 local BH_Part = nil
-
 local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
--- Referências de UI
-local PlayerDrop = nil
-local playerDropdownRef = nil
+-- Configurações padrão para cada movimento
+local ConfigsProps = {
+    Orbita = { Speed = 2, Distance = 10, Height = 2 },
+    Aura = { Speed = 2, Distance = 8, Height = 1 },
+    Tremor = { Speed = 2, Distance = 10, Height = 2 },
+    Caotico = { Speed = 2, Distance = 12, Height = 2 },
+    Estrela = { Speed = 2, Distance = 15, Height = 15 },
+    Alinhamento = { Speed = 2, Distance = 6, Height = 2 },
+    Furacao = { Speed = 2, Distance = 10, Height = 4 },
+    Portal = { Speed = 2, Distance = 10, Height = 4 },
+    Nenhum = { Speed = 0, Distance = 0, Height = 0 }
+}
+-- ====================================================================
+-- 2. FUNÇÕES AUXILIARES E BACKEND
+-- ====================================================================
+
+-- Sistema de notificação integrado com suporte a Ícones / Fotos
+local function SendNotification(titulo, texto, tempo, icone)
+    pcall(function()
+        local dados = {
+            Title = titulo or "Aviso",
+            Text = texto or "",
+            Duration = tempo or 3
+        }
+        if icone then dados.Icon = icone end
+        StarterGui:SetCore("SendNotification", dados)
+    end)
+end
+
+-- Gera a lista com todos os jogadores presentes no servidor
+local function ObterListaNomesProps()
+    local lista = {"Todos"}
+    for _, jogador in ipairs(vu6:GetPlayers()) do
+        table.insert(lista, jogador.Name)
+    end
+    return lista
+end
+
+-- Busca e atualiza a lista de props que respondem aos comandos
+local function AtualizarCacheProps()
+    table.clear(meusPropsCache)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("SetCurrentCFrame") then
+            table.insert(meusPropsCache, obj)
+        end
+    end
+end
+
+-- Verifica se algum modo que necessita do PropMaker está ativo
+local function AlgumModoPropAtivo()
+    return (PropMovementMode ~= "Nenhum") or ModoAvancadoAtivo or ModoKillAtivo or ModoFlingAtivo or PropsActive
+end
 -- ====================================================================
 -- 4. FUNÇÕES AUXILIARES E BACKEND
 -- ====================================================================
@@ -1135,6 +1194,183 @@ local function ForcePart(v)
         alignPos.Attachment0 = att0
         alignPos.Attachment1 = BH_Attachment
     end
+end
+-- ====================================================================
+-- 5. LOOPS DE SEGUNDO PLANO (PROPS E FÍSICA)
+-- ====================================================================
+
+-- Loop PropMaker
+task.spawn(function()
+    local ferramentaNoInventario = false
+    while true do
+        if AlgumModoPropAtivo() then
+            local char = vu7.Character
+            local mochila = vu7:FindFirstChild("Backpack")
+            local fE = char and char:FindFirstChild("PropMaker")
+            local fM = mochila and mochila:FindFirstChild("PropMaker")
+            if not fE and not fM then
+                pcall(function()
+                    vu8:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer("PickingTools", "PropMaker")
+                end)
+            end
+            ferramentaNoInventario = true
+        else
+            if ferramentaNoInventario then
+                pcall(function()
+                    local char = vu7.Character
+                    local mochila = vu7:FindFirstChild("Backpack")
+                    local fE = char and char:FindFirstChild("PropMaker")
+                    local fM = mochila and mochila:FindFirstChild("PropMaker")
+                    if fE then fE:Destroy() end
+                    if fM then fM:Destroy() end
+                end)
+                ferramentaNoInventario = false
+            end
+        end
+        task.wait(0.2)
+    end
+end)
+
+-- Cache de Props
+task.spawn(function()
+    while true do
+        if AlgumModoPropAtivo() then
+            pcall(AtualizarCacheProps)
+        end
+        task.wait(0.4)
+    end
+end)
+
+-- Movimentação Rápida dos Props
+task.spawn(function()
+    local angle, tempoGeral = 0, 0
+    while true do
+        local dt = task.wait(0.03)
+        if (PropMovementMode == "Nenhum" and not ModoAvancadoAtivo and not ModoKillAtivo and not ModoFlingAtivo) or #meusPropsCache == 0 then
+            continue
+        end
+
+        local lista = {}
+        if selecionarTodosProps then
+            for _, p in ipairs(vu6:GetPlayers()) do
+                if p ~= vu7 and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(lista, p)
+                end
+            end
+        else
+            if jogadorSelecionadoProp and jogadorSelecionadoProp.Character and jogadorSelecionadoProp.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(lista, jogadorSelecionadoProp)
+            end
+        end
+
+        if #lista == 0 then continue end
+
+        local cfg = ConfigsProps[PropMovementMode]
+        local speedVal = cfg and cfg.Speed or 2
+        angle = angle + (dt * speedVal)
+        tempoGeral = tempoGeral + dt * (speedVal * 2)
+        local total = #meusPropsCache
+
+        local myChar = vu7.Character
+        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local myCF = myRoot and myRoot.CFrame or CFrame.new()
+
+        for i, prop in ipairs(meusPropsCache) do
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then
+                local pDono = lista[((i - 1) % #lista) + 1]
+                if pDono and pDono.Character and pDono.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = pDono.Character.HumanoidRootPart
+                    local rCF = root.CFrame
+                    local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
+                    local sitCF = rCF * CFrame.new(0, -0.6, 0)
+
+                    if ModoFlingAtivo then
+                        task.spawn(function() pcall(remote.InvokeServer, remote, (humAlvo and (humAlvo.SeatPart or humAlvo.Sit)) and CFrame.new(CoordenadasFling) or sitCF) end)
+                    elseif ModoKillAtivo then
+                        task.spawn(function() pcall(remote.InvokeServer, remote, (humAlvo and (humAlvo.SeatPart or humAlvo.Sit)) and CFrame.new(rCF.Position.X, -500, rCF.Position.Z) or sitCF) end)
+                    elseif ModoAvancadoAtivo then
+                        task.spawn(function() pcall(remote.InvokeServer, remote, (humAlvo and (humAlvo.SeatPart or humAlvo.Sit)) and (myCF * CFrame.new(0, 0, -3)) or sitCF) end)
+                    elseif cfg and PropMovementMode ~= "Nenhum" then
+                        local tPos, olharPara = rCF.Position, rCF.Position
+                        local fAngle = angle + (i * ((math.pi * 2) / math.max(total, 1)))
+
+                        if PropMovementMode == "Orbita" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance)
+                        elseif PropMovementMode == "Aura" then
+                            local o = math.sin(tempoGeral * 3 + i) * 1.5
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance + (o * 0.2)), cfg.Height + o, math.sin(fAngle * 1.5) * (cfg.Distance + (o * 0.2)))
+                            olharPara = rCF.Position + Vector3.new(0, o, 0)
+                        elseif PropMovementMode == "Tremor" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tick() * 50 + i) * 0.8, math.cos(tick() * 55 + i) * 0.8, math.sin(tick() * 60 + i) * 0.8)
+                        elseif PropMovementMode == "Caotico" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tempoGeral + (i * 2)) * (cfg.Distance * 0.5), math.cos(tempoGeral * 1.8 + i) * 4, math.sin(tempoGeral * 1.3 + i) * (cfg.Distance * 0.5))
+                            olharPara = tPos + Vector3.new(math.sin(tempoGeral * 5), math.cos(tempoGeral * 5), math.sin(tempoGeral * 3))
+                        elseif PropMovementMode == "Estrela" then
+                            local e = cfg.Distance + (math.sin(tempoGeral * 2.5 + i) * (cfg.Distance * 0.4))
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * e, cfg.Height + (math.cos(fAngle) * 2), math.sin(fAngle) * e)
+                            olharPara = rCF.Position + Vector3.new(0, cfg.Height, 0)
+                        elseif PropMovementMode == "Alinhamento" then
+                            tPos = rCF.Position + (rCF.LookVector * (-5 - (i * cfg.Distance))) + Vector3.new(0, cfg.Height + (math.sin(tempoGeral + i) * 0.5), 0)
+                            olharPara = tPos - (rCF.LookVector * 100)
+                        elseif PropMovementMode == "Furacao" then
+                            local s = ((tempoGeral + (i * 2)) % 10) - 3
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = pFrente + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))), cfg.Height + s, math.sin(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))))
+                            olharPara = pFrente + Vector3.new(0, 10, 0)
+                        elseif PropMovementMode == "Portal" then
+                            local rp = cfg.Distance * 0.7
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = (rCF * CFrame.new(0, cfg.Height + (math.sin(fAngle) * rp), -5)).Position + (rCF.RightVector * (math.cos(fAngle) * rp))
+                            olharPara = pFrente + (rCF.LookVector * 20)
+                        end
+                        task.spawn(function() pcall(remote.InvokeServer, remote, CFrame.lookAt(tPos, olharPara)) end)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Loop RGB dos Props
+task.spawn(function()
+    while true do
+        if PropsActive and #meusPropsCache > 0 then
+            local tempoAtual = tick()
+            local propColorRemote = vu7:FindFirstChild("PlayerGui")
+                and vu7.PlayerGui:FindFirstChild("NoResetGUIHandler")
+                and vu7.PlayerGui.NoResetGUIHandler:FindFirstChild("PropColorPicker")
+                and vu7.PlayerGui.NoResetGUIHandler.PropColorPicker:FindFirstChild("SetColor")
+
+            for i, prop in ipairs(meusPropsCache) do
+                local remote = prop:FindFirstChild("ChangePropColor")
+                if remote then
+                    local bp = prop:FindFirstChildWhichIsA("BasePart")
+                    local color = Color3.fromHSV(((tempoAtual * WaveSpeed) + ((bp and bp.Position.X or i) * ColorSpread)) % 1, 1, 1)
+                    for _, part in ipairs(prop:GetDescendants()) do
+                        if part:IsA("BasePart") then part.Color = color end
+                    end
+                    task.spawn(function() pcall(remote.InvokeServer, remote, color) end)
+                end
+            end
+            
+            if propColorRemote then
+                pcall(function() propColorRemote:FireServer(Color3.fromHSV((tempoAtual * WaveSpeed) % 1, 1, 1)) end)
+            end
+        end
+        task.wait(0.05)
+    end
+end)
+
+-- Network Bypass (Permite mover peças do mapa)
+if not getgenv().NetworkBypassed then
+    getgenv().NetworkBypassed = true
+    task.spawn(function()
+        while true do
+            pcall(function() sethiddenproperty(vu7, "SimulationRadius", math.huge) end)
+            vu10.Heartbeat:Wait()
+        end
+    end)
 end
 
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
