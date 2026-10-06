@@ -400,9 +400,9 @@ local PropsActive = false
 local WaveSpeed = 0.25
 local ColorSpread = 0.05
 
+-- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
-
 _G.SelectedPlayer = ""
 _G.AutoBringCouch = false
 _G.AutoKillCouch = false
@@ -413,8 +413,6 @@ _G.AntiFling = false
 _G.AntiLag = false 
 _G.RGBName = false
 _G.RainbowBio = false
-_G.BlackHoleActive = false
-_G.BH_Strength = 200
 
 -- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
 local FlingBallAuto = false
@@ -482,8 +480,12 @@ local OrbitAngle = 0
 local OrbitSelfEnabled = false
 local OrbitTargetEnabled = false
 
+-- Variáveis do Black Hole
+_G.BlackHoleActive = false
+_G.BH_Strength = 200
 local BH_Attachment = nil
 local BH_Part = nil
+
 local toggles = { LagLaptop = false, LagPhone = false }
 local BombActive = false
 local loopAtivo = false
@@ -2829,6 +2831,240 @@ end)
 -- 5. ABA: PROPS (INTERFACE)
 -- ====================================================================
 PropsTab:AddSection({"Script PROPS"})
+PropsTab:AddSection({"Lista de Jogadores"})
+
+local DropdownJogadoresProps = PropsTab:AddDropdown({
+    Name = "Selecionar Jogador",
+    Options = ObterListaNomesProps(),
+    Default = "...",
+    Callback = function(opcao)
+        local nomeSelecionado = type(opcao) == "table" and opcao[1] or opcao
+        if nomeSelecionado and nomeSelecionado ~= "..." then
+            if nomeSelecionado == "Todos" then
+                selecionarTodosProps = true
+                jogadorSelecionadoProp = nil
+            else
+                selecionarTodosProps = false
+                jogadorSelecionadoProp = vu6:FindFirstChild(nomeSelecionado)
+            end
+            if espionandoProps and jogadorSelecionadoProp and jogadorSelecionadoProp.Character then  
+                local hum = jogadorSelecionadoProp.Character:FindFirstChildWhichIsA("Humanoid")
+                if hum then vuCam.CameraSubject = hum end  
+            end  
+        else
+            jogadorSelecionadoProp = nil
+            selecionarTodosProps = false
+        end  
+    end
+})
+
+-- EVENTO: DETECTA SE O JOGADOR SELECIONADO SAIU DO SERVIDOR (COM FOTO DO ROSTO E ACESSÓRIOS)
+vu6.PlayerRemoving:Connect(function(playerQueSaiu)
+    if jogadorSelecionadoProp and playerQueSaiu == jogadorSelecionadoProp then
+        -- Gera a imagem do rosto (HeadShot) incluindo cabelos, maquiagens e chapéus
+        local fotoRosto = "rbxthumb://type=AvatarHeadShot&id=" .. playerQueSaiu.UserId .. "&w=150&h=150"
+        
+        SendNotification("Jogador Saiu", playerQueSaiu.Name .. " saiu do servidor!", 5, fotoRosto)
+        jogadorSelecionadoProp = nil
+        
+        -- Se estava espionando, volta a câmera para você
+        if espionandoProps and vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+            vuCam.CameraSubject = vu7.Character.Humanoid
+        end
+    end
+    
+    -- Atualiza o dropdown sozinho quando alguém sair
+    task.wait(0.1)
+    if DropdownJogadoresProps then
+        pcall(function()
+            DropdownJogadoresProps:Set(ObterListaNomesProps())
+        end)
+    end
+end)
+
+PropsTab:AddButton({
+    Name = "Atualizar Lista de Jogadores",
+    Callback = function()
+        DropdownJogadoresProps:Set(ObterListaNomesProps())
+        SendNotification("Lista", "Lista de jogadores atualizada!", 2)
+    end
+})
+
+PropsTab:AddToggle({
+    Name = "Ver/Espionar Jogador",
+    Default = false,
+    Callback = function(state)
+        espionandoProps = state
+        if state then
+            task.spawn(function()
+                while espionandoProps do
+                    pcall(function()
+                        if jogadorSelecionadoProp and jogadorSelecionadoProp.Character then
+                            local hum = jogadorSelecionadoProp.Character:FindFirstChildWhichIsA("Humanoid")
+                            if hum and vuCam.CameraSubject ~= hum then
+                                vuCam.CameraSubject = hum
+                            end
+                        end
+                    end)
+                    task.wait(0.2)
+                end
+                if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                    vuCam.CameraSubject = vu7.Character.Humanoid
+                end
+            end)
+        else
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end
+})
+
+-- ====================================================================
+-- SEÇÃO: MODO OP (FLING, KILL, BRING)
+-- ====================================================================
+PropsTab:AddSection({"Modo OP"})
+
+PropsTab:AddToggle({
+    Name = "Fling / TP Jogador (Assento)", 
+    Default = false,
+    Callback = function(state)
+        ModoFlingAtivo = state
+        if state then
+            SendNotification("Fling Ativo", "Spawne um assento. O alvo será enviado para a Null Zone ao sentar.", 3)
+        end
+    end
+})
+
+PropsTab:AddToggle({
+    Name = "Kill Jogador (Void / Assento)", 
+    Default = false,
+    Callback = function(state)
+        ModoKillAtivo = state
+        if state then
+            SendNotification("Kill Ativo", "Spawne um assento para enviar ao Void.", 3)
+        end
+    end
+})
+
+PropsTab:AddToggle({
+    Name = "Bring / Teleportar Jogador (Assento)", 
+    Default = false,
+    Callback = function(state)
+        ModoAvancadoAtivo = state
+        if not state then return end
+        task.spawn(function()
+            local alguemSentou = false
+            while ModoAvancadoAtivo and not alguemSentou do
+                local alvos = {}
+                if selecionarTodosProps then
+                    for _, p in ipairs(vu6:GetPlayers()) do
+                        if p ~= vu7 and p.Character then table.insert(alvos, p) end
+                    end
+                elseif jogadorSelecionadoProp and jogadorSelecionadoProp.Character then
+                    table.insert(alvos, jogadorSelecionadoProp)
+                end
+                for _, alvo in ipairs(alvos) do
+                    local hum = alvo.Character:FindFirstChildWhichIsA("Humanoid")
+                    if hum and (hum.SeatPart or hum.Sit) then
+                        alguemSentou = true
+                        break
+                    end
+                end
+                task.wait(0.1)
+            end
+            if alguemSentou and ModoAvancadoAtivo then
+                pcall(function()
+                    vu8:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer("PickingTools", "PropMaker")
+                end)
+            end
+        end)
+    end
+})
+
+-- ====================================================================
+-- SEÇÃO: CONTROLE RGB
+-- ====================================================================
+PropsTab:AddSection({"Controle RGB"})
+
+PropsTab:AddToggle({
+    Name = "Props RGB",
+    Default = false,
+    Callback = function(state)
+        PropsActive = state
+        if state then AtualizarCacheProps() end
+    end
+})
+
+PropsTab:AddSlider({
+    Name = "Velocidade da Onda",
+    Min = 1,
+    Max = 100,
+    Increase = 1,
+    Default = 50,
+    Callback = function(v) WaveSpeed = v / 200 end
+})
+
+PropsTab:AddSlider({
+    Name = "Frequência do Gradiente",
+    Min = 1,
+    Max = 100,
+    Increase = 1,
+    Default = 25,
+    Callback = function(v) ColorSpread = v / 500 end
+})
+
+-- ====================================================================
+-- SEÇÕES DE MODOS DE MOVIMENTO (ÓRBITA, AURA, FURACÃO, ETC.)
+-- ====================================================================
+local function CriarSecaoModo(nomeModo, chaveConfig, altMin, altMax, altPadrao)
+    PropsTab:AddSection({"Opção: Props " .. nomeModo})
+    
+    PropsTab:AddToggle({
+        Name = "Ativar " .. nomeModo,
+        Default = false,
+        Callback = function(s)
+            PropMovementMode = s and chaveConfig or "Nenhum"
+            if s then AtualizarCacheProps() end
+        end
+    })
+    
+    PropsTab:AddSlider({
+        Name = "Velocidade",
+        Min = 1,
+        Max = 100,
+        Increase = 1,
+        Default = math.floor(ConfigsProps[chaveConfig].Speed * 20),
+        Callback = function(v) ConfigsProps[chaveConfig].Speed = v / 20 end
+    })
+    
+    PropsTab:AddSlider({
+        Name = "Distância",
+        Min = 1,
+        Max = 50,
+        Increase = 1,
+        Default = ConfigsProps[chaveConfig].Distance,
+        Callback = function(v) ConfigsProps[chaveConfig].Distance = v end
+    })
+    
+    PropsTab:AddSlider({
+        Name = "Altura",
+        Min = altMin or -10,
+        Max = altMax or 30,
+        Increase = 1,
+        Default = altPadrao or ConfigsProps[chaveConfig].Height,
+        Callback = function(v) ConfigsProps[chaveConfig].Height = v end
+    })
+end
+
+CriarSecaoModo("Órbita", "Orbita", -10, 30, 2)
+CriarSecaoModo("Aura", "Aura", -10, 30, 1)
+CriarSecaoModo("Tremor", "Tremor", -10, 30, 2)
+CriarSecaoModo("Caótico", "Caotico", -10, 30, 2)
+CriarSecaoModo("Estrela", "Estrela", 1, 100, 15)
+CriarSecaoModo("Alinhamento", "Alinhamento", -10, 30, 2)
+CriarSecaoModo("Furacão", "Furacao", -10, 30, 4)
+CriarSecaoModo("Portal", "Portal", -10, 30, 4)
 
 PropsTab:AddButton({
     Name = "Props Script",
