@@ -386,20 +386,6 @@ local Camera = Workspace.CurrentCamera
 -- Atalhos de compatibilidade
 local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
 
--- Variáveis de Controle e Configurações
-local CoordenadasFling = Vector3.new(-881615241216, 881615241216, -881615241216)
-local meusPropsCache = {}
-local PropMovementMode = "Nenhum"
-local ModoAvancadoAtivo = false
-local ModoKillAtivo = false
-local ModoFlingAtivo = false
-local selecionarTodosProps = false
-local jogadorSelecionadoProp = nil
-local espionandoProps = false
-local PropsActive = false
-local WaveSpeed = 0.25
-local ColorSpread = 0.05
-
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
@@ -491,58 +477,6 @@ local BombActive = false
 local loopAtivo = false
 local InputID = ""
 
--- Configurações padrão para cada movimento
-local ConfigsProps = {
-    Orbita = { Speed = 2, Distance = 10, Height = 2 },
-    Aura = { Speed = 2, Distance = 8, Height = 1 },
-    Tremor = { Speed = 2, Distance = 10, Height = 2 },
-    Caotico = { Speed = 2, Distance = 12, Height = 2 },
-    Estrela = { Speed = 2, Distance = 15, Height = 15 },
-    Alinhamento = { Speed = 2, Distance = 6, Height = 2 },
-    Furacao = { Speed = 2, Distance = 10, Height = 4 },
-    Portal = { Speed = 2, Distance = 10, Height = 4 },
-    Nenhum = { Speed = 0, Distance = 0, Height = 0 }
-}
--- ====================================================================
--- 2. FUNÇÕES AUXILIARES E BACKEND
--- ====================================================================
-
--- Sistema de notificação integrado com suporte a Ícones / Fotos
-local function SendNotification(titulo, texto, tempo, icone)
-    pcall(function()
-        local dados = {
-            Title = titulo or "Aviso",
-            Text = texto or "",
-            Duration = tempo or 3
-        }
-        if icone then dados.Icon = icone end
-        StarterGui:SetCore("SendNotification", dados)
-    end)
-end
-
--- Gera a lista com todos os jogadores presentes no servidor
-local function ObterListaNomesProps()
-    local lista = {"Todos"}
-    for _, jogador in ipairs(vu6:GetPlayers()) do
-        table.insert(lista, jogador.Name)
-    end
-    return lista
-end
-
--- Busca e atualiza a lista de props que respondem aos comandos
-local function AtualizarCacheProps()
-    table.clear(meusPropsCache)
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") and obj:FindFirstChild("SetCurrentCFrame") then
-            table.insert(meusPropsCache, obj)
-        end
-    end
-end
-
--- Verifica se algum modo que necessita do PropMaker está ativo
-local function AlgumModoPropAtivo()
-    return (PropMovementMode ~= "Nenhum") or ModoAvancadoAtivo or ModoKillAtivo or ModoFlingAtivo or PropsActive
-end
 -- ====================================================================
 -- 4. FUNÇÕES AUXILIARES E BACKEND
 -- ====================================================================
