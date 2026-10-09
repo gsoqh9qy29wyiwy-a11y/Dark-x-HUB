@@ -2588,7 +2588,7 @@ PropsTab:AddButton({
     Name = "Props Script",
     Description = "Brookhaven 🏡",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB/refs/heads/main/Dark%20x%20Hub%20Props"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB/refs/heads/main/Dark%20x%20Hub%20testes"))()
     end
 })
                             
