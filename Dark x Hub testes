@@ -635,7 +635,7 @@ end)
 local Window = Rayfield:CreateWindow({
     Name = "Dark x Hub [Carlolx777]",
     LoadingTitle = "Brookhaven RP",
-    LoadingSubtitle = "by Carlolx777",
+    LoadingSubtitle = "by HACKELINDOO",
     ConfigurationSaving = {
         Enabled = false -- Desativado aqui para não travar nos sliders; nosso JSON próprio cuida do salvamento
     },
