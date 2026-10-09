@@ -1,0 +1,1133 @@
+-- ====================================================================
+-- CARREGAMENTO DA UI (RAYFIELD INTERFACE SUITE)
+-- ====================================================================
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local vu6 = game:GetService("Players")
+local vu7 = vu6.LocalPlayer
+local vu8 = game:GetService("ReplicatedStorage")
+local vuCam = workspace.CurrentCamera
+local httpService = game:GetService("HttpService")
+
+-- Declarações antecipadas para sincronização
+local DropdownCorMensagens = nil
+local DropdownCorBorda = nil
+local DropdownTemas = nil
+local sincronizarCorPlayers = true
+
+-- ====================================================================
+-- COORDENADAS CONFIGURADAS (NULL ZONE / FLING EXTREMO)
+-- ====================================================================
+local CoordenadasFling = Vector3.new(-881615241216, 881615241216, -881615241216)
+
+-- Tabelas de estado e controle dos Props
+local meusPropsCache = {}
+local PropMovementMode = "Nenhum"
+local ModoAvancadoAtivo = false
+local ModoKillAtivo = false
+local ModoFlingAtivo = false
+local selecionarTodosProps = false
+local jogadorSelecionadoProp = nil
+local espionandoProps = false
+local PropsActive = false
+local WaveSpeed = 0.25
+local ColorSpread = 0.05
+local temaEscolhido = "Default"
+
+-- ====================================================================
+-- PALETAS DE CORES (BORDA E MENSAGENS)
+-- ====================================================================
+local CoresBorda = {
+    ["Azul Ciano"] = Color3.fromRGB(0, 220, 255),
+    ["Vermelho Neon"] = Color3.fromRGB(255, 35, 60),
+    ["Roxo Neon"] = Color3.fromRGB(180, 50, 255),
+    ["Verde Limão"] = Color3.fromRGB(50, 255, 110),
+    ["Amarelo Ouro"] = Color3.fromRGB(255, 215, 0),
+    ["Laranja Fogo"] = Color3.fromRGB(255, 115, 20),
+    ["Rosa Choque"] = Color3.fromRGB(255, 55, 185),
+    ["Branco Puro"] = Color3.fromRGB(255, 255, 255),
+    ["Azul Royal"] = Color3.fromRGB(30, 105, 255),
+    ["Cinza Escuro"] = Color3.fromRGB(45, 45, 50)
+}
+
+local listaNomesCoresBorda = {
+    "Azul Ciano",
+    "Vermelho Neon",
+    "Roxo Neon",
+    "Verde Limão",
+    "Amarelo Ouro",
+    "Laranja Fogo",
+    "Rosa Choque",
+    "Branco Puro",
+    "Azul Royal",
+    "Cinza Escuro"
+}
+
+local corBordaSelecionada = CoresBorda["Azul Ciano"]
+local nomeCorBordaSelecionada = "Azul Ciano"
+
+local CoresMensagens = {
+    ["Azul Ciano"] = Color3.fromRGB(0, 220, 255),
+    ["Amarelo Ouro"] = Color3.fromRGB(255, 215, 0),
+    ["Verde Limão"] = Color3.fromRGB(50, 255, 110),
+    ["Vermelho Neon"] = Color3.fromRGB(255, 45, 65),
+    ["Roxo Neon"] = Color3.fromRGB(185, 55, 255),
+    ["Rosa Choque"] = Color3.fromRGB(255, 60, 190),
+    ["Laranja Fogo"] = Color3.fromRGB(255, 120, 25),
+    ["Branco Puro"] = Color3.fromRGB(255, 255, 255),
+    ["Azul Royal"] = Color3.fromRGB(35, 110, 255),
+    ["Dourado"] = Color3.fromRGB(255, 190, 40)
+}
+
+local listaNomesCoresMensagens = {
+    "Azul Ciano",
+    "Amarelo Ouro",
+    "Verde Limão",
+    "Vermelho Neon",
+    "Roxo Neon",
+    "Rosa Choque",
+    "Laranja Fogo",
+    "Branco Puro",
+    "Azul Royal",
+    "Dourado"
+}
+
+local corMensagensSelecionada = CoresMensagens["Azul Ciano"]
+local nomeCorMensagensSelecionada = "Azul Ciano"
+
+-- Configurações padrão para cada movimento
+local ConfigsProps = {
+    Orbita = { Speed = 2, Distance = 10, Height = 2 },
+    Aura = { Speed = 2, Distance = 8, Height = 1 },
+    Tremor = { Speed = 2, Distance = 10, Height = 2 },
+    Caotico = { Speed = 2, Distance = 12, Height = 2 },
+    Estrela = { Speed = 2, Distance = 15, Height = 15 },
+    Alinhamento = { Speed = 2, Distance = 6, Height = 2 },
+    Furacao = { Speed = 2, Distance = 10, Height = 4 },
+    Portal = { Speed = 2, Distance = 10, Height = 4 },
+    Nenhum = { Speed = 0, Distance = 0, Height = 0 }
+}
+
+local function AlgumModoPropAtivo()
+    return (PropMovementMode ~= "Nenhum") or ModoAvancadoAtivo or ModoKillAtivo or ModoFlingAtivo or PropsActive
+end
+
+local function ObterListaNomesProps()
+    local lista = {"Todos"}
+    for _, jogador in ipairs(vu6:GetPlayers()) do
+        table.insert(lista, jogador.Name)
+    end
+    return lista
+end
+
+local function AtualizarCacheProps()
+    table.clear(meusPropsCache)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("SetCurrentCFrame") then
+            table.insert(meusPropsCache, obj)
+        end
+    end
+end
+
+-- ====================================================================
+-- FUNÇÕES DE PERSONALIZAÇÃO VISUAL (BORDA E MENSAGENS)
+-- ====================================================================
+local function MudarCorBorda(cor)
+    pcall(function()
+        local containers = {game:GetService("CoreGui"), vu7:FindFirstChild("PlayerGui")}
+        for _, cont in ipairs(containers) do
+            if cont then
+                for _, obj in ipairs(cont:GetDescendants()) do
+                    if obj:IsA("UIStroke") then
+                        obj.Color = cor
+                    end
+                end
+            end
+        end
+    end)
+end
+
+local function AplicarCorNasNotificacoes()
+    pcall(function()
+        local robloxGui = game:GetService("CoreGui"):FindFirstChild("RobloxGui")
+        local notifFrame = robloxGui and robloxGui:FindFirstChild("NotificationFrame")
+        if notifFrame then
+            for _, desc in ipairs(notifFrame:GetDescendants()) do
+                if desc:IsA("TextLabel") then
+                    desc.TextColor3 = corMensagensSelecionada
+                end
+            end
+        end
+    end)
+end
+
+pcall(function()
+    local robloxGui = game:GetService("CoreGui"):FindFirstChild("RobloxGui")
+    local notifFrame = robloxGui and robloxGui:FindFirstChild("NotificationFrame")
+    if notifFrame then
+        notifFrame.DescendantAdded:Connect(function(desc)
+            if desc:IsA("TextLabel") then
+                task.wait()
+                desc.TextColor3 = corMensagensSelecionada
+            end
+        end)
+    end
+end)
+
+local function SendNotification(titulo, texto, tempo, icone)
+    pcall(function()
+        local dados = {
+            Title = titulo or "Aviso",
+            Text = texto or "",
+            Duration = tempo or 3
+        }
+        if icone then
+            dados.Icon = icone
+        end
+        game:GetService("StarterGui"):SetCore("SendNotification", dados)
+    end)
+
+    task.spawn(function()
+        for _ = 1, 4 do
+            task.wait(0.06)
+            AplicarCorNasNotificacoes()
+        end
+    end)
+end
+
+-- ====================================================================
+-- INJETOR DE FOTOS COM FORMATO QUADRADO
+-- ====================================================================
+local function InjetarFotosNaListaJogadores()
+    pcall(function()
+        local containers = {game:GetService("CoreGui"), vu7:FindFirstChild("PlayerGui")}
+        for _, container in ipairs(containers) do
+            if container then
+                for _, desc in ipairs(container:GetDescendants()) do
+                    if (desc:IsA("TextButton") or desc:IsA("TextLabel")) and desc.Visible then
+                        local nomeOpcao = desc.Text
+                        local playerAlvo = vu6:FindFirstChild(nomeOpcao)
+
+                        if playerAlvo then
+                            if sincronizarCorPlayers then
+                                desc.TextColor3 = corMensagensSelecionada
+                            else
+                                desc.TextColor3 = Color3.fromRGB(240, 240, 240)
+                            end
+
+                            desc.TextXAlignment = Enum.TextXAlignment.Left
+
+                            local padding = desc:FindFirstChild("MiniFotoPadding")
+                            if not padding then
+                                padding = Instance.new("UIPadding")
+                                padding.Name = "MiniFotoPadding"
+                                padding.PaddingLeft = UDim.new(0, 36)
+                                padding.Parent = desc
+                            else
+                                padding.PaddingLeft = UDim.new(0, 36)
+                            end
+
+                            local fotoExistente = desc:FindFirstChild("MiniFotoPlayer")
+                            if not fotoExistente then
+                                local foto = Instance.new("ImageLabel")
+                                foto.Name = "MiniFotoPlayer"
+                                foto.Size = UDim2.new(0, 20, 0, 20)
+                                foto.Position = UDim2.new(0, -28, 0.5, -10)
+                                foto.BackgroundTransparency = 1
+                                foto.Image = "rbxthumb://type=AvatarHeadShot&id=" .. playerAlvo.UserId .. "&w=100&h=100"
+                                foto.ZIndex = (desc.ZIndex or 1) + 4
+
+                                local corner = Instance.new("UICorner")
+                                corner.CornerRadius = UDim.new(0, 3)
+                                corner.Parent = foto
+
+                                local stroke = Instance.new("UIStroke")
+                                stroke.Color = Color3.fromRGB(255, 255, 255)
+                                stroke.Thickness = 1
+                                stroke.Transparency = 0.25
+                                stroke.Parent = foto
+
+                                foto.Parent = desc
+                            else
+                                fotoExistente.Position = UDim2.new(0, -28, 0.5, -10)
+                                fotoExistente.Image = "rbxthumb://type=AvatarHeadShot&id=" .. playerAlvo.UserId .. "&w=100&h=100"
+                                local corner = fotoExistente:FindFirstChildOfClass("UICorner")
+                                if corner then
+                                    corner.CornerRadius = UDim.new(0, 3)
+                                end
+                            end
+                        elseif nomeOpcao == "Todos" and (desc:IsA("TextButton") or desc:IsA("TextLabel")) then
+                            if sincronizarCorPlayers then
+                                desc.TextColor3 = corMensagensSelecionada
+                            else
+                                desc.TextColor3 = Color3.fromRGB(240, 240, 240)
+                            end
+
+                            desc.TextXAlignment = Enum.TextXAlignment.Left
+
+                            local padding = desc:FindFirstChild("MiniFotoPadding")
+                            if not padding then
+                                padding = Instance.new("UIPadding")
+                                padding.Name = "MiniFotoPadding"
+                                padding.PaddingLeft = UDim.new(0, 36)
+                                padding.Parent = desc
+                            else
+                                padding.PaddingLeft = UDim.new(0, 36)
+                            end
+
+                            local fotoExistente = desc:FindFirstChild("MiniFotoPlayer")
+                            if not fotoExistente then
+                                local foto = Instance.new("ImageLabel")
+                                foto.Name = "MiniFotoPlayer"
+                                foto.Size = UDim2.new(0, 20, 0, 20)
+                                foto.Position = UDim2.new(0, -28, 0.5, -10)
+                                foto.BackgroundTransparency = 1
+                                foto.Image = "rbxassetid://10734898124"
+                                foto.ImageColor3 = corMensagensSelecionada
+                                foto.ZIndex = (desc.ZIndex or 1) + 4
+
+                                local corner = Instance.new("UICorner")
+                                corner.CornerRadius = UDim.new(0, 3)
+                                corner.Parent = foto
+
+                                foto.Parent = desc
+                            else
+                                fotoExistente.Position = UDim2.new(0, -28, 0.5, -10)
+                                fotoExistente.ImageColor3 = corMensagensSelecionada
+                                local corner = fotoExistente:FindFirstChildOfClass("UICorner")
+                                if corner then
+                                    corner.CornerRadius = UDim.new(0, 3)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- ====================================================================
+-- EVENTOS DE ENTRADA E SAÍDA DE JOGADORES (COM FOTO)
+-- ====================================================================
+vu6.PlayerAdded:Connect(function(playerQueEntrou)
+    if playerQueEntrou ~= vu7 then
+        local fotoRosto = "rbxthumb://type=AvatarHeadShot&id=" .. playerQueEntrou.UserId .. "&w=150&h=150"
+        local textoInfo = playerQueEntrou.DisplayName .. " (@" .. playerQueEntrou.Name .. ") entrou no servidor!"
+        SendNotification("Jogador Entrou", textoInfo, 4, fotoRosto)
+    end
+end)
+
+vu6.PlayerRemoving:Connect(function(playerQueSaiu)
+    if jogadorSelecionadoProp and playerQueSaiu == jogadorSelecionadoProp then
+        jogadorSelecionadoProp = nil
+        if espionandoProps and vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+            vuCam.CameraSubject = vu7.Character.Humanoid
+        end
+    end
+
+    if playerQueSaiu ~= vu7 then
+        local fotoRosto = "rbxthumb://type=AvatarHeadShot&id=" .. playerQueSaiu.UserId .. "&w=150&h=150"
+        local textoInfo = playerQueSaiu.DisplayName .. " (@" .. playerQueSaiu.Name .. ") saiu do servidor!"
+        SendNotification("Jogador Saiu", textoInfo, 4, fotoRosto)
+    end
+end)
+
+-- ====================================================================
+-- SISTEMA DE SALVAMENTO DE CONFIGURAÇÕES
+-- ====================================================================
+local ConfigFileName = "DarkHub_Config.json"
+
+local function SalvarConfiguracoes()
+    local sucesso = pcall(function()
+        local dadosParaSalvar = {
+            Tema = temaEscolhido,
+            CorBordaNome = nomeCorBordaSelecionada,
+            CorBordaRGB = {corBordaSelecionada.R, corBordaSelecionada.G, corBordaSelecionada.B},
+            CorMensagensNome = nomeCorMensagensSelecionada,
+            CorMensagensRGB = {corMensagensSelecionada.R, corMensagensSelecionada.G, corMensagensSelecionada.B},
+            SincronizarCorPlayers = sincronizarCorPlayers,
+            WaveSpeed = WaveSpeed,
+            ColorSpread = ColorSpread,
+            ConfigsProps = ConfigsProps
+        }
+        if writefile then
+            writefile(ConfigFileName, httpService:JSONEncode(dadosParaSalvar))
+        end
+    end)
+
+    if sucesso then
+        SendNotification("Configurações", "Interface, Borda, Cores e Opções salvas com sucesso!", 3)
+    else
+        SendNotification("Configurações", "Erro ao salvar arquivo local.", 3)
+    end
+end
+
+local function CarregarConfiguracoes()
+    pcall(function()
+        if isfile and readfile and isfile(ConfigFileName) then
+            local conteudo = readfile(ConfigFileName)
+            local dados = httpService:JSONDecode(conteudo)
+            if dados then
+                if dados.Tema then
+                    temaEscolhido = dados.Tema
+                    pcall(function() Window.ModifyTheme(dados.Tema) end)
+                    if DropdownTemas then
+                        pcall(function() DropdownTemas:Set({dados.Tema}) end)
+                    end
+                end
+
+                if dados.CorBordaRGB then
+                    corBordaSelecionada = Color3.new(dados.CorBordaRGB[1], dados.CorBordaRGB[2], dados.CorBordaRGB[3])
+                    nomeCorBordaSelecionada = dados.CorBordaNome or nomeCorBordaSelecionada
+                elseif dados.CorBordaNome and CoresBorda[dados.CorBordaNome] then
+                    corBordaSelecionada = CoresBorda[dados.CorBordaNome]
+                    nomeCorBordaSelecionada = dados.CorBordaNome
+                end
+
+                if DropdownCorBorda and nomeCorBordaSelecionada then
+                    pcall(function() DropdownCorBorda:Set({nomeCorBordaSelecionada}) end)
+                end
+
+                task.spawn(function()
+                    task.wait(0.2)
+                    MudarCorBorda(corBordaSelecionada)
+                    task.wait(0.8)
+                    MudarCorBorda(corBordaSelecionada)
+                end)
+
+                if dados.CorMensagensRGB then
+                    corMensagensSelecionada = Color3.new(dados.CorMensagensRGB[1], dados.CorMensagensRGB[2], dados.CorMensagensRGB[3])
+                    nomeCorMensagensSelecionada = dados.CorMensagensNome or nomeCorMensagensSelecionada
+                elseif dados.CorMensagensNome and CoresMensagens[dados.CorMensagensNome] then
+                    corMensagensSelecionada = CoresMensagens[dados.CorMensagensNome]
+                    nomeCorMensagensSelecionada = dados.CorMensagensNome
+                end
+
+                if DropdownCorMensagens and nomeCorMensagensSelecionada then
+                    pcall(function() DropdownCorMensagens:Set({nomeCorMensagensSelecionada}) end)
+                end
+
+                if dados.SincronizarCorPlayers ~= nil then
+                    sincronizarCorPlayers = dados.SincronizarCorPlayers
+                end
+
+                task.spawn(function()
+                    task.wait(0.3)
+                    AplicarCorNasNotificacoes()
+                    InjetarFotosNaListaJogadores()
+                end)
+
+                if dados.WaveSpeed then WaveSpeed = dados.WaveSpeed end
+                if dados.ColorSpread then ColorSpread = dados.ColorSpread end
+                if dados.ConfigsProps then
+                    for k, v in pairs(dados.ConfigsProps) do
+                        if ConfigsProps[k] then
+                            ConfigsProps[k] = v
+                        end
+                    end
+                end
+
+                SendNotification("Configurações", "Interface e Cores carregadas com sucesso!", 3)
+            end
+        end
+    end)
+end
+
+-- ====================================================================
+-- LOOPS DE SEGUNDO PLANO
+-- ====================================================================
+
+task.spawn(function()
+    local ferramentaNoInventario = false
+    while true do
+        if AlgumModoPropAtivo() then
+            local char = vu7.Character
+            local mochila = vu7:FindFirstChild("Backpack")
+            local fE = char and char:FindFirstChild("PropMaker")
+            local fM = mochila and mochila:FindFirstChild("PropMaker")
+            if not fE and not fM then
+                pcall(function()
+                    vu8:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer("PickingTools", "PropMaker")
+                end)
+            end
+            ferramentaNoInventario = true
+        else
+            if ferramentaNoInventario then
+                pcall(function()
+                    local char = vu7.Character
+                    local mochila = vu7:FindFirstChild("Backpack")
+                    local fE = char and char:FindFirstChild("PropMaker")
+                    local fM = mochila and mochila:FindFirstChild("PropMaker")
+                    if fE then fE:Destroy() end
+                    if fM then fM:Destroy() end
+                end)
+                ferramentaNoInventario = false
+            end
+        end
+        task.wait(0.2)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if AlgumModoPropAtivo() then
+            pcall(AtualizarCacheProps)
+        end
+        task.wait(0.4)
+    end
+end)
+
+task.spawn(function()
+    local angle, tempoGeral = 0, 0
+    while true do
+        local dt = task.wait(0.03)
+        if (PropMovementMode == "Nenhum" and not ModoAvancadoAtivo and not ModoKillAtivo and not ModoFlingAtivo) or #meusPropsCache == 0 then
+            continue
+        end
+
+        local lista = {}
+        if selecionarTodosProps then
+            for _, p in ipairs(vu6:GetPlayers()) do
+                if p ~= vu7 and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(lista, p)
+                end
+            end
+        else
+            if jogadorSelecionadoProp and jogadorSelecionadoProp.Character and jogadorSelecionadoProp.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(lista, jogadorSelecionadoProp)
+            end
+        end
+
+        if #lista == 0 then continue end
+
+        local cfg = ConfigsProps[PropMovementMode]
+        local speedVal = cfg and cfg.Speed or 2
+        angle = angle + (dt * speedVal)
+        tempoGeral = tempoGeral + dt * (speedVal * 2)
+        local total = #meusPropsCache
+
+        local myChar = vu7.Character
+        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local myCF = myRoot and myRoot.CFrame or CFrame.new()
+
+        for i, prop in ipairs(meusPropsCache) do
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then
+                local pDono = lista[((i - 1) % #lista) + 1]
+                if pDono and pDono.Character and pDono.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = pDono.Character.HumanoidRootPart
+                    local rCF = root.CFrame
+                    local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
+
+                    local tempoTick = tick() * 65
+                    local oscilacaoCimaBaixo = math.sin(tempoTick) * 3.5
+                    local oscilacaoFrenteTras = math.cos(tempoTick) * 3.0
+                    local sitCF = rCF * CFrame.new(0, -0.6 + oscilacaoCimaBaixo, oscilacaoFrenteTras)
+
+                    if ModoFlingAtivo then
+                        if humAlvo and (humAlvo.SeatPart or humAlvo.Sit) then
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, CFrame.new(CoordenadasFling))
+                            end)
+                        else
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, sitCF)
+                            end)
+                        end
+                    elseif ModoKillAtivo then
+                        if humAlvo and (humAlvo.SeatPart or humAlvo.Sit) then
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, CFrame.new(rCF.Position.X, -500, rCF.Position.Z))
+                            end)
+                        else
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, sitCF)
+                            end)
+                        end
+                    elseif ModoAvancadoAtivo then
+                        if humAlvo and (humAlvo.SeatPart or humAlvo.Sit) then
+                            task.spawn(function() 
+                                pcall(remote.InvokeServer, remote, myCF * CFrame.new(0, 0, -3)) 
+                            end)
+                        else
+                            task.spawn(function() 
+                                pcall(remote.InvokeServer, remote, sitCF) 
+                            end)
+                        end
+                    elseif cfg and PropMovementMode ~= "Nenhum" then
+                        local tPos = rCF.Position
+                        local olharPara = rCF.Position
+                        local spacing = (math.pi * 2) / math.max(total, 1)
+                        local fAngle = angle + (i * spacing)
+
+                        if PropMovementMode == "Orbita" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance)
+                        elseif PropMovementMode == "Aura" then
+                            local o = math.sin(tempoGeral * 3 + i) * 1.5
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance + (o * 0.2)), cfg.Height + o, math.sin(fAngle * 1.5) * (cfg.Distance + (o * 0.2)))
+                            olharPara = rCF.Position + Vector3.new(0, o, 0)
+                        elseif PropMovementMode == "Tremor" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tick() * 50 + i) * 0.8, math.cos(tick() * 55 + i) * 0.8, math.sin(tick() * 60 + i) * 0.8)
+                        elseif PropMovementMode == "Caotico" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tempoGeral + (i * 2)) * (cfg.Distance * 0.5), math.cos(tempoGeral * 1.8 + i) * 4, math.sin(tempoGeral * 1.3 + i) * (cfg.Distance * 0.5))
+                            olharPara = tPos + Vector3.new(math.sin(tempoGeral * 5), math.cos(tempoGeral * 5), math.sin(tempoGeral * 3))
+                        elseif PropMovementMode == "Estrela" then
+                            local e = cfg.Distance + (math.sin(tempoGeral * 2.5 + i) * (cfg.Distance * 0.4))
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * e, cfg.Height + (math.cos(fAngle) * 2), math.sin(fAngle) * e)
+                            olharPara = rCF.Position + Vector3.new(0, cfg.Height, 0)
+                        elseif PropMovementMode == "Alinhamento" then
+                            tPos = rCF.Position + (rCF.LookVector * (-5 - (i * cfg.Distance))) + Vector3.new(0, cfg.Height + (math.sin(tempoGeral + i) * 0.5), 0)
+                            olharPara = tPos - (rCF.LookVector * 100)
+                        elseif PropMovementMode == "Furacao" then
+                            local s = ((tempoGeral + (i * 2)) % 10) - 3
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = pFrente + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))), cfg.Height + s, math.sin(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))))
+                            olharPara = pFrente + Vector3.new(0, 10, 0)
+                        elseif PropMovementMode == "Portal" then
+                            local rp = cfg.Distance * 0.7
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = (rCF * CFrame.new(0, cfg.Height + (math.sin(fAngle) * rp), -5)).Position + (rCF.RightVector * (math.cos(fAngle) * rp))
+                            olharPara = pFrente + (rCF.LookVector * 20)
+                        end
+                        task.spawn(function() pcall(remote.InvokeServer, remote, CFrame.lookAt(tPos, olharPara)) end)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if PropsActive and #meusPropsCache > 0 then
+            local tempoAtual = tick()
+            local propColorRemote = vu7:FindFirstChild("PlayerGui")
+                and vu7.PlayerGui:FindFirstChild("NoResetGUIHandler")
+                and vu7.PlayerGui.NoResetGUIHandler:FindFirstChild("PropColorPicker")
+                and vu7.PlayerGui.NoResetGUIHandler.PropColorPicker:FindFirstChild("SetColor")
+
+            for i, prop in ipairs(meusPropsCache) do
+                local remote = prop:FindFirstChild("ChangePropColor")
+                if remote then
+                    local bp = prop:FindFirstChildWhichIsA("BasePart")
+                    local color = Color3.fromHSV(((tempoAtual * WaveSpeed) + ((bp and bp.Position.X or i) * ColorSpread)) % 1, 1, 1)
+                    for _, part in ipairs(prop:GetDescendants()) do
+                        if part:IsA("BasePart") then part.Color = color end
+                    end
+                    task.spawn(function() pcall(remote.InvokeServer, remote, color) end)
+                end
+            end
+            
+            if propColorRemote then
+                pcall(function()
+                    propColorRemote:FireServer(Color3.fromHSV((tempoAtual * WaveSpeed) % 1, 1, 1))
+                end)
+            end
+        end
+        task.wait(0.05)
+    end
+end)
+
+-- ====================================================================
+-- CRIAÇÃO DA JANELA RAYFIELD (ANTI-CRASH PARA CELULAR)
+-- ====================================================================
+local Window = Rayfield:CreateWindow({
+    Name = "Dark x Hub [Carlolx777]",
+    LoadingTitle = "Brookhaven RP",
+    LoadingSubtitle = "by Carlolx777",
+    ConfigurationSaving = {
+        Enabled = false -- Desativado aqui para não travar nos sliders; nosso JSON próprio cuida do salvamento
+    },
+    KeySystem = false
+})
+
+-- ====================================================================
+-- ABA 1: INFORMAÇÕES
+-- ====================================================================
+local InfoTab = Window:CreateTab("Informações", 10734898124)
+
+InfoTab:CreateSection("Sobre o Hub")
+
+InfoTab:CreateButton({
+    Name = "Hub: Dark x Hub",
+    Callback = function()
+        SendNotification("Dark x Hub", "Desenvolvido com carinho por Carlolx777!", 3)
+    end
+})
+
+InfoTab:CreateButton({
+    Name = "Jogador: " .. vu7.DisplayName .. " (@" .. vu7.Name .. ")",
+    Callback = function()
+        pcall(function()
+            if setclipboard then
+                setclipboard(tostring(vu7.UserId))
+                SendNotification("Copiado!", "Seu UserId foi copiado: " .. tostring(vu7.UserId), 2)
+            end
+        end)
+    end
+})
+
+InfoTab:CreateSection("Instruções de Uso")
+
+InfoTab:CreateButton({
+    Name = "Como usar Fling/Kill/Bring?",
+    Callback = function()
+        SendNotification("Dica", "Spawne sofás com o botão da aba Props. O prop oscilará para frente/trás e cima/baixo para capturar o alvo!", 4)
+    end
+})
+
+InfoTab:CreateButton({
+    Name = "Como usar Modos de Movimento?",
+    Callback = function()
+        SendNotification("Dica", "Selecione o jogador no dropdown e ative Órbita, Aura, Tremor, etc.", 4)
+    end
+})
+
+-- ====================================================================
+-- ABA 2: PROPS
+-- ====================================================================
+local PropsTab = Window:CreateTab("Props", 10709789810)
+
+PropsTab:CreateSection("Lista de Jogadores")
+
+local DropdownJogadoresProps = PropsTab:CreateDropdown({
+    Name = "Selecionar Jogador",
+    Options = ObterListaNomesProps(),
+    CurrentOption = {"Todos"},
+    MultipleOptions = false,
+    Callback = function(opcao)
+        local nomeSelecionado = type(opcao) == "table" and opcao[1] or opcao
+        if nomeSelecionado and nomeSelecionado ~= "..." then
+            if nomeSelecionado == "Todos" then
+                selecionarTodosProps = true
+                jogadorSelecionadoProp = nil
+                SendNotification("Alvo Selecionado", "Modo: Todos os jogadores selecionados!", 3)
+            else
+                selecionarTodosProps = false
+                jogadorSelecionadoProp = vu6:FindFirstChild(nomeSelecionado)
+                
+                if jogadorSelecionadoProp then
+                    local fotoJogador = "rbxthumb://type=AvatarHeadShot&id=" .. jogadorSelecionadoProp.UserId .. "&w=150&h=150"
+                    local textoInfo = jogadorSelecionadoProp.DisplayName .. " (@" .. jogadorSelecionadoProp.Name .. ")"
+                    SendNotification("Jogador Selecionado", textoInfo, 4, fotoJogador)
+                end
+            end
+            
+            if espionandoProps and jogadorSelecionadoProp and jogadorSelecionadoProp.Character then  
+                local hum = jogadorSelecionadoProp.Character:FindFirstChildWhichIsA("Humanoid")
+                if hum then vuCam.CameraSubject = hum end  
+            end  
+        else
+            jogadorSelecionadoProp = nil
+            selecionarTodosProps = false
+        end  
+    end
+})
+
+local function AtualizarListaManual()
+    pcall(function()
+        local novaLista = ObterListaNomesProps()
+        if DropdownJogadoresProps.Refresh then
+            DropdownJogadoresProps:Refresh(novaLista)
+        end
+        if jogadorSelecionadoProp and not vu6:FindFirstChild(jogadorSelecionadoProp.Name) then
+            jogadorSelecionadoProp = nil
+            selecionarTodosProps = true
+            DropdownJogadoresProps:Set({"Todos"})
+        end
+        task.wait(0.2)
+        InjetarFotosNaListaJogadores()
+    end)
+end
+
+PropsTab:CreateButton({
+    Name = "Atualizar Lista de Jogadores",
+    Callback = function()
+        AtualizarListaManual()
+        SendNotification("Lista", "Lista de jogadores atualizada!", 2)
+    end
+})
+
+PropsTab:CreateToggle({
+    Name = "Ver/Espionar Jogador",
+    CurrentValue = false,
+    Callback = function(state)
+        espionandoProps = state
+        if state then
+            task.spawn(function()
+                while espionandoProps do
+                    pcall(function()
+                        if jogadorSelecionadoProp and jogadorSelecionadoProp.Character then
+                            local hum = jogadorSelecionadoProp.Character:FindFirstChildWhichIsA("Humanoid")
+                            if hum and vuCam.CameraSubject ~= hum then
+                                vuCam.CameraSubject = hum
+                            end
+                        end
+                    end)
+                    task.wait(0.2)
+                end
+                if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                    vuCam.CameraSubject = vu7.Character.Humanoid
+                end
+            end)
+        else
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end
+})
+
+PropsTab:CreateSection("Funções de Teste (Experimental)")
+
+PropsTab:CreateButton({
+    Name = "Pegar PropMaker e Colocar 15 Sofás (Teste)",
+    Callback = function()
+        task.spawn(function()
+            SendNotification("PropMaker (Teste)", "Iniciando colocação de 15 sofás...", 2)
+
+            pcall(function()
+                vu8:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer("PickingTools", "PropMaker")
+            end)
+            task.wait(0.3)
+
+            local vim = game:GetService("VirtualInputManager")
+
+            for i = 1, 15 do
+                local char = vu7.Character
+                local mochila = vu7:FindFirstChild("Backpack")
+                local propMaker = (char and char:FindFirstChild("PropMaker")) or (mochila and mochila:FindFirstChild("PropMaker"))
+                
+                if propMaker and char and propMaker.Parent ~= char then
+                    propMaker.Parent = char
+                    task.wait(0.15)
+                end
+
+                pcall(function()
+                    for _, obj in ipairs(vu7.PlayerGui:GetDescendants()) do
+                        if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+                            local n = obj.Name:lower()
+                            local t = (obj:IsA("TextButton") and obj.Text:lower()) or ""
+                            if n:find("sofa") or n:find("couch") or t:find("sofa") or t:find("couch") then
+                                if getconnections then
+                                    for _, c in ipairs(getconnections(obj.MouseButton1Click)) do c:Fire() end
+                                    for _, c in ipairs(getconnections(obj.Activated)) do c:Fire() end
+                                end
+                                pcall(function() obj.Activated:Fire() end)
+                                break
+                            end
+                        end
+                    end
+                end)
+
+                task.wait(0.08)
+
+                if propMaker then
+                    pcall(function() propMaker:Activate() end)
+                end
+                task.wait(0.05)
+
+                pcall(function()
+                    local cx = vuCam.ViewportSize.X / 2
+                    local cy = vuCam.ViewportSize.Y / 2
+                    vim:SendMouseButtonEvent(cx, cy, 0, true, game, 1)
+                    task.wait(0.03)
+                    vim:SendMouseButtonEvent(cx, cy, 0, false, game, 1)
+                end)
+
+                pcall(function()
+                    vim:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                    task.wait(0.03)
+                    vim:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+                end)
+
+                task.wait(0.15)
+            end
+
+            task.wait(0.5)
+            AtualizarCacheProps()
+            SendNotification("PropMaker (Teste)", "15 Sofás colocados com sucesso! Total no mapa: " .. #meusPropsCache, 3)
+        end)
+    end
+})
+
+PropsTab:CreateSection("Modo OP")
+
+PropsTab:CreateToggle({
+    Name = "Fling / TP Jogador (Assento)",
+    CurrentValue = false,
+    Callback = function(state)
+        ModoFlingAtivo = state
+        if state then
+            SendNotification("Fling Ativo", "Spawne sofás. O prop oscilará para frente/trás e cima/baixo!", 3)
+        end
+    end
+})
+
+PropsTab:CreateToggle({
+    Name = "Kill Jogador (Void / Assento)",
+    CurrentValue = false,
+    Callback = function(state)
+        ModoKillAtivo = state
+        if state then
+            SendNotification("Kill Ativo", "Spawne sofás para puxar ao Void com movimento rápido em cruz!", 3)
+        end
+    end
+})
+
+PropsTab:CreateToggle({
+    Name = "Bring / Teleportar Jogador (Assento)",
+    CurrentValue = false,
+    Callback = function(state)
+        ModoAvancadoAtivo = state
+        if not state then return end
+        task.spawn(function()
+            local alguemSentou = false
+            while ModoAvancadoAtivo and not alguemSentou do
+                local alvos = {}
+                if selecionarTodosProps then
+                    for _, p in ipairs(vu6:GetPlayers()) do
+                        if p ~= vu7 and p.Character then table.insert(alvos, p) end
+                    end
+                elseif jogadorSelecionadoProp and jogadorSelecionadoProp.Character then
+                    table.insert(alvos, jogadorSelecionadoProp)
+                end
+                for _, alvo in ipairs(alvos) do
+                    local hum = alvo.Character:FindFirstChildWhichIsA("Humanoid")
+                    if hum and (hum.SeatPart or hum.Sit) then
+                        alguemSentou = true
+                        break
+                    end
+                end
+                task.wait(0.1)
+            end
+            if alguemSentou and ModoAvancadoAtivo then
+                pcall(function()
+                    vu8:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer("PickingTools", "PropMaker")
+                end)
+            end
+        end)
+    end
+})
+
+PropsTab:CreateSection("Controle RGB")
+
+PropsTab:CreateToggle({
+    Name = "Props RGB",
+    CurrentValue = false,
+    Callback = function(state)
+        PropsActive = state
+        if state then AtualizarCacheProps() end
+    end
+})
+
+pcall(function()
+    PropsTab:CreateSlider({
+        Name = "Velocidade da Onda",
+        Range = {1, 100},
+        Increment = 1,
+        Suffix = "",
+        CurrentValue = 50,
+        Callback = function(v) WaveSpeed = v / 200 end
+    })
+end)
+
+pcall(function()
+    PropsTab:CreateSlider({
+        Name = "Frequência do Gradiente",
+        Range = {1, 100},
+        Increment = 1,
+        Suffix = "",
+        CurrentValue = 25,
+        Callback = function(v) ColorSpread = v / 500 end
+    })
+end)
+
+local function CriarSecaoModo(nomeModo, chaveConfig, altMin, altMax, altPadrao)
+    pcall(function()
+        PropsTab:CreateSection("Opção: Props " .. nomeModo)
+        
+        PropsTab:CreateToggle({
+            Name = "Ativar " .. nomeModo,
+            CurrentValue = false,
+            Callback = function(s)
+                PropMovementMode = s and chaveConfig or "Nenhum"
+                if s then AtualizarCacheProps() end
+            end
+        })
+        
+        PropsTab:CreateSlider({
+            Name = "Velocidade",
+            Range = {1, 100},
+            Increment = 1,
+            Suffix = "",
+            CurrentValue = math.floor(ConfigsProps[chaveConfig].Speed * 20),
+            Callback = function(v) ConfigsProps[chaveConfig].Speed = v / 20 end
+        })
+        
+        PropsTab:CreateSlider({
+            Name = "Distância",
+            Range = {1, 50},
+            Increment = 1,
+            Suffix = "",
+            CurrentValue = ConfigsProps[chaveConfig].Distance,
+            Callback = function(v) ConfigsProps[chaveConfig].Distance = v end
+        })
+        
+        PropsTab:CreateSlider({
+            Name = "Altura",
+            Range = {altMin or 0, altMax or 30},
+            Increment = 1,
+            Suffix = "",
+            CurrentValue = altPadrao or ConfigsProps[chaveConfig].Height,
+            Callback = function(v) ConfigsProps[chaveConfig].Height = v end
+        })
+    end)
+end
+
+CriarSecaoModo("Órbita", "Orbita", 0, 30, 2)
+CriarSecaoModo("Aura", "Aura", 0, 30, 1)
+CriarSecaoModo("Tremor", "Tremor", 0, 30, 2)
+CriarSecaoModo("Caótico", "Caotico", 0, 30, 2)
+CriarSecaoModo("Estrela", "Estrela", 1, 100, 15)
+CriarSecaoModo("Alinhamento", "Alinhamento", 0, 30, 2)
+CriarSecaoModo("Furacão", "Furacao", 0, 30, 4)
+CriarSecaoModo("Portal", "Portal", 0, 30, 4)
+
+-- ====================================================================
+-- ABA 3: CONFIGURAÇÕES (AGORA RENDERIZA SEM TRAVAMENTO)
+-- ====================================================================
+local ConfigTab = Window:CreateTab("Config", 10734950309)
+
+ConfigTab:CreateSection("Cor das Mensagens")
+
+DropdownCorMensagens = ConfigTab:CreateDropdown({
+    Name = "Cor das Mensagens",
+    Options = listaNomesCoresMensagens,
+    CurrentOption = {"Azul Ciano"},
+    MultipleOptions = false,
+    Callback = function(opcao)
+        local nome = type(opcao) == "table" and opcao[1] or opcao
+        if CoresMensagens[nome] then
+            corMensagensSelecionada = CoresMensagens[nome]
+            nomeCorMensagensSelecionada = nome
+            AplicarCorNasNotificacoes()
+            InjetarFotosNaListaJogadores()
+        end
+    end
+})
+
+ConfigTab:CreateButton({
+    Name = "Aplicar Cor nas Mensagens",
+    Callback = function()
+        AplicarCorNasNotificacoes()
+        InjetarFotosNaListaJogadores()
+        SendNotification("Mensagens", "Cor das mensagens alterada para: " .. tostring(nomeCorMensagensSelecionada), 2)
+    end
+})
+
+ConfigTab:CreateToggle({
+    Name = "Sincronizar Cor dos Players com as Mensagens",
+    CurrentValue = true,
+    Callback = function(estado)
+        sincronizarCorPlayers = estado
+        task.spawn(function()
+            task.wait(0.1)
+            InjetarFotosNaListaJogadores()
+        end)
+    end
+})
+
+ConfigTab:CreateSection("Borda da Interface")
+
+DropdownCorBorda = ConfigTab:CreateDropdown({
+    Name = "Cor da Borda",
+    Options = listaNomesCoresBorda,
+    CurrentOption = {"Azul Ciano"},
+    MultipleOptions = false,
+    Callback = function(opcao)
+        local nome = type(opcao) == "table" and opcao[1] or opcao
+        if CoresBorda[nome] then
+            corBordaSelecionada = CoresBorda[nome]
+            nomeCorBordaSelecionada = nome
+            MudarCorBorda(corBordaSelecionada)
+        end
+    end
+})
+
+ConfigTab:CreateButton({
+    Name = "Aplicar Cor na Borda",
+    Callback = function()
+        MudarCorBorda(corBordaSelecionada)
+        SendNotification("Borda", "Cor da borda alterada para: " .. tostring(nomeCorBordaSelecionada), 2)
+    end
+})
+
+ConfigTab:CreateSection("Cores e Temas da Interface")
+
+local TemasDisponiveis = {
+    "Default",
+    "Ocean",
+    "Amethyst",
+    "DarkBlue",
+    "Green",
+    "AmberGlow",
+    "Bloom",
+    "Serenity",
+    "Light"
+}
+
+DropdownTemas = ConfigTab:CreateDropdown({
+    Name = "Selecionar Tema",
+    Options = TemasDisponiveis,
+    CurrentOption = {"Default"},
+    MultipleOptions = false,
+    Callback = function(opcao)
+        local nome = type(opcao) == "table" and opcao[1] or opcao
+        temaEscolhido = nome
+        pcall(function()
+            Window.ModifyTheme(temaEscolhido)
+        end)
+    end
+})
+
+ConfigTab:CreateButton({
+    Name = "Mudar Tema da Interface",
+    Callback = function()
+        pcall(function()
+            Window.ModifyTheme(temaEscolhido)
+        end)
+        SendNotification("Configurações", "Tema alterado para: " .. tostring(temaEscolhido), 2)
+    end
+})
+
+ConfigTab:CreateSection("Salvar e Carregar Interface")
+
+ConfigTab:CreateButton({
+    Name = "Salvar Configurações da Interface",
+    Callback = function()
+        SalvarConfiguracoes()
+    end
+})
+
+ConfigTab:CreateButton({
+    Name = "Carregar Configurações Salvas",
+    Callback = function()
+        CarregarConfiguracoes()
+    end
+})
+
+-- Inicia o injetor de fotos após a interface terminar de carregar
+task.spawn(function()
+    task.wait(1)
+    while true do
+        InjetarFotosNaListaJogadores()
+        task.wait(0.35)
+    end
+end)
+
+-- Carrega automaticamente as configurações salvas anteriormente ao iniciar
+pcall(function()
+    CarregarConfiguracoes()
+end)
