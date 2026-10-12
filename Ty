@@ -322,12 +322,11 @@ local function createLoadingScreen()
                     [2] = "Criador: HACKELINDOO",
                 }))
                 
-                -- Exibe a notificação de boas-vindas
+                 -- Exibe a notificação de boas-vindas
                 StarterGui:SetCore("SendNotification", {
                     Title = "Dark x Hub",
                     Text = "Bem-vindo ao Dark x Hub!",
                     Duration = 4
-                    Icon = "rbxassetid://113088956809836"
                 })
 
                 -- Marca como concluído e limpa
