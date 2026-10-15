@@ -5349,6 +5349,71 @@ end)
 -- ABA: EXPANSÃO 
 -- ====================================================================
 TabExpansao:AddButton({
+    Name = "Ativar Skybox",
+    Description = "Ativar o skybox personalizado",
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local WearShirt = ReplicatedStorage.Remotes.WearShirt
+        WearShirt:InvokeServer(98679358331654)
+
+        local args = {{100839513065432}}
+        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+        
+        -- Animação
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        
+        local function LoadTrack(id)
+            local newAnim = Instance.new("Animation")
+            newAnim.AnimationId = "rbxassetid://" .. tostring(id)
+            local newTrack = humanoid:LoadAnimation(newAnim)
+            newTrack.Priority = Enum.AnimationPriority.Action4
+            newTrack:Play(0.1, 1, 1)
+            return newTrack
+        end
+
+        local EmoteId = 101852027997337
+        LoadTrack(EmoteId)
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Skybox",
+            Text = "Skybox ativado com sucesso!",
+            Duration = 5
+        })
+    end
+})
+
+TabExpansao:AddButton({
+    Name = "Desativar Skybox",
+    Description = "Remover skybox personalizado",
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Remote = ReplicatedStorage.Remotes.ResetCharacterAppearance
+        pcall(function()
+            Remote:FireServer()
+        end)
+
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+                    track:Stop()
+                end
+            end
+        end
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Skybox",
+            Text = "Skybox desativado!",
+            Duration = 5
+        })
+    end
+})
+
+TabExpansao:AddButton({
     Name = "Skybox HACKELINDO3 ”®",
     Description = "Ativa a Skybox permanente Aviso a Skybox e visual",
     Callback = function()
