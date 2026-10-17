@@ -3464,6 +3464,55 @@ TabAntis:AddButton({
         print("Jogador liberado, seguro na posiÃ§Ã£o.")
     end
 })
+TabAntis:AddSection({("Efeito e desefeitos")})
+local Button = TabAntis:AddButton({("Anti Lag"), function()
+      local itemsToRemove = {
+        "Burger Tray", "Bomb", "Laptop", "Paper Bag", "Chips", "Ice Cream", "Taser",
+        "Basketball", "FireX", "Ladder", "Ghost Meter", "Clipboard", "Stretcher", "Glock",
+        "Electric Guitar", "Guitar", "Book", "Box", "Frap Strawberry", "Bank Keycard",
+        "White Keycard", "Mop", "Iphone", "Ipad"
+    }
+
+    local removeLookup = {}
+    do
+        for _, name in ipairs(itemsToRemove) do
+            removeLookup[name] = true
+        end
+    end
+
+    local ClearDelay = 0.5
+
+    local function destroyItemsInCharacter(character)
+        do
+            if not character then return end
+            for _, item in ipairs(character:GetChildren()) do
+                if removeLookup[item.Name] then
+                    pcall(function()
+                        item:Destroy()
+                    end)
+                end
+            end
+        end
+    end
+
+    local function processPlayers()
+        do
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                pcall(function()
+                    if player.Character then
+                        destroyItemsInCharacter(player.Character)
+                    end
+                end)
+            end
+        end
+    end
+
+    task.spawn(function()
+        while task.wait(ClearDelay) do
+            processPlayers()
+        end
+    end)
+end})
 -- ====================================================================
 -- ABA: LAG 
 -- ====================================================================
