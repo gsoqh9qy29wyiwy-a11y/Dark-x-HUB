@@ -1154,7 +1154,6 @@ local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"}
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
 local TrollTab = Window:MakeTab({ Title = "Troll Scripts", Icon = "rbxassetid://13364900349" })
 local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
-local CasasTab = Window:MakeTab({Title = "Casas", Icon = "rbxassetid://7733960981"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local Tab3 = Window:MakeTab({"Avatar", "shirt"})
 local AvatarTab = Window:MakeTab({Title = "Avatar Teste", Icon = "user"})
@@ -3190,9 +3189,6 @@ Tab3:AddButton({
         end)
     end
 })
--- ====================================================================
--- ABA: AVATAR (COMPLETA)
--- ====================================================================
 -- ====================================================================
 -- ABA: ANTIS 
 -- ====================================================================
