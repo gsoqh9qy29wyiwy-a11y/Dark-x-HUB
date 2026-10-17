@@ -1249,7 +1249,6 @@ local TrollTab = Window:MakeTab({ Title = "Troll Scripts", Icon = "rbxassetid://
 local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local Tab3 = Window:MakeTab({"Avatar", "shirt"})
-local AvatarTab = Window:MakeTab({Title = "Avatar Teste", Icon = "user"})
 local TabAntis = Window:MakeTab({"Antis", "shield"})
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
@@ -1258,7 +1257,7 @@ local TabAudio = Window:MakeTab({"Audio All", "radio"})
 local TabMusic = Window:MakeTab({"Music", "music"}) 
 local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Skybox", "home"})
-local Tab2 = Window:MakeTab({"Player", "home"})
+local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
 
@@ -2904,7 +2903,7 @@ Tab3:AddSection({"Sistema de Clonagem de Avatar"})
 
 local TargetClone = nil
 
-local PlayersAvatarDropdown = AvatarTab:AddDropdown({
+local PlayersAvatarDropdown = Tab3:AddDropdown({
     Name = "Selecionar Jogador",
     Description = "Escolha o jogador para clonar",
     Options = {},
