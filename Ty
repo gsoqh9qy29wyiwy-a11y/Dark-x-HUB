@@ -1248,7 +1248,7 @@ local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
 local TrollTab = Window:MakeTab({ Title = "Troll Scripts", Icon = "rbxassetid://13364900349" })
 local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
-local AvatarTab = Window:MakeTab({"Avatar", "shirt"})
+local Tab3 = Window:MakeTab({"Avatar", "shirt"})
 local TabAntis = Window:MakeTab({"Antis", "shield"})
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
@@ -2790,27 +2790,6 @@ end)
 -- ====================================================================
 local RemotesFolder = ReplicatedStorage:WaitForChild("Remotes", 5)
 
-local function wearItem(id, remotesList)
-    if not tonumber(id) or not RemotesFolder then return end
-    for _, nome in ipairs(remotesList) do
-        local remote = RemotesFolder:FindFirstChild(nome)
-        if remote then
-            remote:InvokeServer(tonumber(id))
-            task.wait(0.2)
-            return true
-        end
-    end
-end
-
-local function safeFire(nome, ...)
-    if not RemotesFolder then return end
-    local remote = RemotesFolder:FindFirstChild(nome)
-    if remote then
-        remote:FireServer(...)
-        task.wait(0.2)
-    end
-end
-
 local function aplicarPackCompleto(idsDeRoupas, corpoParts, corHex)
     if not RemotesFolder then return end
 
@@ -2849,9 +2828,9 @@ local function aplicarPackCompleto(idsDeRoupas, corpoParts, corHex)
 end
 
 -- SEÇÃO: ANIMAÇÃO & RESET
-AvatarTab:AddSection({"Animação & Reset"})
+Tab3:AddSection({"Animação & Reset"})
 
-AtvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Resetar Avatar",
     Description = "Restaura o visual original do personagem",
     Callback = function()
@@ -2862,7 +2841,7 @@ AtvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Animação Homem / Mulher",
     Description = "Aplica o pacote de animação",
     Callback = function()
@@ -2874,9 +2853,9 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: MELHORES PARTES
-AvatarTab:AddSection({"Melhores Partes"})
+Tab3:AddSection({"Melhores Partes"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Cabeça Invisível",
     Description = "Equipa a cabeça invisível",
     Callback = function()
@@ -2887,7 +2866,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Machado Escuro",
     Description = "Equipa o machado cosmético",
     Callback = function()
@@ -2898,120 +2877,8 @@ AvatarTab:AddButton({
     end
 })
 
--- SEÇÃO: SISTEMA DE CLONAGEM DE AVATAR
-AvatarTab:AddSection({"Sistema de Clonagem de Avatar"})
-
-local TargetClone = nil
-
-local PlayersAvatarDropdown = AvatarTab:AddDropdown({
-    Name = "Selecionar Jogador",
-    Description = "Escolha o jogador para clonar",
-    Options = {},
-    Default = "...",
-    Callback = function(Value)
-        TargetClone = Value
-    end
-})
-
-AvatarTab:AddButton({
-    Name = "Atualizar Lista de Jogadores",
-    Description = "Recarrega os jogadores do servidor",
-    Callback = function()
-        local lista = {}
-        for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LocalPlayer then
-                table.insert(lista, v.Name)
-            end
-        end
-        if PlayersAvatarDropdown then
-            pcall(function() PlayersAvatarDropdown:Set(lista) end)
-        end
-        ModernNotify("Lista Atualizada", "Jogadores atualizados com sucesso!", 2.5, "info")
-    end
-})
-
-AvatarTab:AddButton({
-    Name = "Copiar Avatar",
-    Description = "Clona roupas, corpo e bio do jogador selecionado",
-    Callback = function()
-        if not TargetClone then
-            ModernNotify("Atenção", "Selecione um jogador na lista primeiro!", 3, "warn")
-            return
-        end
-
-        local TPlayer = Players:FindFirstChild(TargetClone)
-        if not (TPlayer and TPlayer.Character) then
-            ModernNotify("Erro", "Jogador não encontrado ou sem personagem.", 3, "warn")
-            return
-        end
-
-        ModernNotify("Copiando Avatar...", "Clonando itens de @" .. TargetClone, 3, "info")
-
-        local LChar = LocalPlayer.Character
-        local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
-        local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
-
-        if LHumanoid and THumanoid then
-            local PDesc = THumanoid:GetAppliedDescription()
-            local remoteBody = RemotesFolder and RemotesFolder:FindFirstChild("ChangeCharacterBody")
-            
-            if remoteBody then
-                local argsBody = {
-                    [1] = {
-                        PDesc.Torso or 0,
-                        PDesc.RightArm or 0,
-                        PDesc.LeftArm or 0,
-                        PDesc.RightLeg or 0,
-                        PDesc.LeftLeg or 0,
-                        PDesc.Head or 0
-                    }
-                }
-                remoteBody:InvokeServer(unpack(argsBody))
-                task.wait(0.3)
-            end
-
-            wearItem(PDesc.Shirt, {"WearShirt", "WearOutfit", "Wear"})
-            wearItem(PDesc.Pants, {"WearPants", "WearOutfit", "Wear"})
-            wearItem(PDesc.Face, {"WearFace", "Wear"})
-
-            for _, acc in ipairs(PDesc:GetAccessories(true)) do
-                wearItem(acc.AssetId, {"WearAccessory", "Wear"})
-            end
-
-            wearItem(PDesc.IdleAnimation, {"WearAnimation", "Wear"})
-
-            local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
-            if SkinColor then
-                safeFire("ChangeBodyColor", tostring(SkinColor.HeadColor))
-            end
-
-            local Bag = TPlayer:FindFirstChild("PlayersBag")
-            if Bag then
-                local function sendText(childName, remoteKey)
-                    local c = Bag:FindFirstChild(childName)
-                    if c and c.Value ~= "" then
-                        safeFire("RPNameText", remoteKey, c.Value)
-                    end
-                end
-
-                sendText("RPName", "RolePlayName")
-                sendText("RPBio", "RolePlayBio")
-
-                if Bag:FindFirstChild("RPNameColor") then
-                    safeFire("RPNameColor", "PickingRPNameColor", Bag.RPNameColor.Value)
-                end
-                if Bag:FindFirstChild("RPBioColor") then
-                    safeFire("RPNameColor", "PickingRPBioColor", Bag.RPBioColor.Value)
-                end
-            end
-
-            ModernNotify("Sucesso!", "Avatar de @" .. TargetClone .. " clonado!", 4, "success")
-        end
-    end
-})
-
 -- SEÇÃO: SUPER HERÓIS
-AvatarTab:AddSection({"Super Heróis <Packs>"})
+Tab3:AddSection({"Super Heróis <Packs>"})
 
 local heroPacks = {
     ["Homem Aranha"] = {14908247332, 16845737664, 17582186503, 4211409027, 14840793625, 11774975425, 18507527463, 3346307465},
@@ -3020,7 +2887,7 @@ local heroPacks = {
 }
 
 for nome, ids in pairs(heroPacks) do
-    AvatarTab:AddButton({
+    Tab3:AddButton({
         Name = nome,
         Description = "Equipar pack " .. nome,
         Callback = function()
@@ -3036,9 +2903,9 @@ for nome, ids in pairs(heroPacks) do
 end
 
 -- SEÇÃO: MULHER BONITA
-AvatarTab:AddSection({"Mulher Bonita <Packs>"})
+Tab3:AddSection({"Mulher Bonita <Packs>"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Diva",
     Description = "Equipar visual Diva",
     Callback = function()
@@ -3050,7 +2917,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Estilosa",
     Description = "Equipar visual Estilosa",
     Callback = function()
@@ -3062,7 +2929,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Elegância Rosa-Pastel",
     Description = "Equipar visual Elegância Rosa-Pastel",
     Callback = function()
@@ -3074,7 +2941,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Hello Kitty",
     Description = "Equipar visual Hello Kitty",
     Callback = function()
@@ -3086,7 +2953,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Girl Y2k",
     Description = "Equipar visual Girl Y2k",
     Callback = function()
@@ -3098,7 +2965,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Girl v2",
     Description = "Equipar visual Girl v2",
     Callback = function()
@@ -3111,7 +2978,7 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: PACKS MASCULINOS
-AvatarTab:AddSection({"Packs Masculinos"})
+Tab3:AddSection({"Packs Masculinos"})
 
 local malePacks = {
     ["E os D"] = {
@@ -3147,7 +3014,7 @@ local malePacks = {
 }
 
 for nome, data in pairs(malePacks) do
-    AvatarTab:AddButton({
+    Tab3:AddButton({
         Name = nome .. " <Masculino>",
         Description = "Equipar pack " .. nome,
         Callback = function()
@@ -3157,9 +3024,9 @@ for nome, data in pairs(malePacks) do
 end
 
 -- SEÇÃO: PACKS VARIADOS
-AvatarTab:AddSection({"Packs Variados <Conjuntos>"})
+Tab3:AddSection({"Packs Variados <Conjuntos>"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Paty Urbana",
     Description = "Equipar visual Paty Urbana",
     Callback = function()
@@ -3171,7 +3038,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Freak Show",
     Description = "Equipar visual Freak Show",
     Callback = function()
@@ -3184,7 +3051,7 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: ROUPAS 3D
-AvatarTab:AddSection({"Roupas 3D <Conjuntos>"})
+Tab3:AddSection({"Roupas 3D <Conjuntos>"})
 
 local skinIDs = {
     ["Mostro do S.A"] = 123609977175226,
@@ -3210,7 +3077,7 @@ end
 
 local selectedSkinName = nil
 
-AvatarTab:AddDropdown({
+Tab3:AddDropdown({
     Name = "Skins 3D",
     Description = "Escolha um traje 3D especial",
     Options = skinNames,
@@ -3220,7 +3087,7 @@ AvatarTab:AddDropdown({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Vestir Skin 3D",
     Description = "Equipa a skin 3D selecionada",
     Callback = function()
@@ -3230,8 +3097,9 @@ AvatarTab:AddButton({
         end
     end
 })
+
 -- SEÇÃO: ACESSÓRIOS ESPECIAIS
-AvatarTab:AddSection({"Especiais Efeitos <Acessórios>"})
+Tab3:AddSection({"Especiais Efeitos <Acessórios>"})
 
 local acessoriosEspeciais = {
     ["Fada do Outono"] = 128217885,
@@ -3251,7 +3119,7 @@ end
 
 local efeitoSelecionado = nil
 
-AvatarTab:AddDropdown({
+Tab3:AddDropdown({
     Name = "Escolha o Efeito",
     Description = "Selecione o acessório de efeito",
     Options = nomesEfeitos,
@@ -3261,7 +3129,7 @@ AvatarTab:AddDropdown({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Vestir Acessório",
     Description = "Ativa o acessório especial selecionado",
     Callback = function()
@@ -3274,9 +3142,9 @@ AvatarTab:AddButton({
 --------------------------------------------------
 -- Section: Avatar Editor / Partes do corpo
 --------------------------------------------------
-AvatarTab:AddSection({"Avatar Editor"})
+local Section3 = Tab3:AddSection({"Avatar Editor"})
 
-AvatarTab:AddParagraph({
+Tab3:AddParagraph({
     Title = "Aviso: vai resetar seu avatar",
     Content = ""
 })
@@ -3290,7 +3158,7 @@ local function EquipBody(ids)
 end
 
 -- BotÃµes de partes do corpo
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Mini REPO",
     Callback = function()
         local args = {{
@@ -3300,7 +3168,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Mini Garanhão",
     Callback = function()
         local args = {{
@@ -3310,7 +3178,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Stick",
     Callback = function()
         local args = {{
@@ -3320,7 +3188,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Chunky-Bug",
     Callback = function()
         local args = {{
@@ -3329,44 +3197,44 @@ AvatarTab:AddButton({
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
     end
 })
-AvatarTab:AddSection({"Fe Personagem Flash"})
+local Section3 = Tab3:AddSection({"FE Personagens Flash"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Personagem Black Flash",
     Description = "Ativa o personagem Black Flash FE.",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Black%20Flash"))()
     end
 })
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Personagem Flash",
     Description = "Ativa o personagem Flash FE.",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Flash%20original"))()
     end
 })
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Personagem God Flash",
     Description = "Ativa o personagem God Flash FE.",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/GOD%20FLASH"))()
     end
 })
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Personagem Zoom Flash",
     Description = "Ativa o personagem Zoom Flash FE.",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/Zoom%20Flash"))()
     end
 })
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Personagem Flash Reverso",
     Description = "Ativa o personagem Flash Reverso FE.",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/flash%20reverso%20slk%20compen"))()
     end
 })
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Personagem Flash Reverso",
     Description = "Ativa o personagem Flash FE.",
     Callback = function()
@@ -3374,23 +3242,23 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddSection({"Fe Hackes"})
-
- AvatarTab:AddButton({
+local Section3 = Tab3:AddSection({"FE Hackes"})
+ 
+ Tab3:AddButton({
     Name = "Ativar Personagem Goner",
     Description = "Ativa o personagem Goner FE.",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/goner"))()
     end
 })
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Personagem 1x1x1x1",
     Description = "Ativa o personagem 1x1x1x1 FE.",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dboas123432sx/personagem/refs/heads/main/1x1x1x1"))()
     end
 })
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Ativar Tubers93 (Shelby)",
     Description = "TransformaÃ§Ã£o completa Tubers93 by Shelby",
     Callback = function()
