@@ -400,6 +400,99 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
+-- ====================================================================
+-- SISTEMA DE NOTIFICAÇÃO MODERNA (TOAST ANIMADO)
+-- ====================================================================
+local function ModernNotify(titleText, descText, duration, notifyType)
+    duration = duration or 3.5
+    notifyType = notifyType or "info" -- "success", "info", "warn"
+
+    local accentColors = {
+        success = Color3.fromRGB(0, 230, 118),
+        info = Color3.fromRGB(0, 170, 255),
+        warn = Color3.fromRGB(255, 170, 0)
+    }
+    local accent = accentColors[notifyType] or accentColors.info
+
+    task.spawn(function()
+        local parentGui = (RunService:IsStudio() and LocalPlayer:WaitForChild("PlayerGui")) or CoreGui
+        local notifGui = parentGui:FindFirstChild("ModernNotifyUI")
+        if not notifGui then
+            notifGui = Instance.new("ScreenGui")
+            notifGui.Name = "ModernNotifyUI"
+            notifGui.ResetOnSpawn = false
+            notifGui.Parent = parentGui
+        end
+
+        local card = Instance.new("Frame")
+        card.Size = UDim2.new(0, 280, 0, 60)
+        card.Position = UDim2.new(1, 20, 0, 70)
+        card.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+        card.BackgroundTransparency = 0.08
+        card.BorderSizePixel = 0
+        card.Parent = notifGui
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 10)
+        corner.Parent = card
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Thickness = 1.2
+        stroke.Color = Color3.fromRGB(50, 50, 65)
+        stroke.Transparency = 0.3
+        stroke.Parent = card
+
+        local bar = Instance.new("Frame")
+        bar.Size = UDim2.new(0, 4, 1, -16)
+        bar.Position = UDim2.new(0, 8, 0, 8)
+        bar.BackgroundColor3 = accent
+        bar.BorderSizePixel = 0
+        bar.Parent = card
+
+        local barCorner = Instance.new("UICorner")
+        barCorner.CornerRadius = UDim.new(1, 0)
+        barCorner.Parent = bar
+
+        local title = Instance.new("TextLabel")
+        title.Size = UDim2.new(1, -28, 0, 20)
+        title.Position = UDim2.new(0, 22, 0, 9)
+        title.BackgroundTransparency = 1
+        title.Font = Enum.Font.GothamBold
+        title.TextSize = 13
+        title.TextColor3 = Color3.fromRGB(245, 245, 245)
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        title.Text = titleText
+        title.Parent = card
+
+        local desc = Instance.new("TextLabel")
+        desc.Size = UDim2.new(1, -28, 0, 20)
+        desc.Position = UDim2.new(0, 22, 0, 30)
+        desc.BackgroundTransparency = 1
+        desc.Font = Enum.Font.Gotham
+        desc.TextSize = 11
+        desc.TextColor3 = Color3.fromRGB(170, 170, 180)
+        desc.TextXAlignment = Enum.TextXAlignment.Left
+        desc.Text = descText
+        desc.Parent = card
+
+        local tweenIn = TweenService:Create(card, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Position = UDim2.new(1, -300, 0, 70)
+        })
+        tweenIn:Play()
+
+        task.wait(duration)
+
+        local tweenOut = TweenService:Create(card, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 20, 0, 70),
+            BackgroundTransparency = 1
+        })
+        tweenOut:Play()
+        tweenOut.Completed:Connect(function()
+            card:Destroy()
+        end)
+    end)
+end
+
 -- --- FUNÇÕES DO FLING BALL AUTOMÁTICO ---
 local FlingBallAuto = false
 
@@ -2696,220 +2789,489 @@ end)
 -- ====================================================================
 -- ABA: AVATAR 
 -- ====================================================================
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local RemotesFolder = ReplicatedStorage:WaitForChild("Remotes", 5)
 
-local Tab3 = Tab3 -- Certifique-se de que Tab3 ja existe
-
---------------------------------------------------
--- Section: Copy Avatar
---------------------------------------------------
-local Section = Tab3:AddSection({"Copy Avatar"})
-
-local Target = nil
-
-local function GetPlayerNames()
-    local playerNames = {}
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Name ~= LocalPlayer.Name then
-            table.insert(playerNames, player.Name)
-        end
-    end
-    return playerNames
-end
-
-local Dropdown = Tab3:AddDropdown({
-    Name = "Players List",
-    Description = "Escolha um player para copiar a Skin",
-    Options = GetPlayerNames(),
-    Default = "",
-    Flag = "player list",
-    Callback = function(playername)
-        Target = playername
-    end
-})
-
-local function UpdatePlayers()
-    Dropdown:Set(GetPlayerNames())
-end
-
-UpdatePlayers()
-
-Tab3:AddButton({"Atualizar lista", function()
-    UpdatePlayers()
-end})
-
-Players.PlayerAdded:Connect(UpdatePlayers)
-Players.PlayerRemoving:Connect(UpdatePlayers)
-
--- Função para copiar avatar
-local function CopyAvatar(targetName)
-    if not targetName then return end
-
-    local TPlayer = Players:FindFirstChild(targetName)
-    local LChar = LocalPlayer.Character
-    if not TPlayer or not TPlayer.Character or not LChar then return end
-
-    local LHumanoid = LChar:FindFirstChildOfClass("Humanoid")
-    local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if not LHumanoid or not THumanoid then return end
-
-    local LDesc = LHumanoid:GetAppliedDescription()
-    local PDesc = THumanoid:GetAppliedDescription()
-
-    -- Resetar acessÃ³rios, roupas e face do local player
-    for _, acc in ipairs(LDesc:GetAccessories(true)) do
-        if acc.AssetId and tonumber(acc.AssetId) then
-            pcall(function() Remotes.Wear:InvokeServer(tonumber(acc.AssetId)) end)
+local function wearItem(id, remotesList)
+    if not tonumber(id) or not RemotesFolder then return end
+    for _, nome in ipairs(remotesList) do
+        local remote = RemotesFolder:FindFirstChild(nome)
+        if remote then
+            remote:InvokeServer(tonumber(id))
             task.wait(0.2)
+            return true
         end
     end
-    if tonumber(LDesc.Shirt) then pcall(function() Remotes.Wear:InvokeServer(tonumber(LDesc.Shirt)) end) task.wait(0.2) end
-    if tonumber(LDesc.Pants) then pcall(function() Remotes.Wear:InvokeServer(tonumber(LDesc.Pants)) end) task.wait(0.2) end
-    if tonumber(LDesc.Face) then pcall(function() Remotes.Wear:InvokeServer(tonumber(LDesc.Face)) end) task.wait(0.2) end
+end
 
-    -- Aplicar partes do corpo do alvo
-    local argsBody = {
-        [1] = {
-            [1] = PDesc.Torso,
-            [2] = PDesc.RightArm,
-            [3] = PDesc.LeftArm,
-            [4] = PDesc.RightLeg,
-            [5] = PDesc.LeftLeg,
-            [6] = PDesc.Head
-        }
-    }
-    pcall(function() Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody)) end)
-    task.wait(0.5)
+local function safeFire(nome, ...)
+    if not RemotesFolder then return end
+    local remote = RemotesFolder:FindFirstChild(nome)
+    if remote then
+        remote:FireServer(...)
+        task.wait(0.2)
+    end
+end
 
-    -- Equipar roupas e face do alvo
-    if tonumber(PDesc.Shirt) then pcall(function() Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt)) end) task.wait(0.3) end
-    if tonumber(PDesc.Pants) then pcall(function() Remotes.Wear:InvokeServer(tonumber(PDesc.Pants)) end) task.wait(0.3) end
-    if tonumber(PDesc.Face) then pcall(function() Remotes.Wear:InvokeServer(tonumber(PDesc.Face)) end) task.wait(0.3) end
-    for _, v in ipairs(PDesc:GetAccessories(true)) do
-        if v.AssetId and tonumber(v.AssetId) then
-            pcall(function() Remotes.Wear:InvokeServer(tonumber(v.AssetId)) end)
+local function aplicarPackCompleto(idsDeRoupas, corpoParts, corHex)
+    if not RemotesFolder then return end
+
+    for _, id in ipairs(idsDeRoupas) do
+        local remoteWear = RemotesFolder:FindFirstChild("Wear")
+        if remoteWear then
+            remoteWear:InvokeServer(id)
             task.wait(0.3)
         end
     end
 
-    -- Skin color
-    local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
-    if SkinColor then pcall(function() Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor)) end) task.wait(0.3) end
-
-    -- Idle animation
-    if tonumber(PDesc.IdleAnimation) then pcall(function() Remotes.Wear:InvokeServer(tonumber(PDesc.IdleAnimation)) end) task.wait(0.3) end
-
-    -- Nome, bio e cores
-    local Bag = TPlayer:FindFirstChild("PlayersBag")
-    if Bag then
-        if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then pcall(function() Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value) end) task.wait(0.3) end
-        if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then pcall(function() Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value) end) task.wait(0.3) end
-        if Bag:FindFirstChild("RPNameColor") then pcall(function() Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value) end) task.wait(0.3) end
-        if Bag:FindFirstChild("RPBioColor") then pcall(function() Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value) end) task.wait(0.3) end
+    if corpoParts and #corpoParts > 0 then
+        local remoteBody = RemotesFolder:FindFirstChild("ChangeCharacterBody")
+        if remoteBody then
+            local argsBody = {
+                [1] = {
+                    corpoParts[1] or 0,
+                    corpoParts[2] or 0,
+                    corpoParts[3] or 0,
+                    corpoParts[4] or 0,
+                    corpoParts[5] or 0,
+                    corpoParts[6] or 0
+                }
+            }
+            remoteBody:InvokeServer(unpack(argsBody))
+            task.wait(0.3)
+        end
     end
+
+    if corHex then
+        local remoteColor = RemotesFolder:FindFirstChild("ChangeBodyColor")
+        if remoteColor then remoteColor:FireServer(corHex) end
+    end
+    
+    ModernNotify("Pack Equipado", "Conjunto aplicado com sucesso!", 3, "success")
 end
 
+-- SEÇÃO: ANIMAÇÃO & RESET
+Tab3:AddSection({"Animação & Reset"})
+
 Tab3:AddButton({
-    Name = "Copy Avatar",
-    Description = "Copiar a Skin do player selecionado",
+    Name = "Resetar Avatar",
+    Description = "Restaura o visual original do personagem",
     Callback = function()
-        CopyAvatar(Target)
+        if RemotesFolder and RemotesFolder:FindFirstChild("ResetCharacterAppearance") then
+            RemotesFolder.ResetCharacterAppearance:FireServer()
+            ModernNotify("Reset", "Aparência resetada!", 3, "info")
+        end
     end
 })
 
---------------------------------------------------
--- Section: Roupas 3D / Avatares
---------------------------------------------------
-local Section2 = Tab3:AddSection({"Roupas 3D"})
+Tab3:AddButton({
+    Name = "Animação Homem / Mulher",
+    Description = "Aplica o pacote de animação",
+    Callback = function()
+        if RemotesFolder and RemotesFolder:FindFirstChild("Wear") then
+            RemotesFolder.Wear:InvokeServer(4418326547)
+            ModernNotify("Animação", "Pacote de animação equipado!", 3, "success")
+        end
+    end
+})
 
-local AvatarManager = {}
-AvatarManager.ReplicatedStorage = ReplicatedStorage
-AvatarManager.Avatares = {
-    { Nome = "Gato de Manga", ID = 124948425515124 },
-    { Nome = "Tung Saur", ID = 117098257036480 },
-    { Nome = "Tralaleiro", ID = 99459753608381 },
-    { Nome = "Monstro S.A", ID = 123609977175226 },
-    { Nome = "Trenzinho", ID = 80468697076178 },
-    { Nome = "Dino", ID = 11941741105 },
-    { Nome = "Pou idoso", ID = 15742966010  },
-    { Nome = "Coco/boxt@", ID = 77013984520332  },
-    { Nome = "Coelho", ID = 71797333686800  },
-    { Nome = "HipopÃ³tamo", ID = 73215892129281 },
-    { Nome = "Ratatui", ID = 108557570415453 },
-    { Nome = "Galinha", ID = 71251793812515 },
-    { Nome = "Pepa pig", ID = 92979204778377 },
-    { Nome = "pinguin", ID = 94944293759578 },
-    { Nome = "Sid", ID = 87442757321244 },
-    { Nome = "puga grande", ID = 111436158728716 },
-    { Nome = "SHREK AMALDIÃ‡OADO", ID = 120960401202173 },
-    { Nome = "mosquito grande", ID = 108052868536435 },
-    { Nome = "Noob Invertido", ID = 106596990206151 },
-    { Nome = "Pato(a)", ID = 135132836238349 },
-    { Nome = "Cachorro Chihuahua", ID = 18656467256 },
-    { Nome = "Gato sla", ID = 18994959003 },
-    { Nome = "Gato fei ", ID = 77506186615650 },
-    { Nome = "Inpostor", ID = 18234669337 },
-    { Nome = "Simon amarelo", ID = 75183593514657 },
-    { Nome = "Simon azul", ID = 76155710249925 }
+-- SEÇÃO: MELHORES PARTES
+Tab3:AddSection({"Melhores Partes"})
+
+Tab3:AddButton({
+    Name = "Cabeça Invisível",
+    Description = "Equipa a cabeça invisível",
+    Callback = function()
+        if RemotesFolder and RemotesFolder:FindFirstChild("Wear") then
+            RemotesFolder.Wear:InvokeServer(134082579)
+            ModernNotify("Aparência", "Cabeça invisível aplicada!", 3, "success")
+        end
+    end
+})
+
+Tab3:AddButton({
+    Name = "Machado Escuro",
+    Description = "Equipa o machado cosmético",
+    Callback = function()
+        if RemotesFolder and RemotesFolder:FindFirstChild("Wear") then
+            RemotesFolder.Wear:InvokeServer(3240543366)
+            ModernNotify("Item Equipado", "Machado escuro colocado!", 3, "info")
+        end
+    end
+})
+
+-- SEÇÃO: SISTEMA DE CLONAGEM DE AVATAR
+Tab3:AddSection({"Sistema de Clonagem de Avatar"})
+
+local TargetClone = nil
+
+local PlayersAvatarDropdown = AvatarTab:AddDropdown({
+    Name = "Selecionar Jogador",
+    Description = "Escolha o jogador para clonar",
+    Options = {},
+    Default = "...",
+    Callback = function(Value)
+        TargetClone = Value
+    end
+})
+
+Tab3:AddButton({
+    Name = "Atualizar Lista de Jogadores",
+    Description = "Recarrega os jogadores do servidor",
+    Callback = function()
+        local lista = {}
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer then
+                table.insert(lista, v.Name)
+            end
+        end
+        if PlayersAvatarDropdown then
+            pcall(function() PlayersAvatarDropdown:Set(lista) end)
+        end
+        ModernNotify("Lista Atualizada", "Jogadores atualizados com sucesso!", 2.5, "info")
+    end
+})
+
+Tab3:AddButton({
+    Name = "Copiar Avatar",
+    Description = "Clona roupas, corpo e bio do jogador selecionado",
+    Callback = function()
+        if not TargetClone then
+            ModernNotify("Atenção", "Selecione um jogador na lista primeiro!", 3, "warn")
+            return
+        end
+
+        local TPlayer = Players:FindFirstChild(TargetClone)
+        if not (TPlayer and TPlayer.Character) then
+            ModernNotify("Erro", "Jogador não encontrado ou sem personagem.", 3, "warn")
+            return
+        end
+
+        ModernNotify("Copiando Avatar...", "Clonando itens de @" .. TargetClone, 3, "info")
+
+        local LChar = LocalPlayer.Character
+        local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
+        local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+        if LHumanoid and THumanoid then
+            local PDesc = THumanoid:GetAppliedDescription()
+            local remoteBody = RemotesFolder and RemotesFolder:FindFirstChild("ChangeCharacterBody")
+            
+            if remoteBody then
+                local argsBody = {
+                    [1] = {
+                        PDesc.Torso or 0,
+                        PDesc.RightArm or 0,
+                        PDesc.LeftArm or 0,
+                        PDesc.RightLeg or 0,
+                        PDesc.LeftLeg or 0,
+                        PDesc.Head or 0
+                    }
+                }
+                remoteBody:InvokeServer(unpack(argsBody))
+                task.wait(0.3)
+            end
+
+            wearItem(PDesc.Shirt, {"WearShirt", "WearOutfit", "Wear"})
+            wearItem(PDesc.Pants, {"WearPants", "WearOutfit", "Wear"})
+            wearItem(PDesc.Face, {"WearFace", "Wear"})
+
+            for _, acc in ipairs(PDesc:GetAccessories(true)) do
+                wearItem(acc.AssetId, {"WearAccessory", "Wear"})
+            end
+
+            wearItem(PDesc.IdleAnimation, {"WearAnimation", "Wear"})
+
+            local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
+            if SkinColor then
+                safeFire("ChangeBodyColor", tostring(SkinColor.HeadColor))
+            end
+
+            local Bag = TPlayer:FindFirstChild("PlayersBag")
+            if Bag then
+                local function sendText(childName, remoteKey)
+                    local c = Bag:FindFirstChild(childName)
+                    if c and c.Value ~= "" then
+                        safeFire("RPNameText", remoteKey, c.Value)
+                    end
+                end
+
+                sendText("RPName", "RolePlayName")
+                sendText("RPBio", "RolePlayBio")
+
+                if Bag:FindFirstChild("RPNameColor") then
+                    safeFire("RPNameColor", "PickingRPNameColor", Bag.RPNameColor.Value)
+                end
+                if Bag:FindFirstChild("RPBioColor") then
+                    safeFire("RPNameColor", "PickingRPBioColor", Bag.RPBioColor.Value)
+                end
+            end
+
+            ModernNotify("Sucesso!", "Avatar de @" .. TargetClone .. " clonado!", 4, "success")
+        end
+    end
+})
+
+-- SEÇÃO: SUPER HERÓIS
+Tab3:AddSection({"Super Heróis <Packs>"})
+
+local heroPacks = {
+    ["Homem Aranha"] = {14908247332, 16845737664, 17582186503, 4211409027, 14840793625, 11774975425, 18507527463, 3346307465},
+    ["Batman"] = {3049284724, 3049285265, 10647971081, 11977276041},
+    ["ADM <Magnus>"] = {77933716022362, 73722333789629, 91122615317042}
 }
 
-function AvatarManager:GetAvatarNames()
-    local nomes = {}
-    for _, avatar in ipairs(self.Avatares) do
-        table.insert(nomes, avatar.Nome)
-    end
-    return nomes
-end
-
-function AvatarManager:MostrarNotificacao(mensagem)
-    pcall(function()
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Aviso",
-            Text = mensagem,
-            Duration = 5
-        })
-    end)
-end
-
-function AvatarManager:EquiparAvatar(avatarName)
-    for _, avatar in ipairs(self.Avatares) do
-        if avatar.Nome == avatarName then
-            local args = { avatar.ID }
-            pcall(function()
-                Remotes.Wear:InvokeServer(unpack(args))
-            end)
-            self:MostrarNotificacao("Avatar " .. avatarName .. " equipado com sucesso!")
-            return
+for nome, ids in pairs(heroPacks) do
+    AvatarTab:AddButton({
+        Name = nome,
+        Description = "Equipar pack " .. nome,
+        Callback = function()
+            for _, id in ipairs(ids) do
+                if RemotesFolder and RemotesFolder:FindFirstChild("Wear") then
+                    RemotesFolder.Wear:InvokeServer(id)
+                    task.wait(0.3)
+                end
+            end
+            ModernNotify("Pack Equipado", nome .. " colocado com sucesso!", 3, "success")
         end
-    end
-    self:MostrarNotificacao("Avatar " .. avatarName .. " nÃ£o encontrado!")
+    })
 end
 
-local AvatarDropdown = Tab3:AddDropdown({
-    Name = "Acessórios 3D",
-    Description = "Selecione para equipar",
-    Default = nil,
-    Options = AvatarManager:GetAvatarNames(),
-    Callback = function(avatarSelecionado)
-        _G.SelectedAvatar = avatarSelecionado
+-- SEÇÃO: MULHER BONITA
+Tab3:AddSection({"Mulher Bonita <Packs>"})
+
+Tab3:AddButton({
+    Name = "Diva",
+    Description = "Equipar visual Diva",
+    Callback = function()
+        aplicarPackCompleto(
+            {11360863184, 17656515587, 18927622972, 89283403956872, 16040053134, 16899958482, 7074764, 398633812, 10767462626},
+            {86499666, 86499698, 86499716, 4637243648, 4637242166, 86498113},
+            "Pastel brown"
+        )
     end
 })
 
 Tab3:AddButton({
-    Name = "Equipar",
-    Description = "Equipar selecionado",
+    Name = "Estilosa",
+    Description = "Equipar visual Estilosa",
     Callback = function()
-        if not _G.SelectedAvatar or _G.SelectedAvatar == "" then
-            AvatarManager:MostrarNotificacao("Nenhum avatar selecionado!")
-            return
-        end
-        AvatarManager:EquiparAvatar(_G.SelectedAvatar)
+        aplicarPackCompleto(
+            {12938939719, 1018553897, 80421353242027, 124139520692742, 16746345026, 107641508206263, 109333206714180, 17577949104, 90353843350916, 16177197399, 144075659},
+            {86499666, 86499698, 86499716, 86500078, 86500064, 746767604},
+            "Pastel brown"
+        )
     end
 })
 
+Tab3:AddButton({
+    Name = "Elegância Rosa-Pastel",
+    Description = "Equipar visual Elegância Rosa-Pastel",
+    Callback = function()
+        aplicarPackCompleto(
+            {607785314, 144076760, 126583402548463, 13979330180, 17336525832, 88103003332276, 16687323428, 18517084101, 125783616515731, 18105274965, 12548809610, 14708696366, 10907197686, 16945491141, 109260326125093, 17286711891, 619511648, 77427504538679, 8923596632, 619512450, 5319900634, 619512767},
+            {86499666, 86499698, 86499716, 86500078, 86500064, 746767604},
+            "Cocoa"
+        )
+    end
+})
+
+Tab3:AddButton({
+    Name = "Hello Kitty",
+    Description = "Equipar visual Hello Kitty",
+    Callback = function()
+        aplicarPackCompleto(
+            {13173625676, 4899180116, 3810243219, 93871285817506, 12350578988, 16725686557, 137102739371519, 18197906770, 121124788407780, 7343929525, 12064732367, 16860622017, 6808475694, 150381051, 10557360323, 4300266038, 6055891536, 7331163641, 607785314, 144076760, 79519657364119},
+            {86499666, 86499698, 86499716, 4637243648, 4637242166, 86498113},
+            "Black"
+        )
+    end
+})
+
+Tab3:AddButton({
+    Name = "Girl Y2k",
+    Description = "Equipar visual Girl Y2k",
+    Callback = function()
+        aplicarPackCompleto(
+            {117962544014646, 79090236788624, 126490351689789, 87525012171586, 117202070642397, 95833326294342, 18257712999, 15678185297, 17006900288},
+            {86499666, 86499698, 86499716, 4637243648, 4637242166, 86498113},
+            "Light orange"
+        )
+    end
+})
+
+Tab3:AddButton({
+    Name = "Girl v2",
+    Description = "Equipar visual Girl v2",
+    Callback = function()
+        aplicarPackCompleto(
+            {96165808437053, 16266670139, 138071050651366, 14439161358, 78467861086741, 17331454126, 115581513157249, 114153430587737, 125828421311007, 81108098355950, 108041588020934, 17529187838, 130737457414077, 12922239190, 13481364215, 12070660079, 16290585600, 6962749149, 10482501471},
+            {86499666, 86499698, 86499716, 4637243648, 4637242166, 86498113},
+            "Light orange"
+        )
+    end
+})
+
+-- SEÇÃO: PACKS MASCULINOS
+Tab3:AddSection({"Packs Masculinos"})
+
+local malePacks = {
+    ["E os D"] = {
+        ids = {619544080, 4545294588, 5727822995, 3131092953, 14394019402, 14908247332, 6105519422, 100214234209945, 12655501529, 5315424251, 4378579302, 10569953351, 4078052877, 4508445398, 6070755733, 10159610478, 14159848208, 162068415, 6093227893},
+        corpo = {376532000, 376531012, 376530220, 37754710, 139572789, 0},
+        cor = "Sun Tan"
+    },
+    ["Clonado"] = {
+        ids = {619544080, 4545294588, 5727822995, 3131092953, 14394019402, 14908247332, 6105519422, 100214234209945, 12655501529, 5315424251, 4378579302, 10569953351, 4078052877, 4508445398, 6070755733, 10159610478, 14159848208, 162068415, 6093227893},
+        corpo = {376532000, 376531012, 376530220, 37754710, 139572789, 0},
+        cor = "Pale brown"
+    },
+    ["LOUD"] = {
+        ids = {12300914679, 14711386122, 12134711097, 14250194694, 11093823714, 13620518518, 14610802451, 71760767936397, 3343204006, 10798519329, 109333206714180, 124139520692742, 12930533426, 80039258998314, 855783877, 855776103, 18615036770, 15036817621, 6093229495, 18220511033, 90934633702402},
+        corpo = {376532000, 376531012, 376530220, 37754710, 139572789, 0},
+        cor = "Dark nougat"
+    },
+    ["Fino"] = {
+        ids = {80615317017048, 78515624557784, 83728028938556, 15920848733, 117962544014646, 123033387074147, 118006629713408, 12887129839, 7189083561, 12142438478},
+        corpo = {376532000, 376531012, 376530220, 37754710, 139572789, 0},
+        cor = "Dark nougat"
+    },
+    ["Trajado"] = {
+        ids = {15703568073, 18236504983, 13479814649, 18179500302, 18199811960, 18863739797, 11093817656, 12432342407, 75844104186976, 17162919797, 17513707733, 82973533809363, 75623454441613, 12357069856, 18538149046, 95312255683838, 109333206714180, 15100020498, 18507389298, 124139520692742},
+        corpo = {},
+        cor = "Dark nougat"
+    },
+    ["Sem Dona"] = {
+        ids = {14762120248, 14159814207, 18264063859, 15153876013, 5727822995, 15483154656, 8966711821, 102338622582054, 10553396797, 4508445398, 13620518518, 6093226569, 12719043468, 88040909583438},
+        corpo = {},
+        cor = "Dark nougat"
+    }
+}
+
+for nome, data in pairs(malePacks) do
+    AvatarTab:AddButton({
+        Name = nome .. " <Masculino>",
+        Description = "Equipar pack " .. nome,
+        Callback = function()
+            aplicarPackCompleto(data.ids, data.corpo, data.cor)
+        end
+    })
+end
+
+-- SEÇÃO: PACKS VARIADOS
+Tab3:AddSection({"Packs Variados <Conjuntos>"})
+
+Tab3:AddButton({
+    Name = "Paty Urbana",
+    Description = "Equipar visual Paty Urbana",
+    Callback = function()
+        aplicarPackCompleto(
+            {11356850323, 11437083587, 11352777399},
+            {15539008532, 15539008875, 15539008680, 15539008795, 15539011945, 1},
+            "Pastel brown"
+        )
+    end
+})
+
+Tab3:AddButton({
+    Name = "Freak Show",
+    Description = "Equipar visual Freak Show",
+    Callback = function()
+        aplicarPackCompleto(
+            {113688815143735, 226948064, 17475516808},
+            {0, 0, 0, 0, 0, 0},
+            "Ivory"
+        )
+    end
+})
+
+-- SEÇÃO: ROUPAS 3D
+Tab3:AddSection({"Roupas 3D <Conjuntos>"})
+
+local skinIDs = {
+    ["Mostro do S.A"] = 123609977175226,
+    ["Impostor"] = 18234669337,
+    ["Gato Up"] = 18994959003,
+    ["Gato"] = 77506186615650,
+    ["Galinha"] = 71251793812515,
+    ["Coelho"] = 71797333686800,
+    ["Bosta"] = 77013984520332,
+    ["Cachorro"] = 18656467256,
+    ["Pinguim"] = 94944293759578,
+    ["Shrek do mal"] = 120960401202173,
+    ["Pepa Pig"] = 92979204778377,
+    ["Pato"] = 135132836238349,
+    ["MotoMoto"] = 73215892129281,
+    ["Mosquito"] = 108052868536435
+}
+
+local skinNames = {}
+for name in pairs(skinIDs) do
+    table.insert(skinNames, name)
+end
+
+local selectedSkinName = nil
+
+Tab3:AddDropdown({
+    Name = "Skins 3D",
+    Description = "Escolha um traje 3D especial",
+    Options = skinNames,
+    Default = "Selecione...",
+    Callback = function(Value)
+        selectedSkinName = Value
+    end
+})
+
+Tab3:AddButton({
+    Name = "Vestir Skin 3D",
+    Description = "Equipa a skin 3D selecionada",
+    Callback = function()
+        if selectedSkinName and skinIDs[selectedSkinName] and RemotesFolder and RemotesFolder:FindFirstChild("Wear") then
+            RemotesFolder.Wear:InvokeServer(skinIDs[selectedSkinName])
+            ModernNotify("Skin 3D", selectedSkinName .. " equipada!", 3, "success")
+        end
+    end
+})
+-- SEÇÃO: ACESSÓRIOS ESPECIAIS
+Tab3:AddSection({"Especiais Efeitos <Acessórios>"})
+
+local acessoriosEspeciais = {
+    ["Fada do Outono"] = 128217885,
+    ["Fada da Primavera"] = 150381051,
+    ["Fada do Dia de São Petersburgo"] = 226189871,
+    ["Fada do Inverno"] = 141742418,
+    ["Risada de Bruxa"] = 305888394,
+    ["Chifres Bsp"] = 233705355,
+    ["Ghosdeeri"] = 132809431,
+    ["Anjo Brilhante Winas"] = 192557913
+}
+
+local nomesEfeitos = {}
+for nome in pairs(acessoriosEspeciais) do
+    table.insert(nomesEfeitos, nome)
+end
+
+local efeitoSelecionado = nil
+
+Tab3:AddDropdown({
+    Name = "Escolha o Efeito",
+    Description = "Selecione o acessório de efeito",
+    Options = nomesEfeitos,
+    Default = "Selecione...",
+    Callback = function(val)
+        efeitoSelecionado = val
+    end
+})
+
+Tab3:AddButton({
+    Name = "Vestir Acessório",
+    Description = "Ativa o acessório especial selecionado",
+    Callback = function()
+        if efeitoSelecionado and acessoriosEspeciais[efeitoSelecionado] and RemotesFolder and RemotesFolder:FindFirstChild("Wear") then
+            RemotesFolder.Wear:InvokeServer(acessoriosEspeciais[efeitoSelecionado])
+            ModernNotify("Efeito Ativado", efeitoSelecionado .. " equipado!", 3, "success")
+        end
+    end
+})
 --------------------------------------------------
 -- Section: Avatar Editor / Partes do corpo
 --------------------------------------------------
