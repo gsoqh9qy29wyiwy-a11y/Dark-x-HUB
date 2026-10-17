@@ -389,6 +389,14 @@ local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage,
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
+local SelectHouse = nil
+local HouseDropdown = nil
+local isViewActive = false
+local noclipDoorsConnection = nil
+local espSingleConnection = nil
+local espAllConnection = nil
+local viewConnection = nil
+local houseMapping = {}
 _G.SelectedPlayer = ""
 _G.AutoBringCouch = false
 _G.AutoKillCouch = false
@@ -2692,16 +2700,6 @@ PropsTab:AddButton({
 -- ====================================================================
 -- VARIÁVEIS E FUNÇÕES DA ABA CASAS
 -- ====================================================================
-local SelectHouse = nil
-local HouseDropdown = nil
-local isViewActive = false
-
-local noclipDoorsConnection = nil
-local espSingleConnection = nil
-local espAllConnection = nil
-local viewConnection = nil
-local houseMapping = {}
-
 local function getHouseRemote()
     local re = ReplicatedStorage:FindFirstChild("RE")
     return re and re:FindFirstChild("1Player1sHous1e")
