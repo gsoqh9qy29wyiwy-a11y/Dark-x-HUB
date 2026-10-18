@@ -858,10 +858,10 @@ local function bringItemsByPlayerTP(itemNames, originalPosition)
 end
 
 local Window = WindUI:CreateWindow({
-    Title = "🌌 Nytherune Hub 🌌 - 99 Nights in the Forest",
+    Title = "Dark x Hub - 99 Noites na floresta",
     Icon = "star", 
-    Author = "Nytherune Developers / Why Developments Team",
-    Folder = "NytheruneHub99",
+    Author = "Dark Developers / Why HACKELINDOO",
+    Folder = "DarkxHub99",
     Size = UDim2.fromOffset(500, 350),
     Transparent = getgenv().TransparencyEnabled,
     Theme = "Dark",
@@ -1021,9 +1021,9 @@ Tabs.Combat:Section({ Title = "Settings", Icon = "settings" })
 
 Tabs.Combat:Slider({
     Title = "Aura Radius",
-    Value = { Min = 50, Max = 500, Default = 50 },
+    Value = { Min = 50, Max = 5000000000000000000000000000, Default = 50 },
     Callback = function(value)
-        auraRadius = math.clamp(value, 10, 500)
+        auraRadius = math.clamp(value, 10, 5000000000000000000000000000)
     end
 })
 
