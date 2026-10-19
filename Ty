@@ -389,14 +389,6 @@ local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage,
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
-local SelectHouse = nil
-local HouseDropdown = nil
-local isViewActive = false
-local noclipDoorsConnection = nil
-local espSingleConnection = nil
-local espAllConnection = nil
-local viewConnection = nil
-local houseMapping = {}
 _G.SelectedPlayer = ""
 _G.AutoBringCouch = false
 _G.AutoKillCouch = false
@@ -2799,6 +2791,27 @@ end)
 -- ====================================================================
 local RemotesFolder = ReplicatedStorage:WaitForChild("Remotes", 5)
 
+local function wearItem(id, remotesList)
+    if not tonumber(id) or not RemotesFolder then return end
+    for _, nome in ipairs(remotesList) do
+        local remote = RemotesFolder:FindFirstChild(nome)
+        if remote then
+            remote:InvokeServer(tonumber(id))
+            task.wait(0.2)
+            return true
+        end
+    end
+end
+
+local function safeFire(nome, ...)
+    if not RemotesFolder then return end
+    local remote = RemotesFolder:FindFirstChild(nome)
+    if remote then
+        remote:FireServer(...)
+        task.wait(0.2)
+    end
+end
+
 local function aplicarPackCompleto(idsDeRoupas, corpoParts, corHex)
     if not RemotesFolder then return end
 
@@ -2886,6 +2899,118 @@ Tab3:AddButton({
     end
 })
 
+-- SEÇÃO: SISTEMA DE CLONAGEM DE AVATAR
+Tab3:AddSection({"Sistema de Clonagem de Avatar"})
+
+local TargetClone = nil
+
+local PlayersAvatarDropdown = AvatarTab:AddDropdown({
+    Name = "Selecionar Jogador",
+    Description = "Escolha o jogador para clonar",
+    Options = {},
+    Default = "...",
+    Callback = function(Value)
+        TargetClone = Value
+    end
+})
+
+Tab3:AddButton({
+    Name = "Atualizar Lista de Jogadores",
+    Description = "Recarrega os jogadores do servidor",
+    Callback = function()
+        local lista = {}
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer then
+                table.insert(lista, v.Name)
+            end
+        end
+        if PlayersAvatarDropdown then
+            pcall(function() PlayersAvatarDropdown:Set(lista) end)
+        end
+        ModernNotify("Lista Atualizada", "Jogadores atualizados com sucesso!", 2.5, "info")
+    end
+})
+
+Tab3:AddButton({
+    Name = "Copiar Avatar",
+    Description = "Clona roupas, corpo e bio do jogador selecionado",
+    Callback = function()
+        if not TargetClone then
+            ModernNotify("Atenção", "Selecione um jogador na lista primeiro!", 3, "warn")
+            return
+        end
+
+        local TPlayer = Players:FindFirstChild(TargetClone)
+        if not (TPlayer and TPlayer.Character) then
+            ModernNotify("Erro", "Jogador não encontrado ou sem personagem.", 3, "warn")
+            return
+        end
+
+        ModernNotify("Copiando Avatar...", "Clonando itens de @" .. TargetClone, 3, "info")
+
+        local LChar = LocalPlayer.Character
+        local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
+        local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+        if LHumanoid and THumanoid then
+            local PDesc = THumanoid:GetAppliedDescription()
+            local remoteBody = RemotesFolder and RemotesFolder:FindFirstChild("ChangeCharacterBody")
+            
+            if remoteBody then
+                local argsBody = {
+                    [1] = {
+                        PDesc.Torso or 0,
+                        PDesc.RightArm or 0,
+                        PDesc.LeftArm or 0,
+                        PDesc.RightLeg or 0,
+                        PDesc.LeftLeg or 0,
+                        PDesc.Head or 0
+                    }
+                }
+                remoteBody:InvokeServer(unpack(argsBody))
+                task.wait(0.3)
+            end
+
+            wearItem(PDesc.Shirt, {"WearShirt", "WearOutfit", "Wear"})
+            wearItem(PDesc.Pants, {"WearPants", "WearOutfit", "Wear"})
+            wearItem(PDesc.Face, {"WearFace", "Wear"})
+
+            for _, acc in ipairs(PDesc:GetAccessories(true)) do
+                wearItem(acc.AssetId, {"WearAccessory", "Wear"})
+            end
+
+            wearItem(PDesc.IdleAnimation, {"WearAnimation", "Wear"})
+
+            local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
+            if SkinColor then
+                safeFire("ChangeBodyColor", tostring(SkinColor.HeadColor))
+            end
+
+            local Bag = TPlayer:FindFirstChild("PlayersBag")
+            if Bag then
+                local function sendText(childName, remoteKey)
+                    local c = Bag:FindFirstChild(childName)
+                    if c and c.Value ~= "" then
+                        safeFire("RPNameText", remoteKey, c.Value)
+                    end
+                end
+
+                sendText("RPName", "RolePlayName")
+                sendText("RPBio", "RolePlayBio")
+
+                if Bag:FindFirstChild("RPNameColor") then
+                    safeFire("RPNameColor", "PickingRPNameColor", Bag.RPNameColor.Value)
+                end
+                if Bag:FindFirstChild("RPBioColor") then
+                    safeFire("RPNameColor", "PickingRPBioColor", Bag.RPBioColor.Value)
+                end
+            end
+
+            ModernNotify("Sucesso!", "Avatar de @" .. TargetClone .. " clonado!", 4, "success")
+        end
+    end
+})
+
 -- SEÇÃO: SUPER HERÓIS
 Tab3:AddSection({"Super Heróis <Packs>"})
 
@@ -2896,7 +3021,7 @@ local heroPacks = {
 }
 
 for nome, ids in pairs(heroPacks) do
-    Tab3:AddButton({
+    AvatarTab:AddButton({
         Name = nome,
         Description = "Equipar pack " .. nome,
         Callback = function()
@@ -3023,7 +3148,7 @@ local malePacks = {
 }
 
 for nome, data in pairs(malePacks) do
-    Tab3:AddButton({
+    AvatarTab:AddButton({
         Name = nome .. " <Masculino>",
         Description = "Equipar pack " .. nome,
         Callback = function()
@@ -3147,8 +3272,7 @@ Tab3:AddButton({
             ModernNotify("Efeito Ativado", efeitoSelecionado .. " equipado!", 3, "success")
         end
     end
-})
---------------------------------------------------
+})--------------------------------------------------
 -- Section: Avatar Editor / Partes do corpo
 --------------------------------------------------
 local Section3 = Tab3:AddSection({"Avatar Editor"})
