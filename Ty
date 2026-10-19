@@ -2875,7 +2875,7 @@ Tab3:AddButton({
 })
 
 -- SEÇÃO: MELHORES PARTES
-AvatarTab:AddSection({"Melhores Partes"})
+Tab3:AddSection({"Melhores Partes"})
 
 Tab3:AddButton({
     Name = "Cabeça Invisível",
@@ -3158,7 +3158,7 @@ for nome, data in pairs(malePacks) do
 end
 
 -- SEÇÃO: PACKS VARIADOS
-AvatarTab:AddSection({"Packs Variados <Conjuntos>"})
+Tab3:AddSection({"Packs Variados <Conjuntos>"})
 
 Tab3:AddButton({
     Name = "Paty Urbana",
