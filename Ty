@@ -400,6 +400,7 @@ _G.AntiLag = false
 _G.RGBName = false
 _G.RainbowBio = false
 
+
 -- ====================================================================
 -- SISTEMA DE NOTIFICAÇÃO MODERNA (TOAST ANIMADO)
 -- ====================================================================
@@ -2849,9 +2850,9 @@ local function aplicarPackCompleto(idsDeRoupas, corpoParts, corHex)
 end
 
 -- SEÇÃO: ANIMAÇÃO & RESET
-AvatarTab:AddSection({"Animação & Reset"})
+Tab3:AddSection({"Animação & Reset"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Resetar Avatar",
     Description = "Restaura o visual original do personagem",
     Callback = function()
@@ -2862,7 +2863,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Animação Homem / Mulher",
     Description = "Aplica o pacote de animação",
     Callback = function()
@@ -2876,7 +2877,7 @@ AvatarTab:AddButton({
 -- SEÇÃO: MELHORES PARTES
 AvatarTab:AddSection({"Melhores Partes"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Cabeça Invisível",
     Description = "Equipa a cabeça invisível",
     Callback = function()
@@ -2887,7 +2888,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Machado Escuro",
     Description = "Equipa o machado cosmético",
     Callback = function()
@@ -2899,11 +2900,11 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: SISTEMA DE CLONAGEM DE AVATAR
-AvatarTab:AddSection({"Sistema de Clonagem de Avatar"})
+Tab3:AddSection({"Sistema de Clonagem de Avatar"})
 
 local TargetClone = nil
 
-local PlayersAvatarDropdown = AvatarTab:AddDropdown({
+local PlayersAvatarDropdown = Tab3:AddDropdown({
     Name = "Selecionar Jogador",
     Description = "Escolha o jogador para clonar",
     Options = {},
@@ -2913,7 +2914,7 @@ local PlayersAvatarDropdown = AvatarTab:AddDropdown({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Atualizar Lista de Jogadores",
     Description = "Recarrega os jogadores do servidor",
     Callback = function()
@@ -2930,7 +2931,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Copiar Avatar",
     Description = "Clona roupas, corpo e bio do jogador selecionado",
     Callback = function()
@@ -3011,7 +3012,7 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: SUPER HERÓIS
-AvatarTab:AddSection({"Super Heróis <Packs>"})
+Tab3:AddSection({"Super Heróis <Packs>"})
 
 local heroPacks = {
     ["Homem Aranha"] = {14908247332, 16845737664, 17582186503, 4211409027, 14840793625, 11774975425, 18507527463, 3346307465},
@@ -3020,7 +3021,7 @@ local heroPacks = {
 }
 
 for nome, ids in pairs(heroPacks) do
-    AvatarTab:AddButton({
+    Tab3:AddButton({
         Name = nome,
         Description = "Equipar pack " .. nome,
         Callback = function()
@@ -3036,9 +3037,9 @@ for nome, ids in pairs(heroPacks) do
 end
 
 -- SEÇÃO: MULHER BONITA
-AvatarTab:AddSection({"Mulher Bonita <Packs>"})
+Tab3:AddSection({"Mulher Bonita <Packs>"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Diva",
     Description = "Equipar visual Diva",
     Callback = function()
@@ -3050,7 +3051,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Estilosa",
     Description = "Equipar visual Estilosa",
     Callback = function()
@@ -3062,7 +3063,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Elegância Rosa-Pastel",
     Description = "Equipar visual Elegância Rosa-Pastel",
     Callback = function()
@@ -3074,7 +3075,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Hello Kitty",
     Description = "Equipar visual Hello Kitty",
     Callback = function()
@@ -3086,7 +3087,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Girl Y2k",
     Description = "Equipar visual Girl Y2k",
     Callback = function()
@@ -3098,7 +3099,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Girl v2",
     Description = "Equipar visual Girl v2",
     Callback = function()
@@ -3111,7 +3112,7 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: PACKS MASCULINOS
-AvatarTab:AddSection({"Packs Masculinos"})
+Tab3:AddSection({"Packs Masculinos"})
 
 local malePacks = {
     ["E os D"] = {
@@ -3159,7 +3160,7 @@ end
 -- SEÇÃO: PACKS VARIADOS
 AvatarTab:AddSection({"Packs Variados <Conjuntos>"})
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Paty Urbana",
     Description = "Equipar visual Paty Urbana",
     Callback = function()
@@ -3171,7 +3172,7 @@ AvatarTab:AddButton({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Freak Show",
     Description = "Equipar visual Freak Show",
     Callback = function()
@@ -3184,7 +3185,7 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: ROUPAS 3D
-AvatarTab:AddSection({"Roupas 3D <Conjuntos>"})
+Tab3:AddSection({"Roupas 3D <Conjuntos>"})
 
 local skinIDs = {
     ["Mostro do S.A"] = 123609977175226,
@@ -3210,7 +3211,7 @@ end
 
 local selectedSkinName = nil
 
-AvatarTab:AddDropdown({
+Tab3:AddDropdown({
     Name = "Skins 3D",
     Description = "Escolha um traje 3D especial",
     Options = skinNames,
@@ -3220,7 +3221,7 @@ AvatarTab:AddDropdown({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Vestir Skin 3D",
     Description = "Equipa a skin 3D selecionada",
     Callback = function()
@@ -3232,7 +3233,7 @@ AvatarTab:AddButton({
 })
 
 -- SEÇÃO: ACESSÓRIOS ESPECIAIS
-AvatarTab:AddSection({"Especiais Efeitos <Acessórios>"})
+Tab3:AddSection({"Especiais Efeitos <Acessórios>"})
 
 local acessoriosEspeciais = {
     ["Fada do Outono"] = 128217885,
@@ -3252,7 +3253,7 @@ end
 
 local efeitoSelecionado = nil
 
-AvatarTab:AddDropdown({
+Tab3:AddDropdown({
     Name = "Escolha o Efeito",
     Description = "Selecione o acessório de efeito",
     Options = nomesEfeitos,
@@ -3262,7 +3263,7 @@ AvatarTab:AddDropdown({
     end
 })
 
-AvatarTab:AddButton({
+Tab3:AddButton({
     Name = "Vestir Acessório",
     Description = "Ativa o acessório especial selecionado",
     Callback = function()
