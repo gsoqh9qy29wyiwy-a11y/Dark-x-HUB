@@ -551,6 +551,22 @@ local function ObterListaJogadores()
     return lista
 end
 
+local running = false
+local connection = nil
+local flingConnection = nil
+local savedPosition = nil
+local flingToggle = nil
+local testSavedPosition = nil
+
+local function disableCarClient()
+    pcall(function()
+        local playerGui = vu7:FindFirstChild("PlayerGui")
+        if playerGui and playerGui:FindFirstChild("CarClient") then
+            playerGui.CarClient.Disabled = true
+        end
+    end)
+end
+
 -- Variáveis da Bola (Orbit e Fling)
 local OrbitSpeed = 15
 local OrbitDistance = 5
@@ -2213,6 +2229,293 @@ end)
 end
 })
 
+TabTroll:AddSection({Name = "Fling ônibus Teste"})
+
+local selectedPlayer = nil
+local viewLoop = false
+
+local function StopTestFling()
+    running = false
+    if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+    if connection then connection:Disconnect() connection = nil end
+
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character
+    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+
+    if RootPart and Humanoid then
+        Humanoid.PlatformStand = true
+        for _, obj in pairs(RootPart:GetChildren()) do
+            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+        end
+    end
+
+    pcall(function()
+        game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer("DeleteAllVehicles")
+    end)
+    task.wait(0.5)
+
+    if Vehicles then
+        local PCar = Vehicles:FindFirstChild(Player.Name.."Car")
+        if PCar and PCar.PrimaryPart then
+            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
+                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+            end
+        end
+    end
+    task.wait(0.5)
+
+    pcall(function()
+        if RootPart and testSavedPosition then
+            local bp = Instance.new("BodyPosition", RootPart)
+            bp.Position = testSavedPosition + Vector3.new(0, 3, 0)
+            bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            local bg = Instance.new("BodyGyro", RootPart)
+            bg.CFrame = RootPart.CFrame
+            bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            task.wait(1)
+            bp:Destroy()
+            bg:Destroy()
+        end
+        if Humanoid then
+            Humanoid.PlatformStand = false
+        end
+    end)
+end
+
+local function flingWithBus(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character or not LocalPlayer.Character then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local myHRP = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not myHRP then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    
+    testSavedPosition = myHRP.Position
+
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1181.83, 76.08, -1158.83))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+    end)
+    task.wait(0.5)
+
+    disableCarClient()
+
+    local args = { [1] = "DeleteAllVehicles" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    args = { [1] = "PickingCar", [2] = "SchoolBus" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    task.wait(1)
+    local vehiclesFolder = Workspace:FindFirstChild("Vehicles")
+    if not vehiclesFolder then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local busName = LocalPlayer.Name .. "Car"
+    local bus = vehiclesFolder:FindFirstChild(busName)
+    if not bus then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1171.15, 79.45, -1166.2))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        humanoid:ChangeState(Enum.HumanoidStateType.Seated)
+    end)
+    local sitStart = tick()
+    repeat
+        task.wait()
+        if tick() - sitStart > 10 or not running then 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+    until humanoid.Sit
+
+    for _, part in ipairs(bus:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+            pcall(function() part:SetNetworkOwner(nil) end)
+        end
+    end
+
+    running = true
+    connection = RunService.Stepped:Connect(function()
+        if not running then return end
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end)
+
+    local startTime = tick()
+    local walkFlingInstancePlayer = nil
+
+    flingConnection = RunService.Heartbeat:Connect(function()
+        if not running then return end
+        if not targetPlayer or not targetPlayer.Character then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        local newTargetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local newTargetHumanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+        if not newTargetHRP or not newTargetHumanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        if not myHRP or not humanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+
+        local offset = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
+        pcall(function()
+            local targetPosition = newTargetHRP.Position + offset
+            bus:PivotTo(
+                CFrame.new(targetPosition) * CFrame.Angles(
+                    math.rad(Workspace.DistributedGameTime * 12000),
+                    math.rad(Workspace.DistributedGameTime * 15000),
+                    math.rad(Workspace.DistributedGameTime * 18000)
+                )
+            )
+        end)
+
+        local playerSeated = false
+        for _, seat in ipairs(bus:GetDescendants()) do
+            if (seat:IsA("Seat") or seat:IsA("VehicleSeat")) and seat.Name ~= "VehicleSeat" then
+                if seat.Occupant == newTargetHumanoid then
+                    playerSeated = true
+                    break
+                end
+            end
+        end
+
+        if playerSeated or tick() - startTime > 10 then
+            running = false
+            if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+            pcall(function()
+                bus:PivotTo(CFrame.new(Vector3.new(-59599.73, 2040070.50, -293391.16)))
+            end)
+
+            walkFlingInstancePlayer = Instance.new("BodyVelocity")
+            walkFlingInstancePlayer.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            walkFlingInstancePlayer.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 1000000 + Vector3.new(0, 1000000, 0)
+            walkFlingInstancePlayer.Parent = myHRP
+            task.wait(0.5)
+
+            disableCarClient()
+
+            local args = { [1] = "DeleteAllVehicles" }
+            pcall(function()
+                ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+            end)
+
+            if walkFlingInstancePlayer then
+                walkFlingInstancePlayer:Destroy()
+                for _, part in ipairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = true end
+                end
+            end
+
+            pcall(function()
+                myHRP.Anchored = true
+                myHRP.CFrame = CFrame.new(testSavedPosition + Vector3.new(0, 5, 0))
+                task.wait(0.2)
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.Anchored = false
+                if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+            end)
+
+            if flingToggle then flingToggle:Set(false) end
+        end
+    end)
+end
+
+local function ViewPlayer()
+    local Camera = workspace.CurrentCamera
+    task.spawn(function()
+        while viewLoop and selectedPlayer do
+            if selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                Camera.CameraSubject = selectedPlayer.Character.HumanoidRootPart
+            end
+            task.wait(0.1)
+        end
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            Camera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+        end
+    end)
+end
+
+local PlayersDropdown = TabTroll:AddDropdown({
+    Name = "Escolha um jogador",
+    Description = "Selecionar um jogador pra funcionar as funções",
+    Options = getPlayerNames(),
+    Default = "Nenhum",
+    Callback = function(value)
+        selectedPlayer = game.Players:FindFirstChild(value)
+        _G.SelectedPlayer = value
+    end
+})
+
+TabTroll:AddButton({
+    Name = "Atualizar Lista",
+    Callback = function()
+        PlayersDropdown:Set(getPlayerNames())
+    end
+})
+
+TabTroll:AddToggle({
+    Name = "Visualizar Jogador",
+    Description = "Olha jogador de longe qualquer lugar",
+    Default = false,
+    Callback = function(value)
+        viewLoop = value
+        if value then ViewPlayer() end
+    end
+})
+
+flingToggle = TabTroll:AddToggle({
+    Name = "Inicia Fling (Ônibus Teste)",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if selectedPlayer then
+                running = true
+                task.spawn(function()
+                    flingWithBus(selectedPlayer)
+                end)
+            else
+                warn("Selecione um jogador primeiro!")
+                if flingToggle then flingToggle:Set(false) end
+            end
+        else
+            StopTestFling()
+        end
+    end
+})
+
 
 Window:SelectTab(TabTroll)
 local Section = TrollTab:AddSection({"Funções"})
@@ -2689,664 +2992,6 @@ PropsTab:AddButton({
 -- ====================================================================
 -- ABA: CASAS
 -- ====================================================================
--- ====================================================================
--- ABA: CASAS (COMPLETA - TODAS AS FUNÇÕES RESTAURADAS)
--- ====================================================================
-local SelectHouse = nil
-local HouseDropdown = nil
-local isViewActive = false
-local viewConnection = nil
-local espSingleConnection = nil
-local espAllConnection = nil
-
-local isHouseRGBActive = false
-local repeatNames = false
-local House1, House2, House3 = "", "", ""
-local selectedPlayerToBan = nil
-local blacklistActive = false
-
-local ghostToggles = {
-    houseColor = false,
-    curtains = false,
-    garageDoor = false
-}
-
--- Funções Auxiliares
-local function getHouseList()
-    local Tabela = {}
-    local lots = workspace:FindFirstChild("001_Lots")
-    if lots then
-        for _, House in ipairs(lots:GetChildren()) do
-            if House.Name ~= "For Sale" and House:IsA("Model") then
-                table.insert(Tabela, House.Name)
-            end
-        end
-    end
-    return Tabela
-end
-
-local function getSelectedHouse()
-    if SelectHouse and workspace:FindFirstChild("001_Lots") then
-        return workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
-    end
-    return nil
-end
-
-local function getHouseRemote()
-    local re = game:GetService("ReplicatedStorage"):FindFirstChild("RE")
-    return re and re:FindFirstChild("1Player1sHous1e")
-end
-
-local function getHouseOwnerPlayer()
-    local house = getSelectedHouse()
-    if house then
-        local ownerVal = house:FindFirstChild("Owner") or house:FindFirstChild("HouseOwner")
-        if ownerVal and ownerVal.Value then
-            local ownerName = tostring(ownerVal.Value)
-            for _, plr in ipairs(game.Players:GetPlayers()) do
-                if plr.Name == ownerName or plr.DisplayName == ownerName then
-                    return plr
-                end
-            end
-        end
-    end
-    return nil
-end
-
-local function removerESP(container)
-    if container then
-        for _, obj in pairs(container:GetDescendants()) do
-            if obj:IsA("Highlight") and obj.Name == "SafeESP" then
-                obj:Destroy()
-            end
-        end
-    end
-end
--- ====================================================================
--- SEÇÃO: SELEÇÃO & NAVEGAÇÃO
--- ====================================================================
-CasasTab:AddSection({"Seleção & Navegação"})
-
-pcall(function()
-    HouseDropdown = CasasTab:AddDropdown({
-        Name = "Selecione a Casa",
-        Description = "Lista de casas",
-        Options = getHouseList(),
-        Default = "...",
-        Callback = function(Value)
-            SelectHouse = Value
-            print("Casa selecionada: " .. tostring(Value))
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Atualizar Lista de Casas",
-        Description = "Atualiza a lista de casas",
-        Callback = function()
-            local novaLista = getHouseList()
-            if HouseDropdown then
-                pcall(function()
-                    HouseDropdown:Set(novaLista)
-                end)
-            end
-            print("✅ Lista de casas atualizada!")
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Ver Dono da Casa Selecionada",
-        Description = "Mostra o nick e a foto do dono da casa",
-        Callback = function()
-            local plr = getHouseOwnerPlayer()
-            if plr then
-                local thumbUrl = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(plr.UserId) .. "&w=420&h=420"
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Dono: " .. plr.DisplayName,
-                    Text = "Nick: @" .. plr.Name,
-                    Icon = thumbUrl,
-                    Duration = 5
-                })
-            else
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Aviso",
-                    Text = "Dono não encontrado ou casa sem dono.",
-                    Duration = 3
-                })
-            end
-        end
-    })
-end)
-
--- ====================================================================
--- SEÇÃO: CÂMERA / VIEW PLAYER
--- ====================================================================
-CasasTab:AddSection({"Câmera / View Player"})
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "Visualizar Dono da Casa (View)",
-        Description = "Assista o dono da casa selecionada em tempo real",
-        Default = false,
-        Callback = function(Value)
-            isViewActive = Value
-            if Value then
-                viewConnection = game:GetService("RunService").RenderStepped:Connect(function()
-                    if isViewActive then
-                        local targetPlr = getHouseOwnerPlayer()
-                        if targetPlr and targetPlr.Character and targetPlr.Character:FindFirstChild("Humanoid") then
-                            workspace.CurrentCamera.CameraSubject = targetPlr.Character.Humanoid
-                        end
-                    end
-                end)
-
-                local targetPlr = getHouseOwnerPlayer()
-                if targetPlr then
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "View Ativado",
-                        Text = "Observando: " .. targetPlr.Name,
-                        Duration = 3
-                    })
-                else
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "Aviso",
-                        Text = "Casa sem dono ou jogador offline.",
-                        Duration = 3
-                    })
-                end
-            else
-                if viewConnection then
-                    viewConnection:Disconnect()
-                    viewConnection = nil
-                end
-                local lp = game.Players.LocalPlayer
-                if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-                    workspace.CurrentCamera.CameraSubject = lp.Character.Humanoid
-                end
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "View Desativado",
-                    Text = "Câmera restaurada para seu personagem.",
-                    Duration = 3
-                })
-            end
-        end
-    })
-end)
-
--- ====================================================================
--- SEÇÃO: TELEPORTES
--- ====================================================================
-CasasTab:AddSection({"Teleportes"})
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Teleportar para Casa",
-        Description = "Teleporta para casa selecionada",
-        Callback = function()
-            local House = getSelectedHouse()
-            if House and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
-            else
-                print("Casa não encontrada: " .. tostring(SelectHouse))
-            end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Teleportar para Cofre (+ Equipar Bomba)",
-        Description = "Teleporta para o cofre e equipa a bomba",
-        Callback = function()
-            local House = getSelectedHouse()
-            local player = game.Players.LocalPlayer
-            local character = player.Character
-
-            if House and House:FindFirstChild("HousePickedByPlayer") and character and character:FindFirstChild("HumanoidRootPart") then
-                local safe = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
-                if safe then
-                    character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position)
-
-                    local backpack = player:FindFirstChild("Backpack")
-                    if backpack then
-                        local bomb = backpack:FindFirstChild("Bomb") or backpack:FindFirstChild("bomba")
-                        if bomb and character:FindFirstChild("Humanoid") then
-                            character.Humanoid:EquipTool(bomb)
-                            game.StarterGui:SetCore("SendNotification", {
-                                Title = "Bomba Equipada",
-                                Text = "Bomba colocada na mão!",
-                                Duration = 3
-                            })
-                        else
-                            game.StarterGui:SetCore("SendNotification", {
-                                Title = "Teleportado",
-                                Text = "Pegue a bomba na mochila para equipar.",
-                                Duration = 3
-                            })
-                        end
-                    end
-                else
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "Aviso",
-                        Text = "Cofre não encontrado nesta casa.",
-                        Duration = 3
-                    })
-                end
-            else
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Aviso",
-                    Text = "Casa selecionada inválida ou sem dono.",
-                    Duration = 3
-                })
-            end
-        end
-    })
-end)
-
--- ====================================================================
--- SEÇÃO: UNBAN
--- ====================================================================
-CasasTab:AddSection({"Remover Banimento"})
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Remover Ban de Todas as Casas Manual",
-        Description = "Tenta remover o ban de todas as casas",
-        Callback = function()
-            local successCount = 0
-            local failCount = 0
-            for i = 1, 37 do
-                local bannedBlock = workspace:FindFirstChild("BannedBlock" .. i, true)
-                if bannedBlock then
-                    local success = pcall(function() bannedBlock:Destroy() end)
-                    if success then successCount = successCount + 1 else failCount = failCount + 1 end
-                end
-            end
-            for _, house in pairs(workspace:GetDescendants()) do
-                if house.Name:match("BannedBlock") then
-                    local success = pcall(function() house:Destroy() end)
-                    if success then successCount = successCount + 1 else failCount = failCount + 1 end
-                end
-            end
-            if successCount > 0 then
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Sucesso",
-                    Text = "Bans removidos de " .. successCount .. " casas!",
-                    Duration = 4
-                })
-            else
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Aviso",
-                    Text = "Nenhum ban encontrado para remover.",
-                    Duration = 3
-                })
-            end
-        end
-    })
-end)
-
--- ====================================================================
--- SEÇÃO: VISUAIS (ESP)
--- ====================================================================
-CasasTab:AddSection({"Visuais (ESP)"})
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "ESP Cofre (Casa Selecionada)",
-        Description = "Destaca o cofre da casa selecionada",
-        Default = false,
-        Callback = function(Value)
-            if Value then
-                espSingleConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                    local house = getSelectedHouse()
-                    if house and house:FindFirstChild("HousePickedByPlayer") then
-                        local safe = house.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
-                        if safe and not safe:FindFirstChild("SafeESP") then
-                            local highlight = Instance.new("Highlight")
-                            highlight.Name = "SafeESP"
-                            highlight.FillColor = Color3.fromRGB(255, 215, 0)
-                            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                            highlight.Parent = safe
-                        end
-                    end
-                end)
-            else
-                if espSingleConnection then
-                    espSingleConnection:Disconnect()
-                    espSingleConnection = nil
-                end
-                local house = getSelectedHouse()
-                if house then removerESP(house) end
-            end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "ESP Todos os Cofres",
-        Description = "Destaca os cofres de todas as casas do mapa",
-        Default = false,
-        Callback = function(Value)
-            if Value then
-                espAllConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                    local lots = workspace:FindFirstChild("001_Lots")
-                    if lots then
-                        for _, house in pairs(lots:GetChildren()) do
-                            if house:FindFirstChild("HousePickedByPlayer") then
-                                local safe = house.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
-                                if safe and not safe:FindFirstChild("SafeESP") then
-                                    local highlight = Instance.new("Highlight")
-                                    highlight.Name = "SafeESP"
-                                    highlight.FillColor = Color3.fromRGB(255, 140, 0)
-                                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                                    highlight.Parent = safe
-                                end
-                            end
-                        end
-                    end
-                end)
-            else
-                if espAllConnection then
-                    espAllConnection:Disconnect()
-                    espAllConnection = nil
-                end
-                local lots = workspace:FindFirstChild("001_Lots")
-                if lots then removerESP(lots) end
-            end
-        end
-    })
-end)
-
--- ====================================================================
--- SEÇÃO: BANIR JOGADORES
--- ====================================================================
-CasasTab:AddSection({"Banir Jogadores"})
-
-local PlayersBanDropdown = nil
-
-pcall(function()
-    PlayersBanDropdown = CasasTab:AddDropdown({
-        Name = "Jogadores",
-        Description = "Selecione o jogador para banir",
-        Options = {},
-        Default = "Selecione...",
-        Callback = function(playerName)
-            selectedPlayerToBan = game.Players:FindFirstChild(playerName)
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Atualizar Lista de Jogadores",
-        Description = "Atualiza a lista com jogadores do servidor",
-        Callback = function()
-            local novaTabela = {}
-            for _, v in pairs(game.Players:GetPlayers()) do
-                if v ~= game.Players.LocalPlayer then
-                    table.insert(novaTabela, v.Name)
-                end
-            end
-            if PlayersBanDropdown then
-                pcall(function() PlayersBanDropdown:Set(novaTabela) end)
-            end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "Auto Banimento",
-        Description = "Bane o jogador de todas as casas continuamente",
-        Default = false,
-        Callback = function(state)
-            blacklistActive = state
-            if state then
-                task.spawn(function()
-                    while blacklistActive and selectedPlayerToBan do
-                        local lots = workspace:FindFirstChild("001_Lots")
-                        if lots then
-                            for _, casa in pairs(lots:GetChildren()) do
-                                local permissao = casa:FindFirstChild("HousePickedByPlayer")
-                                    and casa.HousePickedByPlayer:FindFirstChild("HouseModel")
-                                    and casa.HousePickedByPlayer.HouseModel:FindFirstChild("Permissions:Disallow")
-
-                                if permissao then
-                                    pcall(function() permissao:FireServer(selectedPlayerToBan) end)
-                                end
-                            end
-                        end
-                        task.wait(1)
-                    end
-                end)
-            end
-        end
-    })
-end)
-
--- ====================================================================
--- SEÇÃO: CASA ASSOMBRADA
--- ====================================================================
-CasasTab:AddSection({"Casa Assombrada"})
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "Roleta Cor Da Casa",
-        Description = "Alterna cores aleatórias na casa continuamente",
-        Default = false,
-        Callback = function(state)
-            ghostToggles.houseColor = state
-            if state then
-                task.spawn(function()
-                    while ghostToggles.houseColor do
-                        local remote = getHouseRemote()
-                        if remote then
-                            local randColor = Color3.new(math.random(), math.random(), math.random())
-                            pcall(function() remote:FireServer("ColorPickHouse", randColor) end)
-                        end
-                        task.wait(2)
-                    end
-                end)
-            end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "Roleta Cortinas",
-        Description = "Abre e fecha as cortinas continuamente",
-        Default = false,
-        Callback = function(state)
-            ghostToggles.curtains = state
-            if state then
-                task.spawn(function()
-                    while ghostToggles.curtains do
-                        local remote = getHouseRemote()
-                        if remote then pcall(function() remote:FireServer("Curtains") end) end
-                        task.wait(1.5)
-                    end
-                end)
-            end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "Roleta Porta da Garagem",
-        Description = "Abre e fecha a garagem continuamente",
-        Default = false,
-        Callback = function(state)
-            ghostToggles.garageDoor = state
-            if state then
-                task.spawn(function()
-                    while ghostToggles.garageDoor do
-                        local remote = getHouseRemote()
-                        if remote then pcall(function() remote:FireServer("GarageDoor") end) end
-                        task.wait(5)
-                    end
-                end)
-            end
-        end
-    })
-end)
-
--- ====================================================================
--- SEÇÃO: CASA RGB & REPETIÇÃO DE NOMES
--- ====================================================================
-CasasTab:AddSection({"Cores & Nome da Casa"})
-
-local colorsRGB = {
-    Color3.new(1, 0, 0), Color3.new(0, 1, 0), Color3.new(0, 0, 1),
-    Color3.new(1, 1, 0), Color3.new(0, 1, 1), Color3.new(1, 0, 1)
-}
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "Casa RGB",
-        Description = "Alterna cores em ciclo contínuo",
-        Default = false,
-        Callback = function(state)
-            isHouseRGBActive = state
-            if state then
-                task.spawn(function()
-                    local remote = getHouseRemote()
-                    if not remote then return end
-                    while isHouseRGBActive do
-                        for _, color in ipairs(colorsRGB) do
-                            if not isHouseRGBActive then return end
-                            pcall(function() remote:FireServer("ColorPickHouse", color) end)
-                            task.wait(0.8)
-                        end
-                    end
-                end)
-            end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddTextBox({
-        Name = "Nome 1 (Repetição)",
-        PlaceholderText = "Nick Casa 1",
-        Callback = function(text) House1 = text end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddTextBox({
-        Name = "Nome 2 (Repetição)",
-        PlaceholderText = "Nick Casa 2",
-        Callback = function(text) House2 = text end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddTextBox({
-        Name = "Nome 3 (Repetição)",
-        PlaceholderText = "Nick Casa 3",
-        Callback = function(text) House3 = text end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddToggle({
-        Name = "Repetir Nome da Casa",
-        Description = "Alterna os 3 nomes automaticamente",
-        Default = false,
-        Callback = function(state)
-            repeatNames = state
-            if state then
-                task.spawn(function()
-                    local re = game:GetService("ReplicatedStorage"):FindFirstChild("RE")
-                    local remoteCasa = re and re:FindFirstChild("1RPHous1eEven1t")
-                    while repeatNames do
-                        if remoteCasa then
-                            if House1 ~= "" then pcall(function() remoteCasa:FireServer("BusinessName", House1) end) task.wait(1) end
-                            if not repeatNames then break end
-                            if House2 ~= "" then pcall(function() remoteCasa:FireServer("BusinessName", House2) end) task.wait(1) end
-                            if not repeatNames then break end
-                            if House3 ~= "" then pcall(function() remoteCasa:FireServer("BusinessName", House3) end) task.wait(1) end
-                            if not repeatNames then break end
-                        else
-                            task.wait(1)
-                        end
-                    end
-                end)
-            end
-        end
-    })
-end)
--- ====================================================================
--- SEÇÃO: MÚSICA NA CASA
--- ====================================================================
-CasasTab:AddSection({"Música na Casa (Game Pass)"})
-
-local selectedMusic = ""
-local MusicsList = {
-    { Name = "Música 1", Id = 10561310081763 },
-    { Name = "Música 2", Id = 112651304685397 },
-    { Name = "Música 3", Id = 16190782181 },
-    { Name = "Música 4", Id = 1843497734 },
-}
-
-local MusicsNames = {}
-local MusicIds = {}
-for _, music in ipairs(MusicsList) do
-    table.insert(MusicsNames, music.Name)
-    if music.Id then MusicIds[music.Name] = music.Id end
-end
-
-pcall(function()
-    CasasTab:AddDropdown({
-        Name = "Selecionar Música",
-        Description = "Funciona com Game Pass",
-        Options = MusicsNames,
-        Default = "Selecione...",
-        Callback = function(Value) selectedMusic = Value end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddTextBox({
-        Name = "Insira o ID da Música",
-        PlaceholderText = "Ex: 74366765967475",
-        Callback = function(value)
-            local parsed = tonumber(value)
-            if parsed then selectedMusic = parsed end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Tocar Música",
-        Description = "Toca a música selecionada",
-        Callback = function()
-            local musicId = tonumber(selectedMusic) or MusicIds[selectedMusic]
-            if musicId then
-                local remote = getHouseRemote()
-                if remote then pcall(function() remote:FireServer("PickHouseMusicText", tostring(musicId)) end) end
-            end
-        end
-    })
-end)
-
-pcall(function()
-    CasasTab:AddButton({
-        Name = "Parar Música",
-        Description = "Para a reprodução de áudio",
-        Callback = function()
-            local remote = getHouseRemote()
-            if remote then pcall(function() remote:FireServer("PickingHouseMusicStop", "") end) end
-        end
-    })
-end)
 =======================================================================
 -- ABA: TELEPORTES 
 -- ====================================================================
