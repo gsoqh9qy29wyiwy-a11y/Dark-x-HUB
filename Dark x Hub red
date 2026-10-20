@@ -2213,8 +2213,6 @@ end)
 end
 })
 
-TabTroll:AddSection({Name = "Fling ônibus Teste"})
-
 
 Window:SelectTab(TabTroll)
 local Section = TrollTab:AddSection({"Funções"})
