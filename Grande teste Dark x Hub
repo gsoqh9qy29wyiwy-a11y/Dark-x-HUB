@@ -5703,3 +5703,38 @@ local Button = TabAntis:AddButton({("Anti Lag"), function()
         end
     end)
 end})
+-- ====================================================================
+-- ABA: LAG 
+-- ====================================================================
+TabLag:AddSection({ Name = "Shutdown Personalizado" })
+
+local function ShutdownLogic(loops)
+    for m = 1, loops do
+        vu8.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "FireHose")
+        pcall(function() vu7.Backpack.FireHose.ToolSound:FireServer("FireHose", "DestroyFireHose") end)
+    end
+    local oldcf = vu7.Character.HumanoidRootPart.CFrame
+    vu7.Character.HumanoidRootPart.CFrame = CFrame.new(999999999, -475, 999999999)
+    repeat task.wait() until not vu7.Character:FindFirstChild("HumanoidRootPart") or vu7.Character.HumanoidRootPart.Parent == nil
+    repeat task.wait() until vu7.Character:FindFirstChild("HumanoidRootPart")
+    vu7.Character.HumanoidRootPart.CFrame = oldcf
+    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Shutdown", Text = "Concluído!", Duration = 5})
+    for _, item in pairs(vu7.Backpack:GetChildren()) do if item.Name == "FireHose" then item.Parent = vu7.Character end end
+    task.wait(0.5)
+    vu7.Character.HumanoidRootPart.CFrame = CFrame.new(9999, -475, 9999)
+end
+
+TabLag:AddButton({ Name = "Shutdown Servidor", Callback = function() ShutdownLogic(495) end })
+TabLag:AddButton({ Name = "Shutdown Servidor (Erro Internet)", Callback = function() ShutdownLogic(535) end })
+TabLag:AddButton({ Name = "Shutdown Servidor (Timeout)", Callback = function() ShutdownLogic(635) end })
+-- ==================== VARIÁVEIS GLOBAIS ====================
+local Section = TabLag:AddSection({
+ Name = "Lag com Bomba"
+})
+
+
+
+TabLag:AddParagraph({ 
+ "Informação de Lag",
+ "O script começa a causar lag após 35 segundos"
+})                    
