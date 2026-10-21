@@ -1051,10 +1051,9 @@ task.spawn(function()
         end
     end
 end)
-
 -- ====================================================================
--- MOVIMENTAÇÃO DOS PROPS COM ÓRBITA FRENETICA (KILL / BRING / FLING)
--- Parâmetros da foto: Velocidade 100 | Distância 2 | Altura -1
+-- MOVIMENTAÇÃO DOS PROPS IDÊNTICA AO VÍDEO (ÓRBITA EM ANEL SINCRONIZADA)
+-- Parâmetros do vídeo: Velocidade 40 | Distância 2 | Altura -1
 -- ====================================================================
 task.spawn(function()
     local angle, tempoGeral = 0, 0
@@ -1079,13 +1078,13 @@ task.spawn(function()
 
         if #lista == 0 then continue end
 
-        -- Configuração baseada na sua foto: Velocidade 100, Distância 2, Altura -1
-        local orbitaSpeed = 8.5   -- Rotação de alta velocidade (equivalente a 100)
-        local orbitaDist = 2      -- Raio de 2 studs (rente ao corpo)
-        local orbitaAlt = -1      -- Altura -1 (na altura exata para forçar a sentar)
+        -- Configurações exatas do vídeo para os modos de ataque
+        local orbitaVelocidade = 4.5  -- Giro rápido e contínuo (equivalente aos sliders do vídeo)
+        local orbitaDistancia = 2     -- Raio 2 (bem colado no corpo)
+        local orbitaAltura = -1       -- Altura -1 (na altura ideal do assento)
 
-        angle = angle + (dt * orbitaSpeed)
-        tempoGeral = tempoGeral + dt * (orbitaSpeed * 2)
+        angle = angle + (dt * orbitaVelocidade)
+        tempoGeral = tempoGeral + dt * (orbitaVelocidade * 2)
         local total = #meusPropsCache
 
         local myChar = vu7.Character
@@ -1102,7 +1101,7 @@ task.spawn(function()
                     local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
                     local jaSentou = humAlvo and (humAlvo.SeatPart or humAlvo.Sit)
 
-                    -- 1. SE JÁ SENTOU, EXECUTA O MÉTODO ESCOLHIDO
+                    -- 1. SE O ALVO SENTOU, EXECUTA O COMANDO SELECIONADO:
                     if ModoFlingAtivo and jaSentou then
                         task.spawn(function()
                             pcall(remote.InvokeServer, remote, CFrame.new(CoordenadasFling))
@@ -1118,38 +1117,37 @@ task.spawn(function()
                             pcall(remote.InvokeServer, remote, myCF * CFrame.new(0, 0, -3)) 
                         end)
 
-                    -- 2. SE AINDA NÃO SENTOU (OU ESTÁ EM MODO FLING/KILL/BRING):
-                    -- ORBITA ULTRA-RÁPIDA COLADA NO ALVO COM PREVISÃO DE CORRIDA
+                    -- 2. SE NÃO SENTOU: CRIA A ÓRBITA IDÊNTICA AO VÍDEO
                     elseif ModoFlingAtivo or ModoKillAtivo or ModoAvancadoAtivo then
                         local vel = root.AssemblyLinearVelocity or root.Velocity
                         local isMoving = (humAlvo and humAlvo.MoveDirection.Magnitude > 0.05) or (vel.Magnitude > 1.5)
                         
-                        -- Centro da órbita: projeta à frente se estiver correndo
-                        local centroOrbita = root.Position
+                        -- Posição central da órbita (se o player correr, o anel vai um pouco à frente)
+                        local centro = root.Position
                         if isMoving then
-                            local avanco = math.clamp(vel.Magnitude * 0.25, 1.5, 6)
-                            centroOrbita = (rCF * CFrame.new(0, 0, -avanco)).Position
+                            local avanco = math.clamp(vel.Magnitude * 0.22, 1.2, 5)
+                            centro = (rCF * CFrame.new(0, 0, -avanco)).Position
                         end
 
-                        -- Distribui todos os props uniformemente em volta do círculo
+                        -- Distribuição simétrica em anel ao redor do alvo
                         local spacing = (math.pi * 2) / math.max(total, 1)
                         local fAngle = angle + (i * spacing)
 
-                        local propPos = centroOrbita + Vector3.new(
-                            math.cos(fAngle) * orbitaDist,
-                            orbitaAlt,
-                            math.sin(fAngle) * orbitaDist
+                        local propPos = centro + Vector3.new(
+                            math.cos(fAngle) * orbitaDistancia,
+                            orbitaAltura,
+                            math.sin(fAngle) * orbitaDistancia
                         )
 
-                        -- O prop orbita olhando para o centro do círculo com rotação agressiva
-                        local lookTarget = centroOrbita + Vector3.new(0, orbitaAlt, 0)
-                        local orbitCF = CFrame.lookAt(propPos, lookTarget) * CFrame.Angles(0, math.rad(angle * 100 % 360), 0)
+                        -- Todos os sofás virados diretamente para o centro, igual ao vídeo
+                        local olharPara = centro + Vector3.new(0, orbitaAltura, 0)
+                        local orbitCF = CFrame.lookAt(propPos, olharPara)
 
                         task.spawn(function()
                             pcall(remote.InvokeServer, remote, orbitCF)
                         end)
 
-                    -- 3. MODOS VISUAIS NORMAIS DO MENU (QUANDO NÃO ESTÁ EM MODO KILL/BRING/FLING)
+                    -- 3. MOVIMENTOS NORMAIS SELECIONADOS NO MENU DE PROPS
                     elseif PropMovementMode ~= "Nenhum" then
                         local cfg = ConfigsProps[PropMovementMode]
                         local tPos = rCF.Position
@@ -1159,6 +1157,7 @@ task.spawn(function()
 
                         if PropMovementMode == "Orbita" then
                             tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance)
+                            olharPara = rCF.Position + Vector3.new(0, cfg.Height, 0)
                         elseif PropMovementMode == "Aura" then
                             local o = math.sin(tempoGeral * 3 + i) * 1.5
                             tPos = rCF.Position + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance + (o * 0.2)), cfg.Height + o, math.sin(fAngle * 1.5) * (cfg.Distance + (o * 0.2)))
@@ -1186,6 +1185,7 @@ task.spawn(function()
                             tPos = (rCF * CFrame.new(0, cfg.Height + (math.sin(fAngle) * rp), -5)).Position + (rCF.RightVector * (math.cos(fAngle) * rp))
                             olharPara = pFrente + (rCF.LookVector * 20)
                         end
+
                         task.spawn(function() pcall(remote.InvokeServer, remote, CFrame.lookAt(tPos, olharPara)) end)
                     end
                 end
