@@ -1,0 +1,541 @@
+--[====================================================================--
+--                        DARK X HUB - BROOKHAVEN                       --
+--                          by HACKELINDOO                              --
+--====================================================================--
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
+-- Função que cria a tela de loading e retorna uma promise
+local function createLoadingScreen()
+    local promise = {}
+    promise.completed = false
+    promise.connection = nil
+    
+    pcall(function()
+        if CoreGui:FindFirstChild("LoadingScreen") then
+            CoreGui.LoadingScreen:Destroy()
+        end
+    end)
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "LoadingScreen"
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+    gui.Parent = CoreGui
+    pcall(function() syn.protect_gui(gui) end)
+
+    local frame = Instance.new("Frame")
+    frame.BackgroundColor3 = Color3.new(0, 0, 0)
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.Parent = gui
+
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 20, 40)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 10, 25))
+    })
+    gradient.Rotation = 45
+    gradient.Parent = frame
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.8, 0, 0.6, 0)
+    container.Position = UDim2.new(0.1, 0, 0.2, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = frame
+
+    local titleText = Instance.new("TextLabel")
+    titleText.Size = UDim2.new(1, 0, 0.3, 0)
+    titleText.Position = UDim2.new(0, 0, 0.1, 0)
+    titleText.TextColor3 = Color3.fromRGB(255, 0, 0)
+    titleText.TextStrokeTransparency = 0.3
+    titleText.TextStrokeColor3 = Color3.fromRGB(255, 0, 0)
+    titleText.BackgroundTransparency = 1
+    titleText.Font = Enum.Font.GothamBold
+    titleText.TextScaled = true
+    titleText.Text = "Dark x Hub"
+    titleText.TextSize = 32
+    titleText.ZIndex = 3
+    titleText.Parent = container
+
+    local percentText = Instance.new("TextLabel")
+    percentText.Size = UDim2.new(1, 0, 0.2, 0)
+    percentText.Position = UDim2.new(0, 0, 0.4, 0)
+    percentText.TextColor3 = Color3.fromRGB(255, 0, 0)
+    percentText.TextStrokeTransparency = 0.5
+    percentText.TextStrokeColor3 = Color3.fromRGB(255, 0, 0)
+    percentText.BackgroundTransparency = 1
+    percentText.Font = Enum.Font.GothamBold
+    percentText.TextScaled = true
+    percentText.Text = "0%"
+    percentText.TextSize = 24
+    percentText.ZIndex = 3
+    percentText.Parent = container
+
+    local barBG = Instance.new("Frame")
+    barBG.Size = UDim2.new(1, 0, 0.08, 0)
+    barBG.Position = UDim2.new(0, 0, 0.65, 0)
+    barBG.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    barBG.BorderSizePixel = 0
+    barBG.BackgroundTransparency = 0.3
+    barBG.ZIndex = 2
+    
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0.5, 0)
+    bgCorner.Parent = barBG
+    barBG.Parent = container
+
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.new(0, 0, 1, 0)
+    bar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    bar.BorderSizePixel = 0
+    bar.ZIndex = 3
+    
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(0.5, 0)
+    barCorner.Parent = bar
+    bar.Parent = barBG
+
+    local userText = Instance.new("TextLabel")
+    userText.Size = UDim2.new(1, 0, 0.15, 0)
+    userText.Position = UDim2.new(0, 0, 0.8, 0)
+    userText.TextColor3 = Color3.fromRGB(255, 0, 0)
+    userText.BackgroundTransparency = 1
+    userText.Font = Enum.Font.Gotham
+    userText.TextScaled = true
+    userText.Text = "Carregando: "..lp.Name.." ("..tostring(lp.AccountAge).." dias)"
+    userText.TextSize = 14
+    userText.ZIndex = 3
+    userText.Parent = container
+
+    local currentPercent = 0
+    local loadingTime = 4
+    local startTime = tick()
+    
+    local heartbeatConnection
+    heartbeatConnection = RunService.Heartbeat:Connect(function()
+        local elapsed = tick() - startTime
+        local progress = math.min(elapsed / loadingTime, 1)
+        currentPercent = math.floor(progress * 100)
+        percentText.Text = currentPercent .. "%"
+        bar.Size = UDim2.new(progress, 0, 1, 0)
+        
+        if progress >= 1 then
+            heartbeatConnection:Disconnect()
+            local fadeTween = TweenService:Create(frame, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 1
+            })
+            fadeTween:Play()
+            fadeTween.Completed:Connect(function()
+                percentText.Text = "100%"
+                task.wait(0.4)
+                
+                pcall(function()
+                    game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer("RolePlayName", "[ Dark User ]")
+                    game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer("RolePlayBio", "Criador: HACKELINDOO")
+                end)
+                
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Dark x Hub",
+                    Text = "Bem-vindo ao Dark x Hub!",
+                    Duration = 4
+                })
+
+                promise.completed = true
+                if gui then gui:Destroy() end
+            end)
+        end
+    end)
+
+    return promise
+end
+
+local function waitForPromise(promise)
+    while not promise.completed do
+        task.wait()
+    end
+end
+
+local loadingPromise = createLoadingScreen()
+waitForPromise(loadingPromise)
+
+-- ====================================================================
+-- 1. SERVIÇOS E VARIÁVEIS INICIAIS
+-- ====================================================================
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local Camera = Workspace.CurrentCamera
+
+local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
+
+local walkSpeed, jumpPower, gravity = 16, 50, 192.2
+local viewEnabled = false
+_G.SelectedPlayer = ""
+_G.AutoBringCouch = false
+_G.AutoKillCouch = false
+_G.AutoFlingCouch = false
+_G.AntiSit = false
+_G.AntiVoid = false
+_G.AntiFling = false
+_G.AntiLag = false 
+_G.RGBName = false
+_G.RainbowBio = false
+
+-- Variáveis globais para o Fling Ônibus
+local running = false
+local connection = nil
+local flingConnection = nil
+local flingToggle = nil
+local testSavedPosition = nil
+
+local function disableCarClient()
+    pcall(function()
+        local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
+        if playerScripts then
+            local carScript = playerScripts:FindFirstChild("CarClient") or playerScripts:FindFirstChild("VehicleClient")
+            if carScript and carScript:IsA("LocalScript") then
+                carScript.Disabled = true
+            end
+        end
+    end)
+end
+
+local function updateCamera()
+    pcall(function()
+        if viewEnabled then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = target.Character.Humanoid
+            end
+        else
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end)
+end
+
+-- Função para parar o Fling Ônibus e retornar à posição salva
+local function StopTestFling()
+    running = false
+    if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+    if connection then connection:Disconnect() connection = nil end
+
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character
+    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+
+    if RootPart and Humanoid then
+        Humanoid.PlatformStand = true
+        for _, obj in pairs(RootPart:GetChildren()) do
+            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+        end
+    end
+
+    pcall(function()
+        game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer("DeleteAllVehicles")
+    end)
+    task.wait(0.5)
+
+    if Vehicles then
+        local PCar = Vehicles:FindFirstChild(Player.Name.."Car")
+        if PCar and PCar.PrimaryPart then
+            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
+                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+            end
+        end
+    end
+    task.wait(0.5)
+
+    pcall(function()
+        if RootPart and testSavedPosition then
+            local bp = Instance.new("BodyPosition", RootPart)
+            bp.Position = testSavedPosition + Vector3.new(0, 3, 0)
+            bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            local bg = Instance.new("BodyGyro", RootPart)
+            bg.CFrame = RootPart.CFrame
+            bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            task.wait(1)
+            bp:Destroy()
+            bg:Destroy()
+        end
+        if Humanoid then
+            Humanoid.PlatformStand = false
+        end
+    end)
+end
+
+-- Função principal do Fling Ônibus
+local function flingWithBus(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character or not LocalPlayer.Character then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local myHRP = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not myHRP then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    
+    testSavedPosition = myHRP.Position
+
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1181.83, 76.08, -1158.83))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+    end)
+    task.wait(0.5)
+
+    disableCarClient()
+
+    local args = { [1] = "DeleteAllVehicles" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    args = { [1] = "PickingCar", [2] = "SchoolBus" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    task.wait(1)
+    local vehiclesFolder = Workspace:FindFirstChild("Vehicles")
+    if not vehiclesFolder then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local busName = LocalPlayer.Name .. "Car"
+    local bus = vehiclesFolder:FindFirstChild(busName)
+    if not bus then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1171.15, 79.45, -1166.2))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        humanoid:ChangeState(Enum.HumanoidStateType.Seated)
+    end)
+    local sitStart = tick()
+    repeat
+        task.wait()
+        if tick() - sitStart > 10 or not running then 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+    until humanoid.Sit
+
+    for _, part in ipairs(bus:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+            pcall(function() part:SetNetworkOwner(nil) end)
+        end
+    end
+
+    running = true
+    connection = RunService.Stepped:Connect(function()
+        if not running then return end
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end)
+
+    local startTime = tick()
+    local walkFlingInstancePlayer = nil
+
+    flingConnection = RunService.Heartbeat:Connect(function()
+        if not running then return end
+        if not targetPlayer or not targetPlayer.Character then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        local newTargetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local newTargetHumanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+        if not newTargetHRP or not newTargetHumanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        if not myHRP or not humanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+
+        local offset = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
+        pcall(function()
+            local targetPosition = newTargetHRP.Position + offset
+            bus:PivotTo(
+                CFrame.new(targetPosition) * CFrame.Angles(
+                    math.rad(Workspace.DistributedGameTime * 12000),
+                    math.rad(Workspace.DistributedGameTime * 15000),
+                    math.rad(Workspace.DistributedGameTime * 18000)
+                )
+            )
+        end)
+
+        local playerSeated = false
+        for _, seat in ipairs(bus:GetDescendants()) do
+            if (seat:IsA("Seat") or seat:IsA("VehicleSeat")) and seat.Name ~= "VehicleSeat" then
+                if seat.Occupant == newTargetHumanoid then
+                    playerSeated = true
+                    break
+                end
+            end
+        end
+
+        if playerSeated or tick() - startTime > 10 then
+            running = false
+            if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+            pcall(function()
+                bus:PivotTo(CFrame.new(Vector3.new(-59599.73, 2040070.50, -293391.16)))
+            end)
+
+            walkFlingInstancePlayer = Instance.new("BodyVelocity")
+            walkFlingInstancePlayer.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            walkFlingInstancePlayer.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 1000000 + Vector3.new(0, 1000000, 0)
+            walkFlingInstancePlayer.Parent = myHRP
+            task.wait(0.5)
+
+            disableCarClient()
+
+            local args = { [1] = "DeleteAllVehicles" }
+            pcall(function()
+                ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+            end)
+
+            if walkFlingInstancePlayer then
+                walkFlingInstancePlayer:Destroy()
+                for _, part in ipairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = true end
+                end
+            end
+
+            pcall(function()
+                myHRP.Anchored = true
+                myHRP.CFrame = CFrame.new(testSavedPosition + Vector3.new(0, 5, 0))
+                task.wait(0.2)
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.Anchored = false
+                if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+            end)
+
+            if flingToggle then flingToggle:Set(false) end
+        end
+    end)
+end
+
+-- Network Bypass
+if not getgenv().NetworkBypassed then
+    getgenv().NetworkBypassed = true
+    task.spawn(function()
+        while true do
+            pcall(function()
+                sethiddenproperty(vu7, "SimulationRadius", math.huge)
+            end)
+            vu10.Heartbeat:Wait()
+        end
+    end)
+end
+
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
+
+-- CRIAÇÃO DA JANELA
+local Window = redzlib:MakeWindow({
+    Title = "Dark x Hub",
+    SubTitle = "Brookhaven RP | by HACKELINDOO",
+    SaveFolder = "UnifiedHubConfig",
+    Size = UDim2.fromOffset(600, 400) -- Tamanho aumentado conforme solicitado anteriormente
+})
+
+Window:AddMinimizeButton({
+    Button = { 
+        Image = "rbxassetid://113088956809836", 
+        BackgroundTransparency = 0,
+        Size = UDim2.new(0, 50, 0, 50)
+    },
+    Corner = { CornerRadius = UDim.new(35, 1) },
+})
+
+local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
+local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
+local TrollTab = Window:MakeTab({ Title = "Troll Scripts", Icon = "rbxassetid://13364900349" })
+local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
+local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
+local TabTP = Window:MakeTab({" Teleportes", "map"})
+local Tab3 = Window:MakeTab({"Avatar", "shirt"})
+local TabAntis = Window:MakeTab({"Antis", "shield"})
+local TabLag = Window:MakeTab({"Lag Server", "bomb"})
+local Tab5 = Window:MakeTab({"Carro", "car"})
+local Tabscript = Window:MakeTab({"Scripts", "scroll"})
+local TabAudio = Window:MakeTab({"Audio All", "radio"})    
+local TabMusic = Window:MakeTab({"Music", "music"}) 
+local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
+local TabExpansao = Window:MakeTab({"Skybox", "home"})
+local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
+local ChildTab = Window:MakeTab({"Criança", "baby"})
+local TabAdmin = Window:MakeTab({"Admin👑", "home"})
+
+-- [ ABA: TROLL - ADICIONADO FLING ÔNIBUS COM TOGGLE ]
+_G.SelectedPlayer = ""
+TabTroll:AddSection({ "Fling Ônibus (Teste)" })
+
+local PlayerDrop = TabTroll:AddDropdown({
+    Name = "Lista de jogadores",
+    Options = updatePlayerList(),
+    Default = "Nenhum Jogador No Servidor",
+    Callback = function(v) 
+        _G.SelectedPlayer = v 
+    end
+})
+
+TabTroll:AddButton({
+    Name = "Atualizar Lista de jogadores", 
+    Callback = function() 
+        PlayerDrop:Set(updatePlayerList()) 
+    end
+})
+
+flingToggle = TabTroll:AddToggle({
+    Name = "Inicia Fling (Ônibus Teste)",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                if target then
+                    running = true
+                    task.spawn(function()
+                        flingWithBus(target)
+                    end)
+                else
+                    warn("Jogador não encontrado!")
+                    if flingToggle then flingToggle:Set(false) end
+                end
+            else
+                warn("Selecione um jogador primeiro!")
+                if flingToggle then flingToggle:Set(false) end
+            end
+        else
+            StopTestFling()
+        end
+    end
+})
+
+-- O restante do seu script permanece intacto...
+Window:SelectTab(TabTroll)
