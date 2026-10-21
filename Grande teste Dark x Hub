@@ -1052,34 +1052,156 @@ task.spawn(function()
     end
 end)
 
+-- ====================================================================
+-- MOVIMENTAÇÃO RÁPIDA DOS PROPS (GIRO FRENETICO + PREVISÃO DE CORRIDA)
+-- ====================================================================
 task.spawn(function()
+    local angle, tempoGeral = 0, 0
     while true do
-        if PropsActive and #meusPropsCache > 0 then
-            local tempoAtual = tick()
-            local propColorRemote = vu7:FindFirstChild("PlayerGui")
-                and vu7.PlayerGui:FindFirstChild("NoResetGUIHandler")
-                and vu7.PlayerGui.NoResetGUIHandler:FindFirstChild("PropColorPicker")
-                and vu7.PlayerGui.NoResetGUIHandler.PropColorPicker:FindFirstChild("SetColor")
+        local dt = task.wait(0.02) -- Frequência aumentada para alta velocidade de resposta
+        if (PropMovementMode == "Nenhum" and not ModoAvancadoAtivo and not ModoKillAtivo and not ModoFlingAtivo) or #meusPropsCache == 0 then
+            continue
+        end
 
-            for i, prop in ipairs(meusPropsCache) do
-                local remote = prop:FindFirstChild("ChangePropColor")
-                if remote then
-                    local bp = prop:FindFirstChildWhichIsA("BasePart")
-                    local color = Color3.fromHSV(((tempoAtual * WaveSpeed) + ((bp and bp.Position.X or i) * ColorSpread)) % 1, 1, 1)
-                    for _, part in ipairs(prop:GetDescendants()) do
-                        if part:IsA("BasePart") then part.Color = color end
-                    end
-                    task.spawn(function() pcall(remote.InvokeServer, remote, color) end)
+        local lista = {}
+        if selecionarTodosProps then
+            for _, p in ipairs(vu6:GetPlayers()) do
+                if p ~= vu7 and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(lista, p)
                 end
             end
-            
-            if propColorRemote then
-                pcall(function()
-                    propColorRemote:FireServer(Color3.fromHSV((tempoAtual * WaveSpeed) % 1, 1, 1))
-                end)
+        else
+            if jogadorSelecionadoProp and jogadorSelecionadoProp.Character and jogadorSelecionadoProp.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(lista, jogadorSelecionadoProp)
             end
         end
-        task.wait(0.05)
+
+        if #lista == 0 then continue end
+
+        local cfg = ConfigsProps[PropMovementMode]
+        local speedVal = cfg and cfg.Speed or 2
+        angle = angle + (dt * speedVal)
+        tempoGeral = tempoGeral + dt * (speedVal * 2)
+        local total = #meusPropsCache
+
+        local myChar = vu7.Character
+        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local myCF = myRoot and myRoot.CFrame or CFrame.new()
+
+        for i, prop in ipairs(meusPropsCache) do
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then
+                local pDono = lista[((i - 1) % #lista) + 1]
+                if pDono and pDono.Character and pDono.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = pDono.Character.HumanoidRootPart
+                    local rCF = root.CFrame
+                    local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
+
+                    -- 1. PREVISÃO DE MOVIMENTO (TELEPORTA NA FRENTE SE ESTIVER CORRENDO)
+                    local vel = root.AssemblyLinearVelocity or root.Velocity
+                    local isMoving = (humAlvo and humAlvo.MoveDirection.Magnitude > 0.05) or (vel.Magnitude > 1.5)
+                    local posAlvo
+
+                    if isMoving then
+                        -- Calcula a distância à frente com base na velocidade do jogador
+                        local distanciaFrente = math.clamp(vel.Magnitude * 0.32, 2.5, 9)
+                        local frenteCF = rCF * CFrame.new(0, -0.55, -distanciaFrente)
+                        posAlvo = frenteCF.Position
+                    else
+                        -- Fica exatamente na base dos pés para forçar o assento imediato
+                        posAlvo = root.Position + Vector3.new(0, -0.55, 0)
+                    end
+
+                    -- 2. GIRO FRENETICO / LOUCO EM ALTA VELOCIDADE
+                    local tGiro = Workspace.DistributedGameTime * 8500
+                    local giroLouco = CFrame.Angles(
+                        math.rad(tGiro * 1.3 % 360),
+                        math.rad(tGiro * 2.5 % 360),
+                        math.rad(tGiro * 0.9 % 360)
+                    )
+
+                    -- CFrame combinado com a posição preditiva e rotação extrema
+                    local sitCF = CFrame.new(posAlvo) * giroLouco
+
+                    local jaSentou = humAlvo and (humAlvo.SeatPart or humAlvo.Sit)
+
+                    -- 1. MODO FLING
+                    if ModoFlingAtivo then
+                        if jaSentou then
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, CFrame.new(CoordenadasFling))
+                            end)
+                        else
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, sitCF)
+                            end)
+                        end
+
+                    -- 2. MODO KILL (VOID)
+                    elseif ModoKillAtivo then
+                        if jaSentou then
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, CFrame.new(rCF.Position.X, -500, rCF.Position.Z))
+                            end)
+                        else
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, sitCF)
+                            end)
+                        end
+
+                    -- 3. MODO BRING
+                    elseif ModoAvancadoAtivo then
+                        if jaSentou then
+                            task.spawn(function() 
+                                pcall(remote.InvokeServer, remote, myCF * CFrame.new(0, 0, -3)) 
+                            end)
+                        else
+                            task.spawn(function() 
+                                pcall(remote.InvokeServer, remote, sitCF) 
+                            end)
+                        end
+
+                    -- 4. MODOS DE MOVIMENTO (ÓRBITA, AURA, ETC.)
+                    elseif cfg and PropMovementMode ~= "Nenhum" then
+                        local tPos = rCF.Position
+                        local olharPara = rCF.Position
+                        local spacing = (math.pi * 2) / math.max(total, 1)
+                        local fAngle = angle + (i * spacing)
+
+                        if PropMovementMode == "Orbita" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance)
+                        elseif PropMovementMode == "Aura" then
+                            local o = math.sin(tempoGeral * 3 + i) * 1.5
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance + (o * 0.2)), cfg.Height + o, math.sin(fAngle * 1.5) * (cfg.Distance + (o * 0.2)))
+                            olharPara = rCF.Position + Vector3.new(0, o, 0)
+                        elseif PropMovementMode == "Tremor" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tick() * 50 + i) * 0.8, math.cos(tick() * 55 + i) * 0.8, math.sin(tick() * 60 + i) * 0.8)
+                        elseif PropMovementMode == "Caotico" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tempoGeral + (i * 2)) * (cfg.Distance * 0.5), math.cos(tempoGeral * 1.8 + i) * 4, math.sin(tempoGeral * 1.3 + i) * (cfg.Distance * 0.5))
+                            olharPara = tPos + Vector3.new(math.sin(tempoGeral * 5), math.cos(tempoGeral * 5), math.sin(tempoGeral * 3))
+                        elseif PropMovementMode == "Estrela" then
+                            local e = cfg.Distance + (math.sin(tempoGeral * 2.5 + i) * (cfg.Distance * 0.4))
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * e, cfg.Height + (math.cos(fAngle) * 2), math.sin(fAngle) * e)
+                            olharPara = rCF.Position + Vector3.new(0, cfg.Height, 0)
+                        elseif PropMovementMode == "Alinhamento" then
+                            tPos = rCF.Position + (rCF.LookVector * (-5 - (i * cfg.Distance))) + Vector3.new(0, cfg.Height + (math.sin(tempoGeral + i) * 0.5), 0)
+                            olharPara = tPos - (rCF.LookVector * 100)
+                        elseif PropMovementMode == "Furacao" then
+                            local s = ((tempoGeral + (i * 2)) % 10) - 3
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = pFrente + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))), cfg.Height + s, math.sin(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))))
+                            olharPara = pFrente + Vector3.new(0, 10, 0)
+                        elseif PropMovementMode == "Portal" then
+                            local rp = cfg.Distance * 0.7
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = (rCF * CFrame.new(0, cfg.Height + (math.sin(fAngle) * rp), -5)).Position + (rCF.RightVector * (math.cos(fAngle) * rp))
+                            olharPara = pFrente + (rCF.LookVector * 20)
+                        end
+                        task.spawn(function() pcall(remote.InvokeServer, remote, CFrame.lookAt(tPos, olharPara)) end)
+                    end
+                end
+            end
+        end
     end
 end)
 
