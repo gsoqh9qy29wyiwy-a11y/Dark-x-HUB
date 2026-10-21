@@ -786,7 +786,51 @@ local function ExecutarFlingCouch(targetPlayer)
     
     repeat task.wait(0.05) until running == false
 end
-
+-- --- FUNÇÃO ANTI-LAG ---
+local backupTables = { Vehicles = {}, Canoes = {}, Jets = {}, Helis = {}, Balls = {} }
+local function AntiFlingLoop(name, getFolderFunc)
+    local active = false
+    task.spawn(function()
+        while true do
+            if active and vu7.Character then
+                local folder = getFolderFunc()
+                if folder then
+                    for _, item in ipairs(folder:GetChildren()) do
+                        local isMine = false
+                        if name == "Vehicles" then
+                            for _, seat in ipairs(item:GetDescendants()) do
+                                if (seat:IsA("VehicleSeat") or seat:IsA("Seat")) and seat.Occupant and seat.Occupant.Parent == vu7.Character then
+                                    isMine = true
+                                    break
+                                end
+                            end
+                        elseif name == "Canoes" then
+                            local owner = item:FindFirstChild("Owner")
+                            isMine = owner and owner.Value == vu7
+                        elseif name == "Jets" or name == "Helis" then
+                            isMine = item.Name == vu7.Name
+                        end
+                        if not isMine then
+                            table.insert(backupTables[name], item:Clone())
+                            item:Destroy()
+                        end
+                    end
+                end
+            end
+            task.wait(0.03)
+        end
+    end)
+    return function(state)
+        active = state
+        if not state then
+            for _, item in ipairs(backupTables[name]) do
+                local parentFolder = getFolderFunc()
+                if parentFolder then item.Parent = parentFolder end
+            end
+            backupTables[name] = {}
+        end
+    end
+end
 local function headsitOnPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local char = vu7.Character
