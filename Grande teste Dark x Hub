@@ -1415,7 +1415,7 @@ local function flingWithBus(targetPlayer)
 
             walkFlingInstancePlayer = Instance.new("BodyVelocity")
             walkFlingInstancePlayer.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            walkFlingInstancePlayer.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 1000000 + Vector3.new(0, 1000000, 0)
+            walkFlingInstancePlayer.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 1000 + Vector3.new(0, 1000, 0)
             walkFlingInstancePlayer.Parent = myHRP
             task.wait(0.5)
 
@@ -1479,9 +1479,11 @@ Window:AddMinimizeButton({
     Corner = { CornerRadius = UDim.new(35, 1) },
 })
 local Tab1 = Window:MakeTab({ Title = "Informações 1", Icon = "rbxassetid://15309138473"})
-local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
 local InfoTab = Window:MakeTab({Title = "Informações 2", Icon = "rbxassetid://15309138473"})
+local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
+local TrollTab = Window:MakeTab({ Title = "Troll Scripts", Icon = "rbxassetid://13364900349" })
 local PropsTab = Window:MakeTab({Title = "Props", Icon = "rbxassetid://10709810948"})
+local CasasTab = Window:MakeTab({Title = "Casas", Icon = "home"})
 
 -- ====================================================================
 -- ABA: CREDITS 
@@ -1495,7 +1497,7 @@ Tab1:AddDiscordInvite({
 })
 local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
 Tab1:AddParagraph({"Executor", executorName})
-Tab1:AddSection({"Versão do Hub 1.1"})
+Tab1:AddSection({"Versão do Hub V3"})
 Tab1:AddParagraph({"Criadores", "HACKELINDOO"})
 
 Tab1:AddButton({
@@ -2507,6 +2509,467 @@ flingToggle = TabTroll:AddToggle({
         end
     end
 })
+Window:SelectTab(TabTroll)
+local Section = TrollTab:AddSection({"Funções"})
+
+TrollTab:AddButton({
+    Name = "Puxar Parts",
+    Description = " Ativando isso você puxa Parts até o seu personagem",
+    Callback = function()
+        local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+
+local angle = 1
+local radius = 10
+local blackHoleActive = false
+
+local function setupPlayer()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    local Folder = Instance.new("Folder", Workspace)
+    local Part = Instance.new("Part", Folder)
+    local Attachment1 = Instance.new("Attachment", Part)
+    Part.Anchored = true
+    Part.CanCollide = false
+    Part.Transparency = 1
+
+    return humanoidRootPart, Attachment1
+end
+
+local humanoidRootPart, Attachment1 = setupPlayer()
+
+if not getgenv().Network then
+    getgenv().Network = {
+        BaseParts = {},
+        Velocity = Vector3.new(100, 100, 100)
+    }
+
+    Network.RetainPart = function(part)
+        if typeof(part) == "Instance" and part:IsA("BasePart") and part:IsDescendantOf(Workspace) then
+            table.insert(Network.BaseParts, part)
+            part.CustomPhysicalProperties = PhysicalProperties.new(80, 0, 0, 0, 0)
+            part.CanCollide = false
+        end
+    end
+
+    local function EnablePartControl()
+        LocalPlayer.ReplicationFocus = Workspace
+        RunService.Heartbeat:Connect(function()
+            sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
+            for _, part in pairs(Network.BaseParts) do
+                if part:IsDescendantOf(Workspace) then
+                    part.Velocity = Network.Velocity
+                end
+            end
+        end)
+    end
+
+    EnablePartControl()
+end
+
+local function ForcePart(v)
+    if v:IsA("Part") and not v.Anchored and not v.Parent:FindFirstChild("Humanoid") and not v.Parent:FindFirstChild("Head") and v.Name ~= "Handle" then
+        for _, x in next, v:GetChildren() do
+            if x:IsA("BodyAngularVelocity") or x:IsA("BodyForce") or x:IsA("BodyGyro") or x:IsA("BodyPosition") or x:IsA("BodyThrust") or x:IsA("BodyVelocity") or x:IsA("RocketPropulsion") then
+                x:Destroy()
+            end
+        end
+        if v:FindFirstChild("Attachment") then
+            v:FindFirstChild("Attachment"):Destroy()
+        end
+        if v:FindFirstChild("AlignPosition") then
+            v:FindFirstChild("AlignPosition"):Destroy()
+        end
+        if v:FindFirstChild("Torque") then
+            v:FindFirstChild("Torque"):Destroy()
+        end
+        v.CanCollide = false
+        
+        local Torque = Instance.new("Torque", v)
+        Torque.Torque = Vector3.new(100000000, 100000000, 100000000)
+        local AlignPosition = Instance.new("AlignPosition", v)
+        local Attachment2 = Instance.new("Attachment", v)
+        Torque.Attachment0 = Attachment2
+        AlignPosition.MaxForce = math.huge
+        AlignPosition.MaxVelocity = math.huge
+        AlignPosition.Responsiveness = 500
+        AlignPosition.Attachment0 = Attachment2
+        AlignPosition.Attachment1 = Attachment1
+    end
+end
+
+local function toggleBlackHole()
+    blackHoleActive = not blackHoleActive
+    if blackHoleActive then
+        for _, v in next, Workspace:GetDescendants() do
+            ForcePart(v)
+        end
+
+        Workspace.DescendantAdded:Connect(function(v)
+            if blackHoleActive then
+                ForcePart(v)
+            end
+        end)
+
+        spawn(function()
+            while blackHoleActive and RunService.RenderStepped:Wait() do
+                angle = angle + math.rad(2)
+
+                local offsetX = math.cos(angle) * radius
+                local offsetZ = math.sin(angle) * radius
+
+                Attachment1.WorldCFrame = humanoidRootPart.CFrame * CFrame.new(offsetX, 0, offsetZ)
+            end
+        end)
+    else
+        Attachment1.WorldCFrame = CFrame.new(0, -1000, 0)
+    end
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+    humanoidRootPart, Attachment1 = setupPlayer()
+    if blackHoleActive then
+        toggleBlackHole()
+    end
+end)
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/miroeramaa/TurtleLib/main/TurtleUiLib.lua"))()
+local window = library:Window("Projeto Darkzin")
+
+window:Slider("Radius Blackhole",1,100,10, function(Value)
+   radius = Value
+end)
+
+window:Toggle("Blackhole", true, function(Value)
+       if Value then
+            toggleBlackHole()
+        else
+            blackHoleActive = false
+        end
+end)
+
+spawn(function()
+    while true do
+        RunService.RenderStepped:Wait()
+        if blackHoleActive then
+            angle = angle + math.rad(angleSpeed)
+        end
+    end
+end)
+
+toggleBlackHole()
+    end
+})
+
+TrollTab:AddSection({ "Black Hole🕳" })
+TrollTab:AddButton({
+    Name = "Black Hole",
+    Description = "Para usar, escreva o nome do alvo que deseja . aperte no botão de bring",
+    Callback = function()
+        -- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+
+local Gui = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+local Box = Instance.new("TextBox")
+local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
+local Label = Instance.new("TextLabel")
+local UITextSizeConstraint_2 = Instance.new("UITextSizeConstraint")
+local Button = Instance.new("TextButton")
+local UITextSizeConstraint_3 = Instance.new("UITextSizeConstraint")
+
+--Properties:
+
+Gui.Name = "Gui"
+Gui.Parent = gethui()
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Main.Name = "Main"
+Main.Parent = Gui
+Main.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
+Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Main.BorderSizePixel = 0
+Main.Position = UDim2.new(0.335954279, 0, 0.542361975, 0)
+Main.Size = UDim2.new(0.240350261, 0, 0.166880623, 0)
+Main.Active = true
+Main.Draggable = true
+
+Box.Name = "Box"
+Box.Parent = Main
+Box.BackgroundColor3 = Color3.fromRGB(95, 95, 95)
+Box.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Box.BorderSizePixel = 0
+Box.Position = UDim2.new(0.0980926454, 0, 0.218712583, 0)
+Box.Size = UDim2.new(0.801089942, 0, 0.364963502, 0)
+Box.FontFace = Font.new("rbxasset://fonts/families/SourceSansSemibold.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+Box.PlaceholderText = "Name player"
+Box.Text = "DARK X HUB "
+Box.TextColor3 = Color3.fromRGB(255, 255, 255)
+Box.TextScaled = true
+Box.TextSize = 31.000
+Box.TextWrapped = true
+
+UITextSizeConstraint.Parent = Box
+UITextSizeConstraint.MaxTextSize = 31
+
+Label.Name = "Label"
+Label.Parent = Main
+Label.BackgroundColor3 = Color3.fromRGB(95, 95, 95)
+Label.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Label.BorderSizePixel = 0
+Label.Size = UDim2.new(1, 0, 0.160583943, 0)
+Label.FontFace = Font.new("rbxasset://fonts/families/Nunito.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+Label.Text = "Black Hole | Deve By: Carlolx777"
+Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+Label.TextScaled = true
+Label.TextSize = 14.000
+Label.TextWrapped = true
+
+UITextSizeConstraint_2.Parent = Label
+UITextSizeConstraint_2.MaxTextSize = 21
+
+Button.Name = "Button"
+Button.Parent = Main
+Button.BackgroundColor3 = Color3.fromRGB(95, 95, 95)
+Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Button.BorderSizePixel = 0
+Button.Position = UDim2.new(0.183284417, 0, 0.656760991, 0)
+Button.Size = UDim2.new(0.629427791, 0, 0.277372271, 0)
+Button.Font = Enum.Font.Nunito
+Button.Text = "Bring | Off"
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.TextScaled = true
+Button.TextSize = 28.000
+Button.TextWrapped = true
+
+UITextSizeConstraint_3.Parent = Button
+UITextSizeConstraint_3.MaxTextSize = 28
+
+-- Scripts:
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+
+local character
+local humanoidRootPart
+
+mainStatus = true
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if input.KeyCode == Enum.KeyCode.RightControl and not gameProcessedEvent then
+		mainStatus = not mainStatus
+		Main.Visible = mainStatus
+	end
+end)
+
+local Folder = Instance.new("Folder", Workspace)
+local Part = Instance.new("Part", Folder)
+local Attachment1 = Instance.new("Attachment", Part)
+Part.Anchored = true
+Part.CanCollide = false
+Part.Transparency = 1
+
+if not getgenv().Network then
+	getgenv().Network = {
+		BaseParts = {},
+		Velocity = Vector3.new(10000, 10000, 10000)
+	}
+
+	Network.RetainPart = function(Part)
+		if Part:IsA("BasePart") and Part:IsDescendantOf(Workspace) then
+			table.insert(Network.BaseParts, Part)
+			Part.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+			Part.CanCollide = false
+		end
+	end
+
+	local function EnablePartControl()
+		LocalPlayer.ReplicationFocus = Workspace
+		RunService.Heartbeat:Connect(function()
+			sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
+			for _, Part in pairs(Network.BaseParts) do
+				if Part:IsDescendantOf(Workspace) then
+					Part.Velocity = Network.Velocity
+				end
+			end
+		end)
+	end
+
+	EnablePartControl()
+end
+
+local function ForcePart(v)
+	if v:IsA("BasePart") and not v.Anchored and not v.Parent:FindFirstChildOfClass("Humanoid") and not v.Parent:FindFirstChild("Head") and v.Name ~= "Handle" then
+		for _, x in ipairs(v:GetChildren()) do
+			if x:IsA("BodyMover") or x:IsA("RocketPropulsion") then
+				x:Destroy()
+			end
+		end
+		if v:FindFirstChild("Attachment") then
+			v:FindFirstChild("Attachment"):Destroy()
+		end
+		if v:FindFirstChild("AlignPosition") then
+			v:FindFirstChild("AlignPosition"):Destroy()
+		end
+		if v:FindFirstChild("Torque") then
+			v:FindFirstChild("Torque"):Destroy()
+		end
+		v.CanCollide = false
+		local Torque = Instance.new("Torque", v)
+		Torque.Torque = Vector3.new(1000000000, 1000000000, 1000000000)
+		local AlignPosition = Instance.new("AlignPosition", v)
+		local Attachment2 = Instance.new("Attachment", v)
+		Torque.Attachment0 = Attachment2
+		AlignPosition.MaxForce = math.huge
+		AlignPosition.MaxVelocity = math.huge
+		AlignPosition.Responsiveness = 2000
+		AlignPosition.Attachment0 = Attachment2
+		AlignPosition.Attachment1 = Attachment1
+	end
+end
+
+local blackHoleActive = false
+local DescendantAddedConnection
+
+local function toggleBlackHole()
+	blackHoleActive = not blackHoleActive
+	if blackHoleActive then
+		Button.Text = "Bring | On"
+		for _, v in ipairs(Workspace:GetDescendants()) do
+			ForcePart(v)
+		end
+
+		DescendantAddedConnection = Workspace.DescendantAdded:Connect(function(v)
+			if blackHoleActive then
+				ForcePart(v)
+			end
+		end)
+
+		spawn(function()
+			while blackHoleActive and RunService.RenderStepped:Wait() do
+				Attachment1.WorldCFrame = humanoidRootPart.CFrame
+			end
+		end)
+	else
+		Button.Text = "Bring | Off"
+		if DescendantAddedConnection then
+			DescendantAddedConnection:Disconnect()
+		end
+	end
+end
+
+local function getPlayer(name)
+	local lowerName = string.lower(name)
+	for _, p in pairs(Players:GetPlayers()) do
+		local lowerPlayer = string.lower(p.Name)
+		if string.find(lowerPlayer, lowerName) then
+			return p
+		elseif string.find(string.lower(p.DisplayName), lowerName) then
+			return p
+		end
+	end
+end
+
+local player = nil
+
+local function VDOYZQL_fake_script() -- Box.Script 
+	local script = Instance.new('Script', Box)
+
+	script.Parent.FocusLost:Connect(function(enterPressed)
+		if enterPressed then
+			player = getPlayer(Box.Text)
+			if player then
+				Box.Text = player.Name
+				print("Player found:", player.Name)
+			else
+				print("Player not found")
+			end
+		end
+	end)
+end
+coroutine.wrap(VDOYZQL_fake_script)()
+local function JUBNQKI_fake_script() -- Button.Script 
+	local script = Instance.new('Script', Button)
+
+	script.Parent.MouseButton1Click:Connect(function()
+		if player then
+			character = player.Character or player.CharacterAdded:Wait()
+			humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+			toggleBlackHole()
+		else
+			print("Player is not selected")
+		end
+	end)
+end
+coroutine.wrap(JUBNQKI_fake_script)()
+    end
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local billboardGuis = {}
+local connections = {}
+local espEnabled = false
+local selectedColor = "RGB"
+local Section = TrollTab:AddSection({"ESP"})
+TrollTab:AddDropdown({
+    Name = "Cor do ESP",
+    Default = "RGB",
+    Options = {"RGB", "Branco", "Preto", "Vermelho", "Verde", "Azul", "Amarelo", "Rosa", "Roxo"},
+    Callback = function(value) selectedColor = value end
+})
+
+local function getESPColor()
+    if selectedColor == "RGB" then return Color3.fromHSV((tick() % 5) / 5, 1, 1) end
+    local cols = {Branco=Color3.new(1,1,1), Preto=Color3.new(0,0,0), Vermelho=Color3.new(1,0,0), Verde=Color3.new(0,1,0), Azul=Color3.new(0,0.6,1), Amarelo=Color3.new(1,1,0), Rosa=Color3.new(1,0.4,0.7), Roxo=Color3.new(0.5,0,1)}
+    return cols[selectedColor] or Color3.new(1,1,1)
+end
+
+local function updateESP(player)
+    if player == Players.LocalPlayer or not espEnabled then return end
+    local char = player.Character
+    if char and char:FindFirstChild("Head") then
+        if billboardGuis[player] then billboardGuis[player]:Destroy() end
+        local bill = Instance.new("BillboardGui", char.Head)
+        bill.Size = UDim2.new(0,200,0,50)
+        bill.AlwaysOnTop = true
+        bill.StudsOffset = Vector3.new(0,3,0)
+        local lab = Instance.new("TextLabel", bill)
+        lab.Size = UDim2.new(1,0,1,0)
+        lab.BackgroundTransparency = 1
+        lab.Text = player.Name .. " | " .. player.AccountAge .. "d"
+        lab.TextColor3 = getESPColor()
+        lab.Font = Enum.Font.SourceSansBold
+        lab.TextSize = 14
+        billboardGuis[player] = bill
+    end
+end
+
+TrollTab:AddToggle({
+    Name = "ESP Ativado",
+    Description = "Mostra nome e idade da conta dos jogadores.",
+    Default = false,
+    Callback = function(value)
+        espEnabled = value
+        if not value then
+            for _, v in pairs(billboardGuis) do v:Destroy() end
+            billboardGuis = {}
+        end
+    end
+})
+
+RunService.Heartbeat:Connect(function()
+    if espEnabled then
+        for _, p in pairs(Players:GetPlayers()) do updateESP(p) end
+    end
+end)
 -- ====================================================================
 -- ABA: INFORMAÇÕES 2
 -- ====================================================================
@@ -2551,6 +3014,14 @@ InfoTab:AddButton({
 -- ====================================================================
 -- ABA: PROPS (INTERFACE REDZLIB COMPATÍVEL)
 -- ====================================================================
+PropsTab:AddSection({"Vc pode usar a versão do script ou a do script Atual"})
+PropsTab:AddButton({
+    Name = "Dark x Hub Prop",
+    Description = "Brookhaven 🏡",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB/refs/heads/main/Dark%20x%20Hub%20testes"))()
+    end
+})
 
 PropsTab:AddSection({"Lista de Jogadores"})
 
@@ -2877,3 +3348,596 @@ CriarSecaoModo("Alinhamento", "Alinhamento", -10, 30, 2)
 CriarSecaoModo("Furacão", "Furacao", -10, 30, 4)
 CriarSecaoModo("Portal", "Portal", -10, 30, 4)
 
+-- ====================================================================
+-- ABA: CASAS 
+-- ====================================================================
+local SelectHouse = nil
+local HouseDropdown = nil
+local isViewActive = false
+local viewConnection = nil
+local espSingleConnection = nil
+local espAllConnection = nil
+
+local isHouseRGBActive = false
+local repeatNames = false
+local House1, House2, House3 = "", "", ""
+local selectedPlayerToBan = nil
+local blacklistActive = false
+
+local ghostToggles = {
+    houseColor = false,
+    curtains = false,
+    garageDoor = false
+}
+
+local function getHouseList()
+    local Tabela = {}
+    local lots = Workspace:FindFirstChild("001_Lots")
+    if lots then
+        for _, House in ipairs(lots:GetChildren()) do
+            if House.Name ~= "For Sale" and House:IsA("Model") then
+                table.insert(Tabela, House.Name)
+            end
+        end
+    end
+    return Tabela
+end
+
+local function getSelectedHouse()
+    if SelectHouse and Workspace:FindFirstChild("001_Lots") then
+        return Workspace["001_Lots"]:FindFirstChild(tostring(SelectHouse))
+    end
+    return nil
+end
+
+local function getHouseRemote()
+    local re = ReplicatedStorage:FindFirstChild("RE")
+    return re and re:FindFirstChild("1Player1sHous1e")
+end
+
+local function getHouseOwnerPlayer()
+    local house = getSelectedHouse()
+    if house then
+        local ownerVal = house:FindFirstChild("Owner") or house:FindFirstChild("HouseOwner")
+        if ownerVal and ownerVal.Value then
+            local ownerName = tostring(ownerVal.Value)
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Name == ownerName or player.DisplayName == ownerName then
+                    return player
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function removerESP(container)
+    if container then
+        for _, obj in pairs(container:GetDescendants()) do
+            if obj:IsA("Highlight") and obj.Name == "SafeESP" then
+                obj:Destroy()
+            end
+        end
+    end
+end
+
+-- SEÇÃO: SELEÇÃO & NAVEGAÇÃO
+CasasTab:AddSection({"Seleção & Navegação"})
+
+pcall(function()
+    HouseDropdown = CasasTab:AddDropdown({
+        Name = "Selecione a Casa",
+        Description = "Lista de casas",
+        Options = getHouseList(),
+        Default = "...",
+        Callback = function(Value)
+            SelectHouse = Value
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Atualizar Lista de Casas",
+        Description = "Atualiza a lista de casas",
+        Callback = function()
+            local novaLista = getHouseList()
+            if HouseDropdown then
+                pcall(function() HouseDropdown:Set(novaLista) end)
+            end
+            ModernNotify("Casas", "Lista de casas atualizada!", 2.5, "info")
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Ver Dono da Casa Selecionada",
+        Description = "Mostra o nick e a foto do dono da casa",
+        Callback = function()
+            local targetOwner = getHouseOwnerPlayer()
+            if targetOwner then
+                local thumbUrl = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(targetOwner.UserId) .. "&w=420&h=420"
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Dono: " .. targetOwner.DisplayName,
+                    Text = "Nick: @" .. targetOwner.Name,
+                    Icon = thumbUrl,
+                    Duration = 5
+                })
+            else
+                ModernNotify("Aviso", "Dono não encontrado ou casa sem dono.", 3, "warn")
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: CÂMERA / VIEW PLAYER
+CasasTab:AddSection({"Câmera / View Player"})
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Visualizar Dono da Casa (View)",
+        Description = "Assista o dono da casa selecionada em tempo real",
+        Default = false,
+        Callback = function(Value)
+            isViewActive = Value
+            if Value then
+                viewConnection = RunService.RenderStepped:Connect(function()
+                    if isViewActive then
+                        local targetOwner = getHouseOwnerPlayer()
+                        if targetOwner and targetOwner.Character and targetOwner.Character:FindFirstChild("Humanoid") then
+                            Camera.CameraSubject = targetOwner.Character.Humanoid
+                        end
+                    end
+                end)
+
+                local targetOwner = getHouseOwnerPlayer()
+                if targetOwner then
+                    ModernNotify("View Ativado", "Observando: " .. targetOwner.Name, 3, "info")
+                else
+                    ModernNotify("Aviso", "Casa sem dono ou jogador offline.", 3, "warn")
+                end
+            else
+                if viewConnection then
+                    viewConnection:Disconnect()
+                    viewConnection = nil
+                end
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                    Camera.CameraSubject = LocalPlayer.Character.Humanoid
+                end
+                ModernNotify("View Desativado", "Câmera restaurada para seu personagem.", 3, "info")
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: TELEPORTES
+CasasTab:AddSection({"Teleportes"})
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Teleportar para Casa",
+        Description = "Teleporta para casa selecionada",
+        Callback = function()
+            local House = getSelectedHouse()
+            if House and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(House.WorldPivot.Position)
+            end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Teleportar para Cofre (+ Equipar Bomba)",
+        Description = "Teleporta para o cofre e equipa a bomba",
+        Callback = function()
+            local House = getSelectedHouse()
+            local character = LocalPlayer.Character
+
+            if House and House:FindFirstChild("HousePickedByPlayer") and character and character:FindFirstChild("HumanoidRootPart") then
+                local safe = House.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
+                if safe then
+                    character.HumanoidRootPart.CFrame = CFrame.new(safe.WorldPivot.Position)
+
+                    local backpack = LocalPlayer:FindFirstChild("Backpack")
+                    if backpack then
+                        local bomb = backpack:FindFirstChild("Bomb") or backpack:FindFirstChild("bomba")
+                        if bomb and character:FindFirstChild("Humanoid") then
+                            character.Humanoid:EquipTool(bomb)
+                            ModernNotify("Bomba Equipada", "Bomba colocada na mão!", 3, "success")
+                        else
+                            ModernNotify("Teleportado", "Pegue a bomba na mochila para equipar.", 3, "info")
+                        end
+                    end
+                else
+                    ModernNotify("Aviso", "Cofre não encontrado nesta casa.", 3, "warn")
+                end
+            else
+                ModernNotify("Aviso", "Casa selecionada inválida ou sem dono.", 3, "warn")
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: UNBAN
+CasasTab:AddSection({"Remover Banimento"})
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Remover Ban de Todas as Casas Manual",
+        Description = "Tenta remover o ban de todas as casas",
+        Callback = function()
+            local successCount = 0
+            local failCount = 0
+            for i = 1, 37 do
+                local bannedBlock = Workspace:FindFirstChild("BannedBlock" .. i, true)
+                if bannedBlock then
+                    local success = pcall(function() bannedBlock:Destroy() end)
+                    if success then successCount = successCount + 1 else failCount = failCount + 1 end
+                end
+            end
+            for _, house in pairs(Workspace:GetDescendants()) do
+                if house.Name:match("BannedBlock") then
+                    local success = pcall(function() house:Destroy() end)
+                    if success then successCount = successCount + 1 else failCount = failCount + 1 end
+                end
+            end
+            if successCount > 0 then
+                ModernNotify("Sucesso", "Bans removidos de " .. successCount .. " casas!", 4, "success")
+            else
+                ModernNotify("Aviso", "Nenhum ban encontrado para remover.", 3, "info")
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: VISUAIS (ESP)
+CasasTab:AddSection({"Visuais (ESP)"})
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "ESP Cofre (Casa Selecionada)",
+        Description = "Destaca o cofre da casa selecionada",
+        Default = false,
+        Callback = function(Value)
+            if Value then
+                espSingleConnection = RunService.Heartbeat:Connect(function()
+                    local house = getSelectedHouse()
+                    if house and house:FindFirstChild("HousePickedByPlayer") then
+                        local safe = house.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
+                        if safe and not safe:FindFirstChild("SafeESP") then
+                            local highlight = Instance.new("Highlight")
+                            highlight.Name = "SafeESP"
+                            highlight.FillColor = Color3.fromRGB(255, 215, 0)
+                            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            highlight.Parent = safe
+                        end
+                    end
+                end)
+            else
+                if espSingleConnection then
+                    espSingleConnection:Disconnect()
+                    espSingleConnection = nil
+                end
+                local house = getSelectedHouse()
+                if house then removerESP(house) end
+            end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "ESP Todos os Cofres",
+        Description = "Destaca os cofres de todas as casas do mapa",
+        Default = false,
+        Callback = function(Value)
+            if Value then
+                espAllConnection = RunService.Heartbeat:Connect(function()
+                    local lots = Workspace:FindFirstChild("001_Lots")
+                    if lots then
+                        for _, house in pairs(lots:GetChildren()) do
+                            if house:FindFirstChild("HousePickedByPlayer") then
+                                local safe = house.HousePickedByPlayer.HouseModel:FindFirstChild("001_Safe")
+                                if safe and not safe:FindFirstChild("SafeESP") then
+                                    local highlight = Instance.new("Highlight")
+                                    highlight.Name = "SafeESP"
+                                    highlight.FillColor = Color3.fromRGB(255, 140, 0)
+                                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                    highlight.Parent = safe
+                                end
+                            end
+                        end
+                    end
+                end)
+            else
+                if espAllConnection then
+                    espAllConnection:Disconnect()
+                    espAllConnection = nil
+                end
+                local lots = Workspace:FindFirstChild("001_Lots")
+                if lots then removerESP(lots) end
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: BANIR JOGADORES
+CasasTab:AddSection({"Banir Jogadores"})
+
+local PlayersBanDropdown = nil
+
+pcall(function()
+    PlayersBanDropdown = CasasTab:AddDropdown({
+        Name = "Jogadores",
+        Description = "Selecione o jogador para banir",
+        Options = {},
+        Default = "Selecione...",
+        Callback = function(playerName)
+            selectedPlayerToBan = Players:FindFirstChild(playerName)
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Atualizar Lista de Jogadores",
+        Description = "Atualiza a lista com jogadores do servidor",
+        Callback = function()
+            local novaTabela = {}
+            for _, v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer then
+                    table.insert(novaTabela, v.Name)
+                end
+            end
+            if PlayersBanDropdown then
+                pcall(function() PlayersBanDropdown:Set(novaTabela) end)
+            end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Auto Banimento",
+        Description = "Bane o jogador de todas as casas continuamente",
+        Default = false,
+        Callback = function(state)
+            blacklistActive = state
+            if state then
+                task.spawn(function()
+                    while blacklistActive and selectedPlayerToBan do
+                        local lots = Workspace:FindFirstChild("001_Lots")
+                        if lots then
+                            for _, casa in pairs(lots:GetChildren()) do
+                                local permissao = casa:FindFirstChild("HousePickedByPlayer")
+                                    and casa.HousePickedByPlayer:FindFirstChild("HouseModel")
+                                    and casa.HousePickedByPlayer.HouseModel:FindFirstChild("Permissions:Disallow")
+
+                                if permissao then
+                                    pcall(function() permissao:FireServer(selectedPlayerToBan) end)
+                                end
+                            end
+                        end
+                        task.wait(1)
+                    end
+                end)
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: CASA ASSOMBRADA
+CasasTab:AddSection({"Casa Assombrada"})
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Roleta Cor Da Casa",
+        Description = "Alterna cores aleatórias na casa continuamente",
+        Default = false,
+        Callback = function(state)
+            ghostToggles.houseColor = state
+            if state then
+                task.spawn(function()
+                    while ghostToggles.houseColor do
+                        local remote = getHouseRemote()
+                        if remote then
+                            local randColor = Color3.new(math.random(), math.random(), math.random())
+                            pcall(function() remote:FireServer("ColorPickHouse", randColor) end)
+                        end
+                        task.wait(2)
+                    end
+                end)
+            end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Roleta Cortinas",
+        Description = "Abre e fecha as cortinas continuamente",
+        Default = false,
+        Callback = function(state)
+            ghostToggles.curtains = state
+            if state then
+                task.spawn(function()
+                    while ghostToggles.curtains do
+                        local remote = getHouseRemote()
+                        if remote then pcall(function() remote:FireServer("Curtains") end) end
+                        task.wait(1.5)
+                    end
+                end)
+            end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Roleta Porta da Garagem",
+        Description = "Abre e fecha a garagem continuamente",
+        Default = false,
+        Callback = function(state)
+            ghostToggles.garageDoor = state
+            if state then
+                task.spawn(function()
+                    while ghostToggles.garageDoor do
+                        local remote = getHouseRemote()
+                        if remote then pcall(function() remote:FireServer("GarageDoor") end) end
+                        task.wait(5)
+                    end
+                end)
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: CASA RGB & REPETIÇÃO DE NOMES
+CasasTab:AddSection({"Cores & Nome da Casa"})
+
+local colorsRGB = {
+    Color3.new(1, 0, 0), Color3.new(0, 1, 0), Color3.new(0, 0, 1),
+    Color3.new(1, 1, 0), Color3.new(0, 1, 1), Color3.new(1, 0, 1)
+}
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Casa RGB",
+        Description = "Alterna cores em ciclo contínuo",
+        Default = false,
+        Callback = function(state)
+            isHouseRGBActive = state
+            if state then
+                task.spawn(function()
+                    local remote = getHouseRemote()
+                    if not remote then return end
+                    while isHouseRGBActive do
+                        for _, color in ipairs(colorsRGB) do
+                            if not isHouseRGBActive then return end
+                            pcall(function() remote:FireServer("ColorPickHouse", color) end)
+                            task.wait(0.8)
+                        end
+                    end
+                end)
+            end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddTextBox({
+        Name = "Nome 1 (Repetição)",
+        PlaceholderText = "Nick Casa 1",
+        Callback = function(text) House1 = text end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddTextBox({
+        Name = "Nome 2 (Repetição)",
+        PlaceholderText = "Nick Casa 2",
+        Callback = function(text) House2 = text end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddTextBox({
+        Name = "Nome 3 (Repetição)",
+        PlaceholderText = "Nick Casa 3",
+        Callback = function(text) House3 = text end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddToggle({
+        Name = "Repetir Nome da Casa",
+        Description = "Alterna os 3 nomes automaticamente",
+        Default = false,
+        Callback = function(state)
+            repeatNames = state
+            if state then
+                task.spawn(function()
+                    local remoteCasa = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1RPHous1eEven1t")
+                    while repeatNames do
+                        if remoteCasa then
+                            if House1 ~= "" then pcall(function() remoteCasa:FireServer("BusinessName", House1) end) task.wait(1) end
+                            if not repeatNames then break end
+                            if House2 ~= "" then pcall(function() remoteCasa:FireServer("BusinessName", House2) end) task.wait(1) end
+                            if not repeatNames then break end
+                            if House3 ~= "" then pcall(function() remoteCasa:FireServer("BusinessName", House3) end) task.wait(1) end
+                            if not repeatNames then break end
+                        else
+                            task.wait(1)
+                        end
+                    end
+                end)
+            end
+        end
+    })
+end)
+
+-- SEÇÃO: MÚSICA NA CASA
+CasasTab:AddSection({"Música na Casa (Game Pass)"})
+
+local selectedMusic = ""
+local MusicsList = {
+    { Name = "Música 1", Id = 10561310081763 },
+    { Name = "Música 2", Id = 112651304685397 },
+    { Name = "Música 3", Id = 16190782181 },
+    { Name = "Música 4", Id = 1843497734 },
+}
+
+local MusicsNames = {}
+local MusicIds = {}
+for _, music in ipairs(MusicsList) do
+    table.insert(MusicsNames, music.Name)
+    if music.Id then MusicIds[music.Name] = music.Id end
+end
+
+pcall(function()
+    CasasTab:AddDropdown({
+        Name = "Selecionar Música",
+        Description = "Funciona com Game Pass",
+        Options = MusicsNames,
+        Default = "Selecione...",
+        Callback = function(Value) selectedMusic = Value end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddTextBox({
+        Name = "Insira o ID da Música",
+        PlaceholderText = "Ex: 74366765967475",
+        Callback = function(value)
+            local parsed = tonumber(value)
+            if parsed then selectedMusic = parsed end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Tocar Música",
+        Description = "Toca a música selecionada",
+        Callback = function()
+            local musicId = tonumber(selectedMusic) or MusicIds[selectedMusic]
+            if musicId then
+                local remote = getHouseRemote()
+                if remote then pcall(function() remote:FireServer("PickHouseMusicText", tostring(musicId)) end) end
+            end
+        end
+    })
+end)
+
+pcall(function()
+    CasasTab:AddButton({
+        Name = "Parar Música",
+        Description = "Para a reprodução de áudio",
+        Callback = function()
+            local remote = getHouseRemote()
+            if remote then pcall(function() remote:FireServer("PickingHouseMusicStop", "") end) end
+        end
+    })
+end)
