@@ -1193,6 +1193,274 @@ task.spawn(function()
         end
     end
 end)
+-- Variáveis globais para o Fling Ônibus
+local running = false
+local connection = nil
+local flingConnection = nil
+local flingToggle = nil
+local testSavedPosition = nil
+
+local function disableCarClient()
+    pcall(function()
+        local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
+        if playerScripts then
+            local carScript = playerScripts:FindFirstChild("CarClient") or playerScripts:FindFirstChild("VehicleClient")
+            if carScript and carScript:IsA("LocalScript") then
+                carScript.Disabled = true
+            end
+        end
+    end)
+end
+
+local function updateCamera()
+    pcall(function()
+        if viewEnabled then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = target.Character.Humanoid
+            end
+        else
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end)
+end
+
+-- Função para parar o Fling Ônibus e retornar à posição salva
+local function StopTestFling()
+    running = false
+    if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+    if connection then connection:Disconnect() connection = nil end
+
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character
+    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+
+    if RootPart and Humanoid then
+        Humanoid.PlatformStand = true
+        for _, obj in pairs(RootPart:GetChildren()) do
+            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+        end
+    end
+
+    pcall(function()
+        game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer("DeleteAllVehicles")
+    end)
+    task.wait(0.5)
+
+    if Vehicles then
+        local PCar = Vehicles:FindFirstChild(Player.Name.."Car")
+        if PCar and PCar.PrimaryPart then
+            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
+                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+            end
+        end
+    end
+    task.wait(0.5)
+
+    pcall(function()
+        if RootPart and testSavedPosition then
+            local bp = Instance.new("BodyPosition", RootPart)
+            bp.Position = testSavedPosition + Vector3.new(0, 3, 0)
+            bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            local bg = Instance.new("BodyGyro", RootPart)
+            bg.CFrame = RootPart.CFrame
+            bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            task.wait(1)
+            bp:Destroy()
+            bg:Destroy()
+        end
+        if Humanoid then
+            Humanoid.PlatformStand = false
+        end
+    end)
+end
+
+-- Função principal do Fling Ônibus
+local function flingWithBus(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character or not LocalPlayer.Character then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local myHRP = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not myHRP then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    
+    testSavedPosition = myHRP.Position
+
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1181.83, 76.08, -1158.83))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+    end)
+    task.wait(0.5)
+
+    disableCarClient()
+
+    local args = { [1] = "DeleteAllVehicles" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    args = { [1] = "PickingCar", [2] = "SchoolBus" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    task.wait(1)
+    local vehiclesFolder = Workspace:FindFirstChild("Vehicles")
+    if not vehiclesFolder then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local busName = LocalPlayer.Name .. "Car"
+    local bus = vehiclesFolder:FindFirstChild(busName)
+    if not bus then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1171.15, 79.45, -1166.2))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        humanoid:ChangeState(Enum.HumanoidStateType.Seated)
+    end)
+    local sitStart = tick()
+    repeat
+        task.wait()
+        if tick() - sitStart > 10 or not running then 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+    until humanoid.Sit
+
+    for _, part in ipairs(bus:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+            pcall(function() part:SetNetworkOwner(nil) end)
+        end
+    end
+
+    running = true
+    connection = RunService.Stepped:Connect(function()
+        if not running then return end
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end)
+
+    local startTime = tick()
+    local walkFlingInstancePlayer = nil
+
+    flingConnection = RunService.Heartbeat:Connect(function()
+        if not running then return end
+        if not targetPlayer or not targetPlayer.Character then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        local newTargetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local newTargetHumanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+        if not newTargetHRP or not newTargetHumanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        if not myHRP or not humanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+
+        local offset = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
+        pcall(function()
+            local targetPosition = newTargetHRP.Position + offset
+            bus:PivotTo(
+                CFrame.new(targetPosition) * CFrame.Angles(
+                    math.rad(Workspace.DistributedGameTime * 12000),
+                    math.rad(Workspace.DistributedGameTime * 15000),
+                    math.rad(Workspace.DistributedGameTime * 18000)
+                )
+            )
+        end)
+
+        local playerSeated = false
+        for _, seat in ipairs(bus:GetDescendants()) do
+            if (seat:IsA("Seat") or seat:IsA("VehicleSeat")) and seat.Name ~= "VehicleSeat" then
+                if seat.Occupant == newTargetHumanoid then
+                    playerSeated = true
+                    break
+                end
+            end
+        end
+
+        if playerSeated or tick() - startTime > 10 then
+            running = false
+            if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+            pcall(function()
+                bus:PivotTo(CFrame.new(Vector3.new(-59599.73, 2040070.50, -293391.16)))
+            end)
+
+            walkFlingInstancePlayer = Instance.new("BodyVelocity")
+            walkFlingInstancePlayer.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            walkFlingInstancePlayer.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 1000000 + Vector3.new(0, 1000000, 0)
+            walkFlingInstancePlayer.Parent = myHRP
+            task.wait(0.5)
+
+            disableCarClient()
+
+            local args = { [1] = "DeleteAllVehicles" }
+            pcall(function()
+                ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+            end)
+
+            if walkFlingInstancePlayer then
+                walkFlingInstancePlayer:Destroy()
+                for _, part in ipairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = true end
+                end
+            end
+
+            pcall(function()
+                myHRP.Anchored = true
+                myHRP.CFrame = CFrame.new(testSavedPosition + Vector3.new(0, 5, 0))
+                task.wait(0.2)
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.Anchored = false
+                if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+            end)
+
+            if flingToggle then flingToggle:Set(false) end
+        end
+    end)
+end
+
+-- Network Bypass
+if not getgenv().NetworkBypassed then
+    getgenv().NetworkBypassed = true
+    task.spawn(function()
+        while true do
+            pcall(function()
+                sethiddenproperty(vu7, "SimulationRadius", math.huge)
+            end)
+            vu10.Heartbeat:Wait()
+        end
+    end)
+end
+
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
 
 --  3. JANELA PRINCIPAL
@@ -2177,6 +2445,43 @@ TabTroll:AddButton({
     end
 })
 
+-- ====================================================================
+-- TOGGLE: VISUALIZAR JOGADOR (VIEW)
+-- ====================================================================
+local viewPlayerConnection = nil
+TabTroll:AddToggle({
+    Name = "Visualizar Jogador (View)",
+    Description = "Observa o jogador selecionado em tempo real",
+    Default = false,
+    Callback = function(state)
+        viewEnabled = state
+        if state then
+            if viewPlayerConnection then
+                viewPlayerConnection:Disconnect()
+            end
+            
+            viewPlayerConnection = RunService.RenderStepped:Connect(function()
+                if viewEnabled and _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                    local target = Players:FindFirstChild(_G.SelectedPlayer)
+                    if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                        Camera.CameraSubject = target.Character.Humanoid
+                    end
+                end
+            end)
+        else
+            if viewPlayerConnection then
+                viewPlayerConnection:Disconnect()
+                viewPlayerConnection = nil
+            end
+            
+            -- Restaura a câmera para o seu personagem
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                Camera.CameraSubject = LocalPlayer.Character.Humanoid
+            end
+        end
+    end
+})
+
 flingToggle = TabTroll:AddToggle({
     Name = "Inicia Fling (Ônibus Teste)",
     Default = false,
@@ -2202,7 +2507,6 @@ flingToggle = TabTroll:AddToggle({
         end
     end
 })
-
 -- ====================================================================
 -- ABA: INFORMAÇÕES 2
 -- ====================================================================
