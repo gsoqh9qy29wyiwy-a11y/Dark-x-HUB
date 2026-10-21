@@ -1210,10 +1210,998 @@ Window:AddMinimizeButton({
     },
     Corner = { CornerRadius = UDim.new(35, 1) },
 })
-
+local Tab1 = Window:MakeTab({ Title = "Informações 1", Icon = "rbxassetid://15309138473"})
+local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
 local InfoTab = Window:MakeTab({Title = "Informações 2", Icon = "rbxassetid://15309138473"})
 local PropsTab = Window:MakeTab({Title = "Props", Icon = "rbxassetid://10709810948"})
-local ConfigTab = Window:MakeTab({Title = "Config1", Icon = "settings"})
+
+-- ====================================================================
+-- ABA: CREDITS 
+-- ====================================================================
+Tab1:AddSection({"Informação do Hub"})
+Tab1:AddDiscordInvite({
+    Name = "Dark x hub",
+    Description = "Servidor oficial",
+    Logo = "rbxassetid://113088956809836",
+    Invite = "",
+})
+local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
+Tab1:AddParagraph({"Executor", executorName})
+Tab1:AddSection({"Versão do Hub 1.1"})
+Tab1:AddParagraph({"Criadores", "HACKELINDOO"})
+
+Tab1:AddButton({
+    Name = "Copiar @ do Tik Tok",
+    Callback = function()
+        setclipboard("@HACKELINDOO") -- Copia o user
+        
+        -- Opcional: Notificação para avisar que copiou
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Tik Tok @HACKELINDOO copiado!",
+            Duration = 3
+        })
+    end
+})
+
+Tab1:AddButton({
+    Name = "Copiar Link do Tik Tok",
+    Callback = function()
+        setclipboard("https://www.instagram.com/carlolx7/") -- Copia o link completo
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Link do Tik Tok copiado!",
+            Duration = 3
+        })
+    end
+})
+TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
+
+local PlayerDrop = TabTroll:AddDropdown({
+    Name = "Lista de jogadores",
+    Options = updatePlayerList(),
+    Default = "Nenhum Jogador No Servidor",
+    Callback = function(v) 
+        _G.SelectedPlayer = v 
+    end
+})
+
+TabTroll:AddButton({
+    Name = "Atualizar Lista de jogadores", 
+    Callback = function() 
+        PlayerDrop:Set(updatePlayerList()) 
+    end
+})
+
+TabTroll:AddToggle({Name = "View Player (Ver Jogador)", Callback = function(s) viewEnabled = s updateCamera() end})
+
+TabTroll:AddButton({Name = "Teleporta para o jogador", Callback = function()
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if T and T.Character then vu7.Character.HumanoidRootPart.CFrame = T.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,0) end
+end})
+
+TabTroll:AddToggle({ Name = "Headsit", Callback = function() 
+    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+    if T then if not headsitActive then headsitOnPlayer(T) headsitActive = true else removeHeadsit() headsitActive = false end end 
+end })
+
+TabTroll:AddSection({ "Black Hole" })
+TabTroll:AddToggle({
+    Name = "Black Hole",
+    Default = false,
+    Callback = function(state)
+        _G.BlackHoleActive = state
+        if state then
+            _G.BH_Orbit_Active = false
+            SetupBlackHole()
+            BH_Connection = vu9.DescendantAdded:Connect(function(v)
+                if _G.BlackHoleActive then ForcePart(v) end
+            end)
+            for _, v in ipairs(vu9:GetDescendants()) do ForcePart(v) end
+
+            task.spawn(function()
+                while _G.BlackHoleActive do
+                    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                    if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                        local t = tick() * 2
+                        local rotation = CFrame.Angles(t, t/2, t/3) 
+                        BH_Part.CFrame = T.Character.HumanoidRootPart.CFrame * rotation
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+                if BH_Connection then BH_Connection:Disconnect() end
+            end)
+        end
+    end
+})
+TabTroll:AddSection({ "Black Hole Orbit" })
+TabTroll:AddToggle({
+    Name = "Black Hole Orbit",
+    Default = false,
+    Callback = function(state)
+        _G.BH_Orbit_Active = state
+        if state then
+            _G.BlackHoleActive = false
+            SetupBlackHole()
+            BH_Connection = vu9.DescendantAdded:Connect(function(v)
+                if _G.BH_Orbit_Active then ForcePart(v) end
+            end)
+            for _, v in ipairs(vu9:GetDescendants()) do ForcePart(v) end
+
+            task.spawn(function()
+                local angle = 0
+                while _G.BH_Orbit_Active do
+                    local T = vu6:FindFirstChild(_G.SelectedPlayer)
+                    if T and T.Character and T.Character:FindFirstChild("HumanoidRootPart") then
+                        angle = angle + 1000000000
+                        local t = tick() * 1
+                        local radius = 7
+                        local orbit = CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(radius, math.sin(t)*2, 3)
+                        local sphereRotation = CFrame.Angles(t, t/2, t/3)
+                        BH_Part.CFrame = T.Character.HumanoidRootPart.CFrame * orbit * sphereRotation
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+                if BH_Connection then BH_Connection:Disconnect() end
+            end)
+        end
+    end
+})
+
+TabTroll:AddSection({ "Couch" })
+-- --- SEÇÃO KILL ---
+TabTroll:AddButton({
+    Name = "Kill Couch (1x)",
+    Callback = function()
+        if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                task.spawn(function()
+                    ExecutarKillCouch(target)
+                end)
+            end
+        end
+    end
+})
+
+TabTroll:AddToggle({
+    Name = "Auto Kill Couch",
+    Description = "Elimina o jogador selecionado no Void continuamente em loop",
+    Default = false,
+    Callback = function(state)
+        _G.AutoKillCouch = state
+        if state then
+            task.spawn(function()
+                while _G.AutoKillCouch do
+                    if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                        local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                        if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                            ExecutarKillCouch(target)
+                        end
+                    end
+                    task.wait(0.8)
+                end
+            end)
+        end
+    end
+})
+
+-- --- SEÇÃO FLING ---
+TabTroll:AddButton({
+    Name = "Fling Couch (1x)",
+    Callback = function()
+        if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                task.spawn(function()
+                    ExecutarFlingCouch(target)
+                end)
+            end
+        end
+    end
+})
+
+TabTroll:AddToggle({
+    Name = "Auto Fling Couch",
+    Description = "Arremessa o jogador selecionado com super velocidade e rotação",
+    Default = false,
+    Callback = function(state)
+        _G.AutoFlingCouch = state
+        if state then
+            task.spawn(function()
+                while _G.AutoFlingCouch do
+                    if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                        local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                        if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0.100 then
+                            ExecutarFlingCouch(target)
+                        end
+                    end
+                    task.wait(0.9)
+                end
+            end)
+        end
+    end
+})
+
+  -- --- SEÇÃO BRING ---
+TabTroll:AddButton({
+    Name = "Bring Couch (1x)",
+    Callback = function()
+        if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0 then
+                task.spawn(function()
+                    ExecutarBringCouch(target)
+                end)
+            end
+        end
+    end
+})
+
+TabTroll:AddToggle({
+    Name = "Auto Bring Couch",
+    Description = "Puxa o jogador selecionado continuamente até onde você está",
+    Default = false,
+    Callback = function(state)
+        _G.AutoBringCouch = state
+        if state then
+            task.spawn(function()
+                while _G.AutoBringCouch do
+                    if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                        local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                        if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0 then
+                            ExecutarBringCouch(target)
+                        end
+                    end
+                    task.wait(0.8)
+                end
+            end)
+        end
+    end
+})
+
+
+TabTroll:AddSection({ "Fling Ball" })
+TabTroll:AddToggle({
+    Name = "Fling Ball",
+Description = ("ligue a função primeiro quando a bola estiver na mão clique na tela para arremessar a bola no alvo"),
+    Callback = function()
+        if _G.SelectedPlayer ~= "" then FlingBall(_G.SelectedPlayer) end
+    end
+})
+-- --- FLING BALL AUTOMÁTICO ADICIONADO AQUI ---
+TabTroll:AddToggle({
+    Name = "Fling Ball Automático",
+Description = ("Arremessar a bola no alvo automaticamente sem clicar na tela"),
+    Default = false,
+    Callback = function(state)
+        FlingBallAuto = state
+        if state then
+            local targetPlayer = vu6:FindFirstChild(_G.SelectedPlayer)
+            if not targetPlayer then return end
+            
+            ForcarEquipamento()
+            
+            task.spawn(function()
+                while FlingBallAuto do
+                    local ball = GetBallAutomatico()
+                    local jogadorSelecionado = vu6:FindFirstChild(_G.SelectedPlayer)
+                    
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBallAutomatico()
+                    end
+
+                    if jogadorSelecionado and jogadorSelecionado.Character and ball then
+                        local tchar = jogadorSelecionado.Character
+                        local troot = tchar:FindFirstChild("HumanoidRootPart")
+                        local thum = tchar:FindFirstChild("Humanoid")
+
+                        if troot and thum and thum.Health > 0 then
+                            ball.CanCollide = false
+                            ball.Massless = true
+                            ball.CustomPhysicalProperties = PhysicalProperties.new(10000, 100, 100, 100, 100)
+
+                            local bv = ball:FindFirstChildWhichIsA("BodyVelocity")
+                            if not bv then
+                                bv = Instance.new("BodyVelocity")
+                                bv.Name = "FlingPower"
+                                bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                bv.P = 9e900
+                                bv.Parent = ball
+                            else
+                                bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                            end
+
+                            local bav = ball:FindFirstChildWhichIsA("BodyAngularVelocity")
+                            if not bav then
+                                bav = Instance.new("BodyAngularVelocity")
+                                bav.Name = "FlingSpin"
+                                bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                                bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                                bav.P = 9e900
+                                bav.Parent = ball
+                            else
+                                bav.AngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+                            end
+
+                            ball.AssemblyLinearVelocity = Vector3.new(9e9, 9e9, 9e9)
+                            ball.AssemblyAngularVelocity = Vector3.new(9e9, 9e9, 9e9)
+
+                            vuCam.CameraSubject = thum
+
+                            local t = tick() * 99999999999999999999999999999999999999999999999999999999
+                            local moveOffset = Vector3.new(
+                                math.sin(t) * 1.0,
+                                math.cos(t * 1.0) * 1.0,
+                                math.cos(t) * 1.0
+                            )
+
+                            local targetPos = troot.Position
+                            if troot.Velocity.Magnitude > 0 then
+                                targetPos = targetPos + (troot.Velocity / 1.2)
+                            end
+
+                            ball.CFrame = CFrame.new(targetPos + moveOffset) * CFrame.Angles(
+                                math.rad(math.random(0, 30)),
+                                math.rad(math.random(0, 30)),
+                                math.rad(math.random(0, 30))
+                            )
+                        end
+                    end
+                    vu10.Heartbeat:Wait()
+                end
+                updateCamera()
+            end)
+        else
+            updateCamera()
+        end
+    end
+})
+
+-- ====================================================================
+-- SEÇÃO: SISTEMA DE BOLA FLING & ÓRBITA
+-- ====================================================================
+TabTroll:AddSection({ "Sistema de Bola Fling" })
+
+TabTroll:AddSlider({
+    Name = "Velocidade da Bola",
+    MinValue = 0,
+    MaxValue = 9000000000000,
+    Default = 15,
+    Increase = 1,
+    Callback = function(v)
+        OrbitSpeed = v
+    end
+})
+
+TabTroll:AddSlider({
+    Name = "Distância da Bola",
+    MinValue = 1,
+    MaxValue = 50,
+    Default = 5,
+    Increase = 00.1,
+    Callback = function(v)
+        OrbitDistance = v
+    end
+})
+
+TabTroll:AddSlider({
+    Name = "Altura da Bola",
+    MinValue = -15,
+    MaxValue = 15,
+    Default = 0,
+    Increase = 1,
+    Callback = function(v)
+        OrbitHeight = v
+    end
+})
+
+-- Toggle: Orbitar em Mim
+TabTroll:AddToggle({
+    Name = "Orbitar em Mim",
+    Default = false,
+    Callback = function(state)
+        OrbitSelfEnabled = state
+        if state then 
+            OrbitTargetEnabled = false
+            FlingBallAuto = false
+            ForcarEquipamento()
+            task.spawn(function()
+                while OrbitSelfEnabled do
+                    local character = LocalPlayer.Character
+                    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+                    local backpack = LocalPlayer:FindFirstChild("Backpack")
+                    if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
+                    
+                    local ball = GetBall()
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBall()
+                    end
+
+                    if ball and hrp then
+                        local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
+                        if part then
+                            AplicarFisicaFling(part)
+                            OrbitAngle = OrbitAngle + (OrbitSpeed / 100)
+                            local ox = math.cos(OrbitAngle) * OrbitDistance
+                            local oz = math.sin(OrbitAngle) * OrbitDistance
+                            part.CFrame = hrp.CFrame * CFrame.new(ox, OrbitHeight, oz)
+                        end
+                    end
+                    RunService.Heartbeat:Wait()
+                end
+                
+                local ball = GetBall()
+                if ball then LimparFisicaFling(ball) end
+            end)
+        else
+            local ball = GetBall()
+            if ball then LimparFisicaFling(ball) end
+        end
+    end
+})
+-- Toggle: Orbitar no Alvo
+TabTroll:AddToggle({
+    Name = "Orbitar no Alvo",
+    Default = false,
+    Callback = function(state)
+        OrbitTargetEnabled = state
+        if state then
+            local targetPlayer = Players:FindFirstChild(_G.SelectedPlayer)
+            if not targetPlayer then 
+                SendNotification("Erro", "Selecione um jogador na lista primeiro!", 3)
+                OrbitTargetEnabled = false
+                return 
+            end
+            OrbitSelfEnabled = false
+            FlingBallAuto = false
+            ForcarEquipamento()
+            task.spawn(function()
+                while OrbitTargetEnabled do
+                    local target = Players:FindFirstChild(_G.SelectedPlayer)
+                    local backpack = LocalPlayer:FindFirstChild("Backpack")
+                    if backpack and backpack:FindFirstChild("SoccerBall") then ForcarEquipamento() end
+                    
+                    local ball = GetBall()
+                    if not ball then
+                        ForcarEquipamento()
+                        task.wait(0.2)
+                        ball = GetBall()
+                    end
+
+                    if target and target.Character and ball then
+                        local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
+                        local part = ball:IsA("BasePart") and ball or ball:FindFirstChildWhichIsA("BasePart", true)
+                        if tRoot and part then
+                            AplicarFisicaFling(part)
+                            OrbitAngle = OrbitAngle + (OrbitSpeed / 10000)
+                            local ox = math.cos(OrbitAngle) * OrbitDistance
+                            local oz = math.sin(OrbitAngle) * OrbitDistance
+                            
+                            local targetPos = tRoot.Position
+                            if tRoot.AssemblyLinearVelocity and tRoot.AssemblyLinearVelocity.Magnitude > 0.5 then
+                                targetPos = targetPos + (tRoot.AssemblyLinearVelocity / 1.5)
+                            end
+
+                            part.CFrame = CFrame.new(targetPos) * CFrame.Angles(0, OrbitAngle, 0) * CFrame.new(ox, OrbitHeight, oz)
+                        end
+                    end
+                    RunService.Heartbeat:Wait()
+                end
+                
+                local ball = GetBall()
+                if ball then LimparFisicaFling(ball) end
+            end)
+        else
+            local ball = GetBall()
+            if ball then LimparFisicaFling(ball) end
+        end
+    end
+})
+TabTroll:AddSection({ "Clicks TP" })
+TabTroll:AddButton({
+    Name = "Teleport Tool sond",
+    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Marts-teleport-tool-80005"))()end
+})
+TabTroll:AddButton({
+    Name = "Teleport Portal",
+    Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tptool-107347"))() end
+})
+TabTroll:AddButton({
+    Name = "Pegar Teleport Tool",
+    Callback = function()
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        local tool = Instance.new("Tool")
+        tool.RequiresHandle = false
+        tool.Name = "Tp Tool"
+        tool.Activated:Connect(function()
+            local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+            end
+        end)
+        tool.Parent = game.Players.LocalPlayer.Backpack
+    end
+})
+
+TabTroll:AddSection({Name = "Clicks"})
+local jogadores = game:GetService("Players")
+local rep = game:GetService("ReplicatedStorage")
+local mundo = game:GetService("Workspace")
+local entrada = game:GetService("UserInputService")
+local cam = mundo.CurrentCamera
+local eu = jogadores.LocalPlayer
+local toggleFlingBallActive = false
+
+TabTroll:AddToggle({
+	Name = ("Clique Bola <Fling>"),
+	Description = ("trolar jogadores usando isso apenas damdo clique"),
+	Default = false,
+	Callback = function(valor)
+		toggleFlingBallActive = valor
+	end
+})
+
+local function FlingBall(target)
+	local player = eu
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local hrp = character:WaitForChild("HumanoidRootPart")
+	local backpack = player:WaitForChild("Backpack")
+	local ServerBalls = mundo.WorkspaceCom:FindFirstChild("001_SoccerBalls")
+	if not ServerBalls then return end
+
+	local function GetBall()
+		if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then
+			rep.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
+		end
+
+		repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")
+
+		local ballTool = backpack:FindFirstChild("SoccerBall")
+		if ballTool then ballTool.Parent = character end
+
+		repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
+		return ServerBalls:FindFirstChild("Soccer" .. player.Name)
+	end
+
+	local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
+	if not Ball then return end
+
+	Ball.CanCollide = false
+	Ball.Massless = true
+	Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
+
+	if target ~= player then
+		local tchar = target.Character
+		if not tchar then return end
+
+		local troot = tchar:FindFirstChild("HumanoidRootPart")
+		local thum = tchar:FindFirstChild("Humanoid")
+		if not troot or not thum then return end
+
+		local bvAntigo = Ball:FindFirstChildWhichIsA("BodyVelocity")
+		if bvAntigo then bvAntigo:Destroy() end
+
+		local bv = Instance.new("BodyVelocity")
+		bv.Name = "FlingPower"
+		bv.Velocity = Vector3.new(1e9, 1e9, 1e9)
+		bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+		bv.P = 9e900
+		bv.Parent = Ball
+
+		repeat
+			local pos = troot.Position + (troot.Velocity / 1.5)
+			local tempo = tick()
+
+		
+			local altura = math.sin(tempo * 7) * 2
+			Ball.CFrame = CFrame.new(pos.X, pos.Y + altura, pos.Z)
+			Ball.Orientation += Vector3.new(45, 60, 30)
+
+			task.wait(1 / 5000)
+		until troot.Velocity.Magnitude > 100000 or thum.Health <= 0 or not tchar:IsDescendantOf(mundo) or target.Parent ~= jogadores
+	end
+end
+
+entrada.TouchTap:Connect(function(toques, processado)
+	if not toggleFlingBallActive or processado then return end
+	local pos = toques[1]
+	local raio = cam:ScreenPointToRay(pos.X, pos.Y)
+	local hit = mundo:Raycast(raio.Origin, raio.Direction * 1000)
+	if hit and hit.Instance then
+		local modelo = hit.Instance:FindFirstAncestorOfClass("Model")
+		local jogador = jogadores:GetPlayerFromCharacter(modelo)
+		if jogador and jogador ~= eu then
+			FlingBall(jogador)
+		end
+	end
+end)
+
+TabTroll:AddButton({
+    Name = "Click Fling Admin v2 (Tool)",
+    Callback = function()
+        local jogadores = game:GetService("Players")
+        local rep = game:GetService("ReplicatedStorage")
+        local mundo = game:GetService("Workspace")
+        local entrada = game:GetService("UserInputService")
+        local cam = mundo.CurrentCamera
+        local eu = jogadores.LocalPlayer
+
+        local NOME_FERRAMENTA = "Admin Fling"
+        local ferramentaEquipada = false
+        local mochila = eu:WaitForChild("Backpack")
+
+        for _, ferramentaExistente in pairs(mochila:GetChildren()) do
+            if ferramentaExistente:IsA("Tool") and ferramentaExistente.Name:lower():find("fling") then
+                ferramentaExistente.Name = "Admin Fling"
+            end
+        end
+
+        if not mochila:FindFirstChild(NOME_FERRAMENTA) then
+            local ferramenta = Instance.new("Tool")
+            ferramenta.Name = NOME_FERRAMENTA
+            ferramenta.RequiresHandle = true
+            ferramenta.CanBeDropped = false
+
+            local handle = Instance.new("Part")
+            handle.Name = "Handle"
+            handle.Size = Vector3.new(1, 1, 1)
+            handle.Parent = ferramenta
+
+            ferramenta.Equipped:Connect(function() ferramentaEquipada = true end)
+            ferramenta.Unequipped:Connect(function() ferramentaEquipada = false end)
+            ferramenta.Parent = mochila
+        end
+
+        local function FlingBallTool(target)
+            local player = jogadores.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoid = character:WaitForChild("Humanoid")
+            local backpack = player:WaitForChild("Backpack")
+            local ServerBalls = mundo:WaitForChild("WorkspaceCom"):WaitForChild("001_SoccerBalls")
+
+            local function GetBall()
+                if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then
+                    rep.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
+                end
+                repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")
+                local ballTool = backpack:FindFirstChild("SoccerBall")
+                if ballTool then ballTool.Parent = character end
+                repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
+                return ServerBalls:FindFirstChild("Soccer" .. player.Name)
+            end
+
+            local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name) or GetBall()
+            Ball.CanCollide = false
+            Ball.Massless = true
+            Ball.Transparency = 1
+            Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
+
+            if target ~= player then
+                local tchar = target.Character
+                if tchar and tchar:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("Humanoid") then
+                    local troot = tchar.HumanoidRootPart
+                    local thum = tchar.Humanoid
+                    if Ball:FindFirstChildWhichIsA("BodyVelocity") then
+                        Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
+                    end
+                    local bv = Instance.new("BodyVelocity")
+                    bv.Name = "FlingPower"
+                    bv.Velocity = Vector3.new(9e8, 9e8, 9e8)
+                    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    bv.P = 9e900
+                    bv.Parent = Ball
+                    mundo.CurrentCamera.CameraSubject = thum
+
+                    repeat
+                        if troot.Velocity.Magnitude > 0 then
+                            local pos = troot.Position + (troot.Velocity / 1.5)
+                            Ball.CFrame = CFrame.new(pos)
+                            Ball.Orientation += Vector3.new(45, 60, 30)
+                        else
+                            for _, v in pairs(tchar:GetChildren()) do
+                                if v:IsA("BasePart") and v.CanCollide and not v.Anchored then
+                                    Ball.CFrame = v.CFrame
+                                    task.wait(1/6000)
+                                end
+                            end
+                        end
+                        task.wait(1/6000)
+                    until troot.Velocity.Magnitude > 1000 or thum.Health <= 0 or not tchar:IsDescendantOf(mundo) or target.Parent ~= jogadores
+
+                    mundo.CurrentCamera.CameraSubject = humanoid
+                end
+            end
+        end
+
+        entrada.InputEnded:Connect(function(input, processed)
+            if input.UserInputType == Enum.UserInputType.Touch and ferramentaEquipada then
+                local pos = input.Position
+                local raio = cam:ScreenPointToRay(pos.X, pos.Y)
+                local hit = mundo:Raycast(raio.Origin, raio.Direction * 1000)
+                if hit and hit.Instance then
+                    local modelo = hit.Instance:FindFirstAncestorOfClass("Model")
+                    local jogador = jogadores:GetPlayerFromCharacter(modelo)
+                    if jogador and jogador ~= eu then
+                        FlingBallTool(jogador)
+                    end
+                end
+            end
+        end)
+    end
+})
+                    
+TabTroll:AddButton({
+    Name = "Click Kill Couch (Tool)",
+    Callback = function()
+        local jogadores = game:GetService("Players")
+        local rep = game:GetService("ReplicatedStorage")
+        local loop = game:GetService("RunService")
+        local mundo = game:GetService("Workspace")
+        local entrada = game:GetService("UserInputService")
+        local eu = jogadores.LocalPlayer
+        local cam = mundo.CurrentCamera
+        local NOME_FERRAMENTA = "Click Kill Couch"
+        local ferramentaEquipada = false
+        local nomeAlvo = nil
+        local loopTP = nil
+        local sofaEquipado = false
+        local base = nil
+        local posInicial = nil
+        local raiz = nil
+        local mochila = eu:WaitForChild("Backpack")
+        if not mochila:FindFirstChild(NOME_FERRAMENTA) then
+            local ferramenta = Instance.new("Tool") ferramenta.Name = NOME_FERRAMENTA
+            ferramenta.RequiresHandle = false
+            ferramenta.CanBeDropped = false
+            ferramenta.Equipped:Connect(function() ferramentaEquipada = true end)
+            ferramenta.Unequipped:Connect(function() ferramentaEquipada = false nomeAlvo = nil limparSofa() end)
+            ferramenta.Parent = mochila
+        end
+        function limparSofa()
+            if loopTP then loopTP:Disconnect() loopTP = nil end
+            if sofaEquipado and eu.Character then
+                local sofa = eu.Character:FindFirstChild("Couch")
+                if sofa then sofa.Parent = eu.Backpack sofaEquipado = false end
+            end
+            if base then base:Destroy() base = nil end
+            if getgenv().AntiSit then getgenv().AntiSit:Set(false) end
+            local humano = eu.Character and eu.Character:FindFirstChildOfClass("Humanoid")
+            if humano then humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true) humano:ChangeState(Enum.HumanoidStateType.GettingUp) end
+            if posInicial and raiz then raiz.CFrame = posInicial posInicial = nil end
+        end
+        function pegarSofa()
+            local boneco = eu.Character if not boneco then return end
+            if not eu.Backpack:FindFirstChild("Couch") and not boneco:FindFirstChild("Couch") then
+                rep.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
+                task.wait(0.1)
+            end
+            local sofa = eu.Backpack:FindFirstChild("Couch") or boneco:FindFirstChild("Couch")
+            if sofa then sofa.Parent = boneco sofaEquipado = true end
+        end
+        function posAleatoriaAbaixo(boneco)
+            local rp = boneco:FindFirstChild("HumanoidRootPart") if not rp then return Vector3.new() end
+            return rp.Position + Vector3.new(math.random(-2, 2), -5.1, math.random(-2, 2))
+        end
+        function tpAbaixo(alvo)
+            if not alvo or not alvo.Character or not alvo.Character:FindFirstChild("HumanoidRootPart") then return end
+            local meuBoneco = eu.Character
+            local minhaRaiz = meuBoneco and meuBoneco:FindFirstChild("HumanoidRootPart")
+            local humano = meuBoneco and meuBoneco:FindFirstChildOfClass("Humanoid")
+            if not minhaRaiz or not humano then return end
+            humano:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+            if not base then
+                base = Instance.new("Part") base.Size = Vector3.new(10, 1, 10)
+                base.Anchored = true base.CanCollide = true base.Transparency = 0.5 base.Parent = mundo
+            end
+            local destino = posAleatoriaAbaixo(alvo.Character)
+            base.Position = destino
+            minhaRaiz.CFrame = CFrame.new(destino)
+            humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+        end
+        function arremessarComSofa(alvo)
+            if not alvo then return end
+            nomeAlvo = alvo.Name
+            if not eu.Character then return end
+            posInicial = eu.Character:FindFirstChild("HumanoidRootPart") and eu.Character.HumanoidRootPart.CFrame
+            raiz = eu.Character:FindFirstChild("HumanoidRootPart")
+            pegarSofa()
+            loopTP = loop.Heartbeat:Connect(function()
+                local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
+                if not alvoAtual or not alvoAtual.Character or not alvoAtual.Character:FindFirstChild("Humanoid") then limparSofa() return end
+                if getgenv().AntiSit then getgenv().AntiSit:Set(true) end
+                tpAbaixo(alvoAtual)
+            end)
+            task.spawn(function()
+                local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
+                while alvoAtual and alvoAtual.Character and alvoAtual.Character:FindFirstChild("Humanoid") do
+                    task.wait(0.05)
+                    if alvoAtual.Character.Humanoid.SeatPart then
+                        local buraco = CFrame.new(265.46, -450.83, -59.93)
+                        alvoAtual.Character.HumanoidRootPart.CFrame = buraco
+                        eu.Character.HumanoidRootPart.CFrame = buraco
+                        task.wait(0.4) limparSofa() task.wait(0.2)
+                        if posInicial then eu.Character.HumanoidRootPart.CFrame = posInicial end
+                        break
+                    end
+                end
+            end)
+        end
+        entrada.TouchTap:Connect(function(toques, processado)
+            if not ferramentaEquipada or processado then return end
+            local pos = toques[1]
+            local raio = cam:ScreenPointToRay(pos.X, pos.Y)
+            local hit = mundo:Raycast(raio.Origin, raio.Direction * 1000)
+            if hit and hit.Instance then
+                local jogador = jogadores:GetPlayerFromCharacter(hit.Instance:FindFirstAncestorOfClass("Model"))
+                if jogador and jogador ~= eu then arremessarComSofa(jogador) end
+            end
+        end)
+    end
+})
+TabTroll:AddButton({
+ Name = "Click Fling Couch (Tool)",
+ Callback = function()
+local jogadores = game:GetService("Players") local rep = game:GetService("ReplicatedStorage")
+local entrada = game:GetService("UserInputService")
+local eu = jogadores.LocalPlayer
+local cam = workspace.CurrentCamera
+local podeClicar = true
+local ferramentaEquipada = false
+local NOME_FERRAMENTA = "Click Fling Couch"
+local mochila = eu:WaitForChild("Backpack")
+if not mochila:FindFirstChild(NOME_FERRAMENTA) and not (eu.Character and 
+eu.Character:FindFirstChild(NOME_FERRAMENTA)) then
+local ferramenta = Instance.new("Tool")
+ferramenta.Name = NOME_FERRAMENTA
+ferramenta.RequiresHandle = false
+ferramenta.CanBeDropped = false
+ferramenta.Equipped:Connect(function()
+ferramentaEquipada = true
+end)
+ferramenta.Unequipped:Connect(function()
+ferramentaEquipada = false
+end)
+ferramenta.Parent = mochila
+end
+local function jogarComSofa(alvo)
+if not ferramentaEquipada then return end
+if not alvo or not alvo.Character or alvo == eu then return end
+local jogando = true
+local raiz = eu.Character and eu.Character:FindFirstChild("HumanoidRootPart")
+local alvoRaiz = alvo.Character and 
+alvo.Character:FindFirstChild("HumanoidRootPart")
+if not raiz or not alvoRaiz then return end
+local boneco = eu.Character
+local humano = boneco:FindFirstChildOfClass("Humanoid")
+local posOriginal = raiz.CFrame
+rep:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+task.wait(0.2)
+rep.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+task.wait(0.3)
+local sofa = eu.Backpack:FindFirstChild("Couch")
+if sofa then
+sofa.Parent = boneco
+end
+task.wait(0.1)
+game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, 
+false, game)
+task.wait(0.25) workspace.FallenPartsDestroyHeight = 0/0
+local forca = Instance.new("BodyVelocity")
+forca.Name = "ForcaJogada"
+forca.Velocity = Vector3.new(9e8, 9e8, 9e8)
+forca.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+forca.Parent = raiz
+humano:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+humano.PlatformStand = false
+cam.CameraSubject = alvo.Character:FindFirstChild("Head") or alvoRaiz or 
+humano
+task.spawn(function()
+local angulo = 0
+local partes = {raiz}
+while jogando and alvo and alvo.Character and 
+alvo.Character:FindFirstChildOfClass("Humanoid") do
+local alvoHum = alvo.Character:FindFirstChildOfClass("Humanoid")
+if alvoHum.Sit then break end
+angulo += 50
+for _, parte in ipairs(partes) do
+local hrp = alvo.Character.HumanoidRootPart
+local pos = hrp.Position + hrp.Velocity / 1.5
+raiz.CFrame = CFrame.new(pos) * 
+CFrame.Angles(math.rad(angulo), 0, 0)
+end
+raiz.Velocity = Vector3.new(9e8, 9e8, 9e8)
+raiz.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+task.wait()
+end
+jogando = false
+forca:Destroy()
+humano:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+humano.PlatformStand = false
+raiz.CFrame = posOriginal
+cam.CameraSubject = humano
+for _, p in pairs(boneco:GetDescendants()) do
+if p:IsA("BasePart") then
+p.Velocity = Vector3.zero
+p.RotVelocity = Vector3.zero
+end
+end
+humano:UnequipTools()
+rep.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+end)
+while jogando do
+task.wait()
+end
+end
+entrada.TouchTap:Connect(function(toques, processado) if processado or not podeClicar or not ferramentaEquipada then return end
+local pos = toques[1]
+local raio = cam:ScreenPointToRay(pos.X, pos.Y)
+local acerto = workspace:Raycast(raio.Origin, raio.Direction * 1000)
+if acerto and acerto.Instance then
+local alvo = 
+jogadores:GetPlayerFromCharacter(acerto.Instance:FindFirstAncestorOfClass("Model"))
+if alvo and alvo ~= eu then
+podeClicar = false
+jogarComSofa(alvo)
+task.delay(2, function()
+podeClicar = true
+end)
+end
+end
+end)
+end
+})
+TabTroll:AddSection({ "Fling Ônibus (Teste)" })
+
+local PlayerDrop = TabTroll:AddDropdown({
+    Name = "Lista de jogadores",
+    Options = updatePlayerList(),
+    Default = "Nenhum Jogador No Servidor",
+    Callback = function(v) 
+        _G.SelectedPlayer = v 
+    end
+})
+
+TabTroll:AddButton({
+    Name = "Atualizar Lista de jogadores", 
+    Callback = function() 
+        PlayerDrop:Set(updatePlayerList()) 
+    end
+})
+
+flingToggle = TabTroll:AddToggle({
+    Name = "Inicia Fling (Ônibus Teste)",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                if target then
+                    running = true
+                    task.spawn(function()
+                        flingWithBus(target)
+                    end)
+                else
+                    warn("Jogador não encontrado!")
+                    if flingToggle then flingToggle:Set(false) end
+                end
+            else
+                warn("Selecione um jogador primeiro!")
+                if flingToggle then flingToggle:Set(false) end
+            end
+        else
+            StopTestFling()
+        end
+    end
+})
 
 -- ====================================================================
 -- ABA: INFORMAÇÕES 2
@@ -1224,7 +2212,7 @@ InfoTab:AddSection({"Sobre o Hub"})
 InfoTab:AddButton({
     Name = "Hub: Dark x Hub",
     Callback = function()
-        SendNotification("Dark x Hub", "Desenvolvido com carinho por Carlolx777!", 3)
+        SendNotification("Dark x Hub", "Desenvolvido por HACKELINDOO!", 3)
     end
 })
 
@@ -1585,19 +2573,3 @@ CriarSecaoModo("Alinhamento", "Alinhamento", -10, 30, 2)
 CriarSecaoModo("Furacão", "Furacao", -10, 30, 4)
 CriarSecaoModo("Portal", "Portal", -10, 30, 4)
 
--- ====================================================================
--- ABA: CONFIGURAÇÕES (CONFIG1)
--- ====================================================================
-
-ConfigTab:AddSection({"Sobre a Interface"})
-
-ConfigTab:AddParagraph({"Hub", "Dark x Hub - Versão Unificada"})
-ConfigTab:AddParagraph({"Criador", "HACKELINDOO / Carlolx777"})
-
-ConfigTab:AddButton({
-    Name = "Reiniciar Interface",
-    Description = "Recarrega os elementos do menu",
-    Callback = function()
-        SendNotification("Configurações", "Interface pronta e atualizada!", 2)
-    end
-})
