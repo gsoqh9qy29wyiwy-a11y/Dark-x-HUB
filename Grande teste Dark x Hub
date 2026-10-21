@@ -1053,12 +1053,13 @@ task.spawn(function()
 end)
 
 -- ====================================================================
--- MOVIMENTAÇÃO RÁPIDA DOS PROPS (GIRO FRENETICO + PREVISÃO DE CORRIDA)
+-- MOVIMENTAÇÃO DOS PROPS COM ÓRBITA FRENETICA (KILL / BRING / FLING)
+-- Parâmetros da foto: Velocidade 100 | Distância 2 | Altura -1
 -- ====================================================================
 task.spawn(function()
     local angle, tempoGeral = 0, 0
     while true do
-        local dt = task.wait(0.02) -- Frequência aumentada para alta velocidade de resposta
+        local dt = task.wait(0.02)
         if (PropMovementMode == "Nenhum" and not ModoAvancadoAtivo and not ModoKillAtivo and not ModoFlingAtivo) or #meusPropsCache == 0 then
             continue
         end
@@ -1078,10 +1079,13 @@ task.spawn(function()
 
         if #lista == 0 then continue end
 
-        local cfg = ConfigsProps[PropMovementMode]
-        local speedVal = cfg and cfg.Speed or 2
-        angle = angle + (dt * speedVal)
-        tempoGeral = tempoGeral + dt * (speedVal * 2)
+        -- Configuração baseada na sua foto: Velocidade 100, Distância 2, Altura -1
+        local orbitaSpeed = 8.5   -- Rotação de alta velocidade (equivalente a 100)
+        local orbitaDist = 2      -- Raio de 2 studs (rente ao corpo)
+        local orbitaAlt = -1      -- Altura -1 (na altura exata para forçar a sentar)
+
+        angle = angle + (dt * orbitaSpeed)
+        tempoGeral = tempoGeral + dt * (orbitaSpeed * 2)
         local total = #meusPropsCache
 
         local myChar = vu7.Character
@@ -1096,73 +1100,58 @@ task.spawn(function()
                     local root = pDono.Character.HumanoidRootPart
                     local rCF = root.CFrame
                     local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
-
-                    -- 1. PREVISÃO DE MOVIMENTO (TELEPORTA NA FRENTE SE ESTIVER CORRENDO)
-                    local vel = root.AssemblyLinearVelocity or root.Velocity
-                    local isMoving = (humAlvo and humAlvo.MoveDirection.Magnitude > 0.05) or (vel.Magnitude > 1.5)
-                    local posAlvo
-
-                    if isMoving then
-                        -- Calcula a distância à frente com base na velocidade do jogador
-                        local distanciaFrente = math.clamp(vel.Magnitude * 0.32, 2.5, 9)
-                        local frenteCF = rCF * CFrame.new(0, -0.55, -distanciaFrente)
-                        posAlvo = frenteCF.Position
-                    else
-                        -- Fica exatamente na base dos pés para forçar o assento imediato
-                        posAlvo = root.Position + Vector3.new(0, -0.55, 0)
-                    end
-
-                    -- 2. GIRO FRENETICO / LOUCO EM ALTA VELOCIDADE
-                    local tGiro = Workspace.DistributedGameTime * 8500
-                    local giroLouco = CFrame.Angles(
-                        math.rad(tGiro * 1.3 % 360),
-                        math.rad(tGiro * 2.5 % 360),
-                        math.rad(tGiro * 0.9 % 360)
-                    )
-
-                    -- CFrame combinado com a posição preditiva e rotação extrema
-                    local sitCF = CFrame.new(posAlvo) * giroLouco
-
                     local jaSentou = humAlvo and (humAlvo.SeatPart or humAlvo.Sit)
 
-                    -- 1. MODO FLING
-                    if ModoFlingAtivo then
-                        if jaSentou then
-                            task.spawn(function()
-                                pcall(remote.InvokeServer, remote, CFrame.new(CoordenadasFling))
-                            end)
-                        else
-                            task.spawn(function()
-                                pcall(remote.InvokeServer, remote, sitCF)
-                            end)
+                    -- 1. SE JÁ SENTOU, EXECUTA O MÉTODO ESCOLHIDO
+                    if ModoFlingAtivo and jaSentou then
+                        task.spawn(function()
+                            pcall(remote.InvokeServer, remote, CFrame.new(CoordenadasFling))
+                        end)
+
+                    elseif ModoKillAtivo and jaSentou then
+                        task.spawn(function()
+                            pcall(remote.InvokeServer, remote, CFrame.new(rCF.Position.X, -500, rCF.Position.Z))
+                        end)
+
+                    elseif ModoAvancadoAtivo and jaSentou then
+                        task.spawn(function() 
+                            pcall(remote.InvokeServer, remote, myCF * CFrame.new(0, 0, -3)) 
+                        end)
+
+                    -- 2. SE AINDA NÃO SENTOU (OU ESTÁ EM MODO FLING/KILL/BRING):
+                    -- ORBITA ULTRA-RÁPIDA COLADA NO ALVO COM PREVISÃO DE CORRIDA
+                    elseif ModoFlingAtivo or ModoKillAtivo or ModoAvancadoAtivo then
+                        local vel = root.AssemblyLinearVelocity or root.Velocity
+                        local isMoving = (humAlvo and humAlvo.MoveDirection.Magnitude > 0.05) or (vel.Magnitude > 1.5)
+                        
+                        -- Centro da órbita: projeta à frente se estiver correndo
+                        local centroOrbita = root.Position
+                        if isMoving then
+                            local avanco = math.clamp(vel.Magnitude * 0.25, 1.5, 6)
+                            centroOrbita = (rCF * CFrame.new(0, 0, -avanco)).Position
                         end
 
-                    -- 2. MODO KILL (VOID)
-                    elseif ModoKillAtivo then
-                        if jaSentou then
-                            task.spawn(function()
-                                pcall(remote.InvokeServer, remote, CFrame.new(rCF.Position.X, -500, rCF.Position.Z))
-                            end)
-                        else
-                            task.spawn(function()
-                                pcall(remote.InvokeServer, remote, sitCF)
-                            end)
-                        end
+                        -- Distribui todos os props uniformemente em volta do círculo
+                        local spacing = (math.pi * 2) / math.max(total, 1)
+                        local fAngle = angle + (i * spacing)
 
-                    -- 3. MODO BRING
-                    elseif ModoAvancadoAtivo then
-                        if jaSentou then
-                            task.spawn(function() 
-                                pcall(remote.InvokeServer, remote, myCF * CFrame.new(0, 0, -3)) 
-                            end)
-                        else
-                            task.spawn(function() 
-                                pcall(remote.InvokeServer, remote, sitCF) 
-                            end)
-                        end
+                        local propPos = centroOrbita + Vector3.new(
+                            math.cos(fAngle) * orbitaDist,
+                            orbitaAlt,
+                            math.sin(fAngle) * orbitaDist
+                        )
 
-                    -- 4. MODOS DE MOVIMENTO (ÓRBITA, AURA, ETC.)
-                    elseif cfg and PropMovementMode ~= "Nenhum" then
+                        -- O prop orbita olhando para o centro do círculo com rotação agressiva
+                        local lookTarget = centroOrbita + Vector3.new(0, orbitaAlt, 0)
+                        local orbitCF = CFrame.lookAt(propPos, lookTarget) * CFrame.Angles(0, math.rad(angle * 100 % 360), 0)
+
+                        task.spawn(function()
+                            pcall(remote.InvokeServer, remote, orbitCF)
+                        end)
+
+                    -- 3. MODOS VISUAIS NORMAIS DO MENU (QUANDO NÃO ESTÁ EM MODO KILL/BRING/FLING)
+                    elseif PropMovementMode ~= "Nenhum" then
+                        local cfg = ConfigsProps[PropMovementMode]
                         local tPos = rCF.Position
                         local olharPara = rCF.Position
                         local spacing = (math.pi * 2) / math.max(total, 1)
@@ -1204,7 +1193,6 @@ task.spawn(function()
         end
     end
 end)
-
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
 
 --  3. JANELA PRINCIPAL
