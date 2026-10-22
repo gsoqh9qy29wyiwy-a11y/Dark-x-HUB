@@ -5842,7 +5842,6 @@ Tab5:AddButton({
             })
         end
 })
--- ==================== MÃšSICA NO CARRO ====================
 Tab5:AddSection({"MÃºsica No Carro <GamePass>"})
 
 local MusicsList = {
@@ -5957,59 +5956,5 @@ Tab5:AddDropdown({
     Options = MusicNames,
     Callback = function(v)
         selectedMusic = v
-    end
-})
-
-Tab5:AddButton({
-    Name = "Tocar MÃºsica",
-    Callback = function()
-        local id = MusicIds[selectedMusic]
-        if id then
-            local events = {"PickingVehicleMusicText", "PickingCarMusicText", "PickingScooterMusicText"}
-            for _, ev in pairs(events) do
-                vu8.RE:FindFirstChild("1Player1sCa1r"):FireServer(ev, id)
-            end
-        end
-    end
-})
-
--- ==================== CARRO COLORIDO ====================
-Tab5:AddSection({"Carro Colorido"})
-
-Tab5:AddToggle({
-    Name = "Carro Colorido <GamePass>",
-    Default = false,
-    Callback = function(s)
-        isColorChanging = s
-        if s then
-            task.spawn(function()
-                while isColorChanging do
-                    for _, v in pairs(vu9.Vehicles:GetChildren()) do
-                        if v:FindFirstChild("Owner") and v.Owner.Value == vu7.Name then
-                            local color = Color3.new(math.random(), math.random(), math.random())
-                            for _, p in pairs(v:GetDescendants()) do
-                                if p:IsA("BasePart") then
-                                    p.Color = color
-                                end
-                            end
-                        end
-                    end
-                    task.wait(0.5)
-                end
-            end)
-        end
-    end
-})
-
-Tab5:AddButton({
-    Name = "Controle de Carros",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/DeepSecSentry/MR.dsScripts/refs/heads/main/Vehicle%20Controller-v17"))()
-    end
-})
-Tab5:AddButton({
-    Name = "DARK CAR FLY FREE",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/realgengar/scripts/refs/heads/main/FlyCar.lua', true))()
     end
 })
