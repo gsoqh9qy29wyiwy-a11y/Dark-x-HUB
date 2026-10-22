@@ -5783,3 +5783,62 @@ TabLag:AddParagraph({
  "O script começa a causar lag após 35 segundos"
 })                            
                 
+-- ===================================================================
+-- ABA: CARROS
+-- ====================================================================
+-- VariÃ¡veis
+local carSpeed = 25
+local turboValue = "25"
+local selectedMusic = ""
+local selectedVehicle = nil
+local isColorChanging = false
+
+-- ==================== VELOCIDADE E TURBO ====================
+Tab5:AddSection({"Velocidade Sem <GamePass>"})
+
+Tab5:AddTextBox({
+    Name = "Definir Velocidade",
+    PlaceholderText = "Velocidade: 200",
+    Callback = function(v)
+        carSpeed = tonumber(v) or carSpeed
+    end
+})
+
+Tab5:AddTextBox({
+    Name = "Definir Turbo",
+    PlaceholderText = "Turbo: 200",
+    Callback = function(v)
+        turboValue = tostring(v)
+    end
+})
+
+Tab5:AddButton({
+    Name = "Aplicar Velocidade e Turbo",
+    Callback = function()
+        local car = vu9.Vehicles:FindFirstChild(vu7.Name .. "Car")
+        if not car then return end
+
+        local function apply(seat)
+            if seat then
+                local ms = seat:FindFirstChild("MaxSpeed") or seat:FindFirstChild("TopSpeed")
+                if ms then ms.Value = carSpeed end
+                
+                local tb = seat:FindFirstChild("Turbo")
+                if tb then tb.Value = turboValue end
+            end
+        end
+
+        if car:FindFirstChild("Seats") then
+            apply(car.Seats:FindFirstChild("VehicleSeat"))
+        end
+        if car:FindFirstChild("Body") then
+            apply(car.Body:FindFirstChild("VehicleSeat"))
+        end
+
+        game.StarterGui:SetCore("SendNotification", {
+                Title = "Sucesso ✅",
+                Text = "Velocidade e Turbo Aplicados ",
+                Duration = 5
+            })
+        end
+})
