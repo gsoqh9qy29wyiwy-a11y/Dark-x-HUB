@@ -5786,19 +5786,6 @@ TabLag:AddParagraph({
 -- ===================================================================
 -- ABA: CARROS
 -- ====================================================================
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui = game:GetService("StarterGui")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
-
--- Variáveis de compatibilidade seguras
-local vu7 = LocalPlayer
-local vu8 = ReplicatedStorage
-local vu9 = Workspace
-
 local carSpeed = 25
 local turboValue = "25"
 local selectedMusic = ""
