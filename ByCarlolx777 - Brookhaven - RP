@@ -1,3 +1,8 @@
+--[====================================================================--
+--                        DARK X HUB - BROOKHAVEN                       --
+--                          by HACKELINDOO                              --
+--====================================================================--
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
@@ -5,20 +10,18 @@ local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
--- Função que cria a tela de loading e retorna uma promise
+-- ====================================================================
+-- TELA DE CARREGAMENTO (LOADING SCREEN)
+-- ====================================================================
 local function createLoadingScreen()
-    local promise = {}
-    promise.completed = false
-    promise.connection = nil
+    local promise = { completed = false, connection = nil }
     
-    -- Remove GUI antiga se existir
     pcall(function()
         if CoreGui:FindFirstChild("LoadingScreen") then
             CoreGui.LoadingScreen:Destroy()
         end
     end)
 
-    -- Cria a UI de carregamento
     local gui = Instance.new("ScreenGui")
     gui.Name = "LoadingScreen"
     gui.IgnoreGuiInset = true
@@ -26,13 +29,11 @@ local function createLoadingScreen()
     gui.Parent = CoreGui
     pcall(function() syn.protect_gui(gui) end)
 
-    -- Frame principal com gradiente azul
     local frame = Instance.new("Frame")
     frame.BackgroundColor3 = Color3.new(0, 0, 0)
     frame.Size = UDim2.new(1, 0, 1, 0)
     frame.Parent = gui
 
-    -- Gradiente azul escuro para o fundo
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 20, 40)),
@@ -41,20 +42,18 @@ local function createLoadingScreen()
     gradient.Rotation = 45
     gradient.Parent = frame
 
-    -- Container central para o conteúdo
     local container = Instance.new("Frame")
     container.Size = UDim2.new(0.8, 0, 0.6, 0)
     container.Position = UDim2.new(0.1, 0, 0.2, 0)
     container.BackgroundTransparency = 1
     container.Parent = frame
 
-    -- Título "Demon Hub" com efeito brilhante
     local titleText = Instance.new("TextLabel")
     titleText.Size = UDim2.new(1, 0, 0.3, 0)
     titleText.Position = UDim2.new(0, 0, 0.1, 0)
-    titleText.TextColor3 = Color3.fromRGB(359, 0, 0)
+    titleText.TextColor3 = Color3.fromRGB(255, 0, 0)
     titleText.TextStrokeTransparency = 0.3
-    titleText.TextStrokeColor3 = Color3.fromRGB(359, 0, 0)
+    titleText.TextStrokeColor3 = Color3.fromRGB(255, 0, 0)
     titleText.BackgroundTransparency = 1
     titleText.Font = Enum.Font.GothamBold
     titleText.TextScaled = true
@@ -63,26 +62,12 @@ local function createLoadingScreen()
     titleText.ZIndex = 3
     titleText.Parent = container
 
-    -- Efeito de brilho no título
-    spawn(function()
-        while titleText and titleText.Parent do
-            local tween = TweenService:Create(
-                titleText,
-                TweenInfo.new(3.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 0, true),
-                {TextColor3 = Color3.fromRGB(30, 0, 0)}
-            )
-            tween:Play()
-            task.wait(1.5)
-        end
-    end)
-
-    -- Porcentagem
     local percentText = Instance.new("TextLabel")
     percentText.Size = UDim2.new(1, 0, 0.2, 0)
     percentText.Position = UDim2.new(0, 0, 0.4, 0)
-    percentText.TextColor3 = Color3.fromRGB(359, 0, 0)
+    percentText.TextColor3 = Color3.fromRGB(255, 0, 0)
     percentText.TextStrokeTransparency = 0.5
-    percentText.TextStrokeColor3 = Color3.fromRGB(359, 0, 0)
+    percentText.TextStrokeColor3 = Color3.fromRGB(255, 0, 0)
     percentText.BackgroundTransparency = 1
     percentText.Font = Enum.Font.GothamBold
     percentText.TextScaled = true
@@ -91,7 +76,6 @@ local function createLoadingScreen()
     percentText.ZIndex = 3
     percentText.Parent = container
 
-    -- Barra de progresso background (com cantos arredondados)
     local barBG = Instance.new("Frame")
     barBG.Size = UDim2.new(1, 0, 0.08, 0)
     barBG.Position = UDim2.new(0, 0, 0.65, 0)
@@ -100,277 +84,85 @@ local function createLoadingScreen()
     barBG.BackgroundTransparency = 0.3
     barBG.ZIndex = 2
     
-    -- Corner para arredondar o fundo
     local bgCorner = Instance.new("UICorner")
     bgCorner.CornerRadius = UDim.new(0.5, 0)
     bgCorner.Parent = barBG
-    
     barBG.Parent = container
 
-    -- Barra de progresso (com cantos arredondados)
     local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(0, 0, 1, 0) -- Começa em 0
-    bar.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
+    bar.Size = UDim2.new(0, 0, 1, 0)
+    bar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     bar.BorderSizePixel = 0
     bar.ZIndex = 3
     
-    -- Corner para arredondar a barra
     local barCorner = Instance.new("UICorner")
     barCorner.CornerRadius = UDim.new(0.5, 0)
     barCorner.Parent = bar
-    
-    -- Gradiente na barra
-    local barGradient = Instance.new("UIGradient")
-    barGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 200, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 200, 255))
-    })
-    barGradient.Parent = bar
-   
     bar.Parent = barBG
 
-    -- Texto do usuário
     local userText = Instance.new("TextLabel")
     userText.Size = UDim2.new(1, 0, 0.15, 0)
     userText.Position = UDim2.new(0, 0, 0.8, 0)
-    userText.TextColor3 = Color3.fromRGB(359, 0, 0)
+    userText.TextColor3 = Color3.fromRGB(255, 0, 0)
     userText.BackgroundTransparency = 1
     userText.Font = Enum.Font.Gotham
     userText.TextScaled = true
-    userText.Text = "Carregando: "..lp.Name.." ("..tostring(lp.AccountAge).." dias)"
+    userText.Text = "Carregando: " .. lp.Name .. " (" .. tostring(lp.AccountAge) .. " dias)"
     userText.TextSize = 14
     userText.ZIndex = 3
     userText.Parent = container
 
-    -- Sistema de Partículas Vemelhos Melhorado
-    local function createParticles()
-        local particlesFolder = Instance.new("Folder")
-        particlesFolder.Name = "Particles"
-        particlesFolder.Parent = frame
-
-        -- Partículas pequenas
-        for i = 1, 20 do
-            local particle = Instance.new("Frame")
-            particle.Size = UDim2.new(0, math.random(3, 8), 0, math.random(3, 8))
-            particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
-            particle.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
-            particle.BackgroundTransparency = 0.8
-            particle.BorderSizePixel = 0
-            particle.ZIndex = 1
-            
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(1, 0)
-            corner.Parent = particle
-            
-            particle.Parent = particlesFolder
-
-            -- Animação da partícula
-            spawn(function()
-                while particle and particle.Parent do
-                    local targetPos = UDim2.new(math.random(), 0, math.random(), 0)
-                    local tweenInfo = TweenInfo.new(
-                        math.random(3, 6),
-                        Enum.EasingStyle.Quad,
-                        Enum.EasingDirection.InOut
-                    )
-                    
-                    local tween = TweenService:Create(particle, tweenInfo, {
-                        Position = targetPos,
-                        BackgroundTransparency = math.random(0.5, 0.9),
-                        Size = UDim2.new(0, math.random(2, 10), 0, math.random(2, 10))
-                    })
-                    tween:Play()
-                    
-                    task.wait(math.random(2, 4))
-                end
-            end)
-        end
-
-        -- Partículas médias
-        for i = 1, 10 do
-            local mediumParticle = Instance.new("Frame")
-            mediumParticle.Size = UDim2.new(0, math.random(10, 20), 0, math.random(10, 20))
-            mediumParticle.Position = UDim2.new(math.random(), 0, math.random(), 0)
-            mediumParticle.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
-            mediumParticle.BackgroundTransparency = 0.6
-            mediumParticle.BorderSizePixel = 0
-            mediumParticle.ZIndex = 1
-            
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(1, 0)
-            corner.Parent = mediumParticle
-            
-            mediumParticle.Parent = particlesFolder
-
-            -- Animação da partícula média
-            spawn(function()
-                while mediumParticle and mediumParticle.Parent do
-                    local targetPos = UDim2.new(math.random(), 0, math.random(), 0)
-                    local tweenInfo = TweenInfo.new(
-                        math.random(4, 8),
-                        Enum.EasingStyle.Circular,
-                        Enum.EasingDirection.InOut
-                    )
-                    
-                    local tween = TweenService:Create(mediumParticle, tweenInfo, {
-                        Position = targetPos,
-                        BackgroundTransparency = math.random(0.3, 0.7),
-                        Rotation = math.random(-360, 360)
-                    })
-                    tween:Play()
-                    
-                    task.wait(math.random(3, 6))
-                end
-            end)
-        end
-
-        -- Partículas especiais (estrelas)
-        for i = 1, 5 do
-            local star = Instance.new("Frame")
-            star.Size = UDim2.new(0, 4, 0, 4)
-            star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-            star.BackgroundColor3 = Color3.fromRGB(359, 0, 0)
-            star.BackgroundTransparency = 0.9
-            star.BorderSizePixel = 0
-            star.ZIndex = 2
-            
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(1, 0)
-            corner.Parent = star
-            
-            star.Parent = particlesFolder
-
-            -- Animação de brilho da estrela
-            spawn(function()
-                while star and star.Parent do
-                    local tweenInfo = TweenInfo.new(
-                        0.8,
-                        Enum.EasingStyle.Quad,
-                        Enum.EasingDirection.InOut,
-                        0,
-                        true
-                    )
-                    
-                    local tween = TweenService:Create(star, tweenInfo, {
-                        BackgroundTransparency = 0.4,
-                        Size = UDim2.new(0, 6, 0, 6)
-                    })
-                    tween:Play()
-                    
-                    task.wait(1.6)
-                end
-            end)
-        end
-    end
-
-    -- Criar partículas
-    createParticles()
-
-    -- Variáveis para controle do loading
     local currentPercent = 0
-    local targetPercent = 100
-    local loadingTime = 4 -- 4 segundos para carregar até 100%
+    local loadingTime = 4
     local startTime = tick()
     
-    -- Função para atualizar o loading
-    local function updateLoading()
+    local heartbeatConnection
+    heartbeatConnection = RunService.Heartbeat:Connect(function()
         local elapsed = tick() - startTime
         local progress = math.min(elapsed / loadingTime, 1)
-        
         currentPercent = math.floor(progress * 100)
         percentText.Text = currentPercent .. "%"
         bar.Size = UDim2.new(progress, 0, 1, 0)
         
-        return progress >= 1
-    end
-
-    -- Conexão para atualizar o loading
-    local heartbeatConnection
-    heartbeatConnection = RunService.Heartbeat:Connect(function()
-        local finished = updateLoading()
-        
-        if finished then
+        if progress >= 1 then
             heartbeatConnection:Disconnect()
-            
-            -- Fade out suave de toda a UI
             local fadeTween = TweenService:Create(frame, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 BackgroundTransparency = 1
             })
             fadeTween:Play()
-            
-            -- Aguarda o fade out terminar e executa as ações finais
             fadeTween.Completed:Connect(function()
                 percentText.Text = "100%"
-                wait(0.4)
+                task.wait(0.4)
                 
-                -- Toca som de conclusão
-                local sound = Instance.new("Sound")
-                sound.SoundId = "rbxassetid://8486683243"
-                sound.Volume = 0.5
-                sound.PlayOnRemove = true
-                sound.Parent = workspace
-                sound:Destroy()
+                pcall(function()
+                    game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer("RolePlayName", "[ Dark User ]")
+                    game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer("RolePlayBio", "Criador: HACKELINDOO")
+                end)
                 
-                game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
-                [1] = "RolePlayName",
-                [2] = "[ Dark User ]"
-                }))
-                
-                -- Define a bio do jogador
-                game:GetService("ReplicatedStorage").RE["1RPNam1eTex1t"]:FireServer(table.unpack({
-                    [1] = "RolePlayBio",
-                    [2] = "Criador: HACKELINDOO",
-                }))
-                
-                 -- Exibe a notificação de boas-vindas
                 StarterGui:SetCore("SendNotification", {
                     Title = "Dark x Hub",
                     Text = "Bem-vindo ao Dark x Hub!",
                     Duration = 4
                 })
 
-                -- Marca como concluído e limpa
                 promise.completed = true
-                if gui then
-                    gui:Destroy()
-                end
+                if gui then gui:Destroy() end
             end)
         end
     end)
 
-    -- Função para limpar a UI
-    local function cleanup()
-        if heartbeatConnection then
-            heartbeatConnection:Disconnect()
-        end
-        if gui then
-            gui:Destroy()
-        end
-        if promise.connection then
-            promise.connection:Disconnect()
-        end
-    end
-
-    -- Configura a promise para limpeza
-    promise.cleanup = cleanup
-    
     return promise
 end
 
--- Função para esperar até que a promise seja resolvida
 local function waitForPromise(promise)
     while not promise.completed do
         task.wait()
     end
 end
 
--- Uso:
 local loadingPromise = createLoadingScreen()
-
--- Aqui você coloca o código que deve esperar até que o loading termine
 waitForPromise(loadingPromise)
 
-print("Loading completo! Agora executando o resto do script...")
 -- ====================================================================
 -- 1. SERVIÇOS E VARIÁVEIS INICIAIS
 -- ====================================================================
@@ -1224,7 +1016,643 @@ local function ForcePart(v)
         alignPos.Attachment1 = BH_Attachment
     end
 end
-                      
+-- ====================================================================
+-- 3. COORDENADAS E BACKEND DOS PROPS
+-- ====================================================================
+local CoordenadasFling = Vector3.new(-881615241216, 881615241216, -881615241216)
+
+local meusPropsCache = {}
+local PropMovementMode = "Nenhum"
+local ModoAvancadoAtivo = false
+local ModoKillAtivo = false
+local ModoFlingAtivo = false
+local selecionarTodosProps = false
+local jogadorSelecionadoProp = nil
+local espionandoProps = false
+local PropsActive = false
+local WaveSpeed = 0.25
+local ColorSpread = 0.05
+
+local ConfigsProps = {
+    Orbita = { Speed = 2, Distance = 10, Height = 2 },
+    Aura = { Speed = 2, Distance = 8, Height = 1 },
+    Tremor = { Speed = 2, Distance = 10, Height = 2 },
+    Caotico = { Speed = 2, Distance = 12, Height = 2 },
+    Estrela = { Speed = 2, Distance = 15, Height = 15 },
+    Alinhamento = { Speed = 2, Distance = 6, Height = 2 },
+    Furacao = { Speed = 2, Distance = 10, Height = 4 },
+    Portal = { Speed = 2, Distance = 10, Height = 4 },
+    Nenhum = { Speed = 0, Distance = 0, Height = 0 }
+}
+
+local function AlgumModoPropAtivo()
+    return (PropMovementMode ~= "Nenhum") or ModoAvancadoAtivo or ModoKillAtivo or ModoFlingAtivo or PropsActive
+end
+
+local function ObterListaNomesProps()
+    local lista = {"Todos"}
+    for _, jogador in ipairs(vu6:GetPlayers()) do
+        table.insert(lista, jogador.Name)
+    end
+    return lista
+end
+
+local function AtualizarCacheProps()
+    table.clear(meusPropsCache)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("SetCurrentCFrame") then
+            table.insert(meusPropsCache, obj)
+        end
+    end
+end
+
+local function SendNotification(titulo, texto, tempo, icone)
+    pcall(function()
+        local dados = {
+            Title = titulo or "Aviso",
+            Text = texto or "",
+            Duration = tempo or 3
+        }
+        if icone then
+            dados.Icon = icone
+        end
+        game:GetService("StarterGui"):SetCore("SendNotification", dados)
+    end)
+end
+
+-- Loops de Segundo Plano dos Props
+task.spawn(function()
+    local ferramentaNoInventario = false
+    while true do
+        if AlgumModoPropAtivo() then
+            local char = vu7.Character
+            local mochila = vu7:FindFirstChild("Backpack")
+            local fE = char and char:FindFirstChild("PropMaker")
+            local fM = mochila and mochila:FindFirstChild("PropMaker")
+            if not fE and not fM then
+                pcall(function()
+                    vu8:WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer("PickingTools", "PropMaker")
+                end)
+            end
+            ferramentaNoInventario = true
+        else
+            if ferramentaNoInventario then
+                pcall(function()
+                    local char = vu7.Character
+                    local mochila = vu7:FindFirstChild("Backpack")
+                    local fE = char and char:FindFirstChild("PropMaker")
+                    local fM = mochila and mochila:FindFirstChild("PropMaker")
+                    if fE then fE:Destroy() end
+                    if fM then fM:Destroy() end
+                end)
+                ferramentaNoInventario = false
+            end
+        end
+        task.wait(0.2)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if AlgumModoPropAtivo() then
+            pcall(AtualizarCacheProps)
+        end
+        task.wait(0.4)
+    end
+end)
+
+task.spawn(function()
+    local angle, tempoGeral = 0, 0
+    while true do
+        local dt = task.wait(0.03)
+        if (PropMovementMode == "Nenhum" and not ModoAvancadoAtivo and not ModoKillAtivo and not ModoFlingAtivo) or #meusPropsCache == 0 then
+            continue
+        end
+
+        local lista = {}
+        if selecionarTodosProps then
+            for _, p in ipairs(vu6:GetPlayers()) do
+                if p ~= vu7 and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(lista, p)
+                end
+            end
+        else
+            if jogadorSelecionadoProp and jogadorSelecionadoProp.Character and jogadorSelecionadoProp.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(lista, jogadorSelecionadoProp)
+            end
+        end
+
+        if #lista == 0 then continue end
+
+        local cfg = ConfigsProps[PropMovementMode]
+        local speedVal = cfg and cfg.Speed or 2
+        angle = angle + (dt * speedVal)
+        tempoGeral = tempoGeral + dt * (speedVal * 2)
+        local total = #meusPropsCache
+
+        local myChar = vu7.Character
+        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local myCF = myRoot and myRoot.CFrame or CFrame.new()
+
+        for i, prop in ipairs(meusPropsCache) do
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then
+                local pDono = lista[((i - 1) % #lista) + 1]
+                if pDono and pDono.Character and pDono.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = pDono.Character.HumanoidRootPart
+                    local rCF = root.CFrame
+                    local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
+                    local sitCF = rCF * CFrame.new(0, -0.6, 0)
+
+                    -- 1. MODO FLING
+                    if ModoFlingAtivo then
+                        if humAlvo and (humAlvo.SeatPart or humAlvo.Sit) then
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, CFrame.new(CoordenadasFling))
+                            end)
+                        else
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, sitCF)
+                            end)
+                        end
+
+                    -- 2. MODO KILL (VOID)
+                    elseif ModoKillAtivo then
+                        if humAlvo and (humAlvo.SeatPart or humAlvo.Sit) then
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, CFrame.new(rCF.Position.X, -500, rCF.Position.Z))
+                            end)
+                        else
+                            task.spawn(function()
+                                pcall(remote.InvokeServer, remote, sitCF)
+                            end)
+                        end
+
+                    -- 3. MODO BRING
+                    elseif ModoAvancadoAtivo then
+                        if humAlvo and (humAlvo.SeatPart or humAlvo.Sit) then
+                            task.spawn(function() 
+                                pcall(remote.InvokeServer, remote, myCF * CFrame.new(0, 0, -3)) 
+                            end)
+                        else
+                            task.spawn(function() 
+                                pcall(remote.InvokeServer, remote, sitCF) 
+                            end)
+                        end
+
+                    -- 4. MODOS DE MOVIMENTO
+                    elseif cfg and PropMovementMode ~= "Nenhum" then
+                        local tPos = rCF.Position
+                        local olharPara = rCF.Position
+                        local spacing = (math.pi * 2) / math.max(total, 1)
+                        local fAngle = angle + (i * spacing)
+
+                        if PropMovementMode == "Orbita" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance)
+                        elseif PropMovementMode == "Aura" then
+                            local o = math.sin(tempoGeral * 3 + i) * 1.5
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance + (o * 0.2)), cfg.Height + o, math.sin(fAngle * 1.5) * (cfg.Distance + (o * 0.2)))
+                            olharPara = rCF.Position + Vector3.new(0, o, 0)
+                        elseif PropMovementMode == "Tremor" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tick() * 50 + i) * 0.8, math.cos(tick() * 55 + i) * 0.8, math.sin(tick() * 60 + i) * 0.8)
+                        elseif PropMovementMode == "Caotico" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tempoGeral + (i * 2)) * (cfg.Distance * 0.5), math.cos(tempoGeral * 1.8 + i) * 4, math.sin(tempoGeral * 1.3 + i) * (cfg.Distance * 0.5))
+                            olharPara = tPos + Vector3.new(math.sin(tempoGeral * 5), math.cos(tempoGeral * 5), math.sin(tempoGeral * 3))
+                        elseif PropMovementMode == "Estrela" then
+                            local e = cfg.Distance + (math.sin(tempoGeral * 2.5 + i) * (cfg.Distance * 0.4))
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * e, cfg.Height + (math.cos(fAngle) * 2), math.sin(fAngle) * e)
+                            olharPara = rCF.Position + Vector3.new(0, cfg.Height, 0)
+                        elseif PropMovementMode == "Alinhamento" then
+                            tPos = rCF.Position + (rCF.LookVector * (-5 - (i * cfg.Distance))) + Vector3.new(0, cfg.Height + (math.sin(tempoGeral + i) * 0.5), 0)
+                            olharPara = tPos - (rCF.LookVector * 100)
+                        elseif PropMovementMode == "Furacao" then
+                            local s = ((tempoGeral + (i * 2)) % 10) - 3
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = pFrente + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))), cfg.Height + s, math.sin(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))))
+                            olharPara = pFrente + Vector3.new(0, 10, 0)
+                        elseif PropMovementMode == "Portal" then
+                            local rp = cfg.Distance * 0.7
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = (rCF * CFrame.new(0, cfg.Height + (math.sin(fAngle) * rp), -5)).Position + (rCF.RightVector * (math.cos(fAngle) * rp))
+                            olharPara = pFrente + (rCF.LookVector * 20)
+                        end
+                        task.spawn(function() pcall(remote.InvokeServer, remote, CFrame.lookAt(tPos, olharPara)) end)
+                    end
+                end
+            end
+        end
+    end
+end)
+-- ====================================================================
+-- MOVIMENTAÇÃO DOS PROPS IDÊNTICA AO VÍDEO (ÓRBITA EM ANEL SINCRONIZADA)
+-- Parâmetros do vídeo: Velocidade 40 | Distância 2 | Altura -1
+-- ====================================================================
+task.spawn(function()
+    local angle, tempoGeral = 0, 0
+    while true do
+        local dt = task.wait(0.02)
+        if (PropMovementMode == "Nenhum" and not ModoAvancadoAtivo and not ModoKillAtivo and not ModoFlingAtivo) or #meusPropsCache == 0 then
+            continue
+        end
+
+        local lista = {}
+        if selecionarTodosProps then
+            for _, p in ipairs(vu6:GetPlayers()) do
+                if p ~= vu7 and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(lista, p)
+                end
+            end
+        else
+            if jogadorSelecionadoProp and jogadorSelecionadoProp.Character and jogadorSelecionadoProp.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(lista, jogadorSelecionadoProp)
+            end
+        end
+
+        if #lista == 0 then continue end
+
+        -- Configurações exatas do vídeo para os modos de ataque
+        local orbitaVelocidade = 4.5  -- Giro rápido e contínuo (equivalente aos sliders do vídeo)
+        local orbitaDistancia = 2     -- Raio 2 (bem colado no corpo)
+        local orbitaAltura = -1       -- Altura -1 (na altura ideal do assento)
+
+        angle = angle + (dt * orbitaVelocidade)
+        tempoGeral = tempoGeral + dt * (orbitaVelocidade * 2)
+        local total = #meusPropsCache
+
+        local myChar = vu7.Character
+        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local myCF = myRoot and myRoot.CFrame or CFrame.new()
+
+        for i, prop in ipairs(meusPropsCache) do
+            local remote = prop:FindFirstChild("SetCurrentCFrame")
+            if remote then
+                local pDono = lista[((i - 1) % #lista) + 1]
+                if pDono and pDono.Character and pDono.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = pDono.Character.HumanoidRootPart
+                    local rCF = root.CFrame
+                    local humAlvo = pDono.Character:FindFirstChildWhichIsA("Humanoid")
+                    local jaSentou = humAlvo and (humAlvo.SeatPart or humAlvo.Sit)
+
+                    -- 1. SE O ALVO SENTOU, EXECUTA O COMANDO SELECIONADO:
+                    if ModoFlingAtivo and jaSentou then
+                        task.spawn(function()
+                            pcall(remote.InvokeServer, remote, CFrame.new(CoordenadasFling))
+                        end)
+
+                    elseif ModoKillAtivo and jaSentou then
+                        task.spawn(function()
+                            pcall(remote.InvokeServer, remote, CFrame.new(rCF.Position.X, -500, rCF.Position.Z))
+                        end)
+
+                    elseif ModoAvancadoAtivo and jaSentou then
+                        task.spawn(function() 
+                            pcall(remote.InvokeServer, remote, myCF * CFrame.new(0, 0, -3)) 
+                        end)
+
+                    -- 2. SE NÃO SENTOU: CRIA A ÓRBITA IDÊNTICA AO VÍDEO
+                    elseif ModoFlingAtivo or ModoKillAtivo or ModoAvancadoAtivo then
+                        local vel = root.AssemblyLinearVelocity or root.Velocity
+                        local isMoving = (humAlvo and humAlvo.MoveDirection.Magnitude > 0.05) or (vel.Magnitude > 1.5)
+                        
+                        -- Posição central da órbita (se o player correr, o anel vai um pouco à frente)
+                        local centro = root.Position
+                        if isMoving then
+                            local avanco = math.clamp(vel.Magnitude * 0.22, 1.2, 5)
+                            centro = (rCF * CFrame.new(0, 0, -avanco)).Position
+                        end
+
+                        -- Distribuição simétrica em anel ao redor do alvo
+                        local spacing = (math.pi * 2) / math.max(total, 1)
+                        local fAngle = angle + (i * spacing)
+
+                        local propPos = centro + Vector3.new(
+                            math.cos(fAngle) * orbitaDistancia,
+                            orbitaAltura,
+                            math.sin(fAngle) * orbitaDistancia
+                        )
+
+                        -- Todos os sofás virados diretamente para o centro, igual ao vídeo
+                        local olharPara = centro + Vector3.new(0, orbitaAltura, 0)
+                        local orbitCF = CFrame.lookAt(propPos, olharPara)
+
+                        task.spawn(function()
+                            pcall(remote.InvokeServer, remote, orbitCF)
+                        end)
+
+                    -- 3. MOVIMENTOS NORMAIS SELECIONADOS NO MENU DE PROPS
+                    elseif PropMovementMode ~= "Nenhum" then
+                        local cfg = ConfigsProps[PropMovementMode]
+                        local tPos = rCF.Position
+                        local olharPara = rCF.Position
+                        local spacing = (math.pi * 2) / math.max(total, 1)
+                        local fAngle = angle + (i * spacing)
+
+                        if PropMovementMode == "Orbita" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance)
+                            olharPara = rCF.Position + Vector3.new(0, cfg.Height, 0)
+                        elseif PropMovementMode == "Aura" then
+                            local o = math.sin(tempoGeral * 3 + i) * 1.5
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance + (o * 0.2)), cfg.Height + o, math.sin(fAngle * 1.5) * (cfg.Distance + (o * 0.2)))
+                            olharPara = rCF.Position + Vector3.new(0, o, 0)
+                        elseif PropMovementMode == "Tremor" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tick() * 50 + i) * 0.8, math.cos(tick() * 55 + i) * 0.8, math.sin(tick() * 60 + i) * 0.8)
+                        elseif PropMovementMode == "Caotico" then
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * cfg.Distance, cfg.Height, math.sin(fAngle) * cfg.Distance) + Vector3.new(math.sin(tempoGeral + (i * 2)) * (cfg.Distance * 0.5), math.cos(tempoGeral * 1.8 + i) * 4, math.sin(tempoGeral * 1.3 + i) * (cfg.Distance * 0.5))
+                            olharPara = tPos + Vector3.new(math.sin(tempoGeral * 5), math.cos(tempoGeral * 5), math.sin(tempoGeral * 3))
+                        elseif PropMovementMode == "Estrela" then
+                            local e = cfg.Distance + (math.sin(tempoGeral * 2.5 + i) * (cfg.Distance * 0.4))
+                            tPos = rCF.Position + Vector3.new(math.cos(fAngle) * e, cfg.Height + (math.cos(fAngle) * 2), math.sin(fAngle) * e)
+                            olharPara = rCF.Position + Vector3.new(0, cfg.Height, 0)
+                        elseif PropMovementMode == "Alinhamento" then
+                            tPos = rCF.Position + (rCF.LookVector * (-5 - (i * cfg.Distance))) + Vector3.new(0, cfg.Height + (math.sin(tempoGeral + i) * 0.5), 0)
+                            olharPara = tPos - (rCF.LookVector * 100)
+                        elseif PropMovementMode == "Furacao" then
+                            local s = ((tempoGeral + (i * 2)) % 10) - 3
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = pFrente + Vector3.new(math.cos(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))), cfg.Height + s, math.sin(fAngle * 1.5) * (cfg.Distance * (1 - (s / 15))))
+                            olharPara = pFrente + Vector3.new(0, 10, 0)
+                        elseif PropMovementMode == "Portal" then
+                            local rp = cfg.Distance * 0.7
+                            local pFrente = rCF.Position + (rCF.LookVector * 5)
+                            tPos = (rCF * CFrame.new(0, cfg.Height + (math.sin(fAngle) * rp), -5)).Position + (rCF.RightVector * (math.cos(fAngle) * rp))
+                            olharPara = pFrente + (rCF.LookVector * 20)
+                        end
+
+                        task.spawn(function() pcall(remote.InvokeServer, remote, CFrame.lookAt(tPos, olharPara)) end)
+                    end
+                end
+            end
+        end
+    end
+end)
+-- Variáveis globais para o Fling Ônibus
+local running = false
+local connection = nil
+local flingConnection = nil
+local flingToggle = nil
+local testSavedPosition = nil
+
+local function disableCarClient()
+    pcall(function()
+        local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
+        if playerScripts then
+            local carScript = playerScripts:FindFirstChild("CarClient") or playerScripts:FindFirstChild("VehicleClient")
+            if carScript and carScript:IsA("LocalScript") then
+                carScript.Disabled = true
+            end
+        end
+    end)
+end
+
+local function updateCamera()
+    pcall(function()
+        if viewEnabled then
+            local target = vu6:FindFirstChild(_G.SelectedPlayer)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = target.Character.Humanoid
+            end
+        else
+            if vu7.Character and vu7.Character:FindFirstChild("Humanoid") then
+                vuCam.CameraSubject = vu7.Character.Humanoid
+            end
+        end
+    end)
+end
+
+-- Função para parar o Fling Ônibus e retornar à posição salva
+local function StopTestFling()
+    running = false
+    if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+    if connection then connection:Disconnect() connection = nil end
+
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character
+    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    local Vehicles = game.Workspace:FindFirstChild("Vehicles")
+
+    if RootPart and Humanoid then
+        Humanoid.PlatformStand = true
+        for _, obj in pairs(RootPart:GetChildren()) do
+            if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+        end
+    end
+
+    pcall(function()
+        game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer("DeleteAllVehicles")
+    end)
+    task.wait(0.5)
+
+    if Vehicles then
+        local PCar = Vehicles:FindFirstChild(Player.Name.."Car")
+        if PCar and PCar.PrimaryPart then
+            for _, obj in pairs(PCar.PrimaryPart:GetChildren()) do
+                if obj:IsA("BodyAngularVelocity") or obj:IsA("BodyVelocity") then obj:Destroy() end
+            end
+        end
+    end
+    task.wait(0.5)
+
+    pcall(function()
+        if RootPart and testSavedPosition then
+            local bp = Instance.new("BodyPosition", RootPart)
+            bp.Position = testSavedPosition + Vector3.new(0, 3, 0)
+            bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            local bg = Instance.new("BodyGyro", RootPart)
+            bg.CFrame = RootPart.CFrame
+            bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            task.wait(1)
+            bp:Destroy()
+            bg:Destroy()
+        end
+        if Humanoid then
+            Humanoid.PlatformStand = false
+        end
+    end)
+end
+
+-- Função principal do Fling Ônibus
+local function flingWithBus(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character or not LocalPlayer.Character then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local myHRP = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not myHRP then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    
+    testSavedPosition = myHRP.Position
+
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1181.83, 76.08, -1158.83))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+    end)
+    task.wait(0.5)
+
+    disableCarClient()
+
+    local args = { [1] = "DeleteAllVehicles" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    args = { [1] = "PickingCar", [2] = "SchoolBus" }
+    pcall(function()
+        ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+    end)
+    task.wait(1)
+    local vehiclesFolder = Workspace:FindFirstChild("Vehicles")
+    if not vehiclesFolder then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    local busName = LocalPlayer.Name .. "Car"
+    local bus = vehiclesFolder:FindFirstChild(busName)
+    if not bus then 
+        if flingToggle then flingToggle:Set(false) end
+        return 
+    end
+    pcall(function()
+        myHRP.Anchored = true
+        myHRP.CFrame = CFrame.new(Vector3.new(1171.15, 79.45, -1166.2))
+        task.wait(0.2)
+        myHRP.Velocity = Vector3.zero
+        myHRP.RotVelocity = Vector3.zero
+        myHRP.Anchored = false
+        humanoid:ChangeState(Enum.HumanoidStateType.Seated)
+    end)
+    local sitStart = tick()
+    repeat
+        task.wait()
+        if tick() - sitStart > 10 or not running then 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+    until humanoid.Sit
+
+    for _, part in ipairs(bus:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+            pcall(function() part:SetNetworkOwner(nil) end)
+        end
+    end
+
+    running = true
+    connection = RunService.Stepped:Connect(function()
+        if not running then return end
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end)
+
+    local startTime = tick()
+    local walkFlingInstancePlayer = nil
+
+    flingConnection = RunService.Heartbeat:Connect(function()
+        if not running then return end
+        if not targetPlayer or not targetPlayer.Character then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        local newTargetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local newTargetHumanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+        if not newTargetHRP or not newTargetHumanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+        if not myHRP or not humanoid then 
+            running = false 
+            if flingToggle then flingToggle:Set(false) end
+            return 
+        end
+
+        local offset = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
+        pcall(function()
+            local targetPosition = newTargetHRP.Position + offset
+            bus:PivotTo(
+                CFrame.new(targetPosition) * CFrame.Angles(
+                    math.rad(Workspace.DistributedGameTime * 12000),
+                    math.rad(Workspace.DistributedGameTime * 15000),
+                    math.rad(Workspace.DistributedGameTime * 18000)
+                )
+            )
+        end)
+
+        local playerSeated = false
+        for _, seat in ipairs(bus:GetDescendants()) do
+            if (seat:IsA("Seat") or seat:IsA("VehicleSeat")) and seat.Name ~= "VehicleSeat" then
+                if seat.Occupant == newTargetHumanoid then
+                    playerSeated = true
+                    break
+                end
+            end
+        end
+
+        if playerSeated or tick() - startTime > 10 then
+            running = false
+            if flingConnection then flingConnection:Disconnect() flingConnection = nil end
+            pcall(function()
+                bus:PivotTo(CFrame.new(Vector3.new(-59599.73, 2040070.50, -293391.16)))
+            end)
+
+            walkFlingInstancePlayer = Instance.new("BodyVelocity")
+            walkFlingInstancePlayer.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            walkFlingInstancePlayer.Velocity = Vector3.new(math.random(-5, 5), 5, math.random(-5, 5)).Unit * 1000 + Vector3.new(0, 1000, 0)
+            walkFlingInstancePlayer.Parent = myHRP
+            task.wait(0.5)
+
+            disableCarClient()
+
+            local args = { [1] = "DeleteAllVehicles" }
+            pcall(function()
+                ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+            end)
+
+            if walkFlingInstancePlayer then
+                walkFlingInstancePlayer:Destroy()
+                for _, part in ipairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = true end
+                end
+            end
+
+            pcall(function()
+                myHRP.Anchored = true
+                myHRP.CFrame = CFrame.new(testSavedPosition + Vector3.new(0, 5, 0))
+                task.wait(0.2)
+                myHRP.Velocity = Vector3.zero
+                myHRP.RotVelocity = Vector3.zero
+                myHRP.Anchored = false
+                if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+            end)
+
+            if flingToggle then flingToggle:Set(false) end
+        end
+    end)
+end
+
+-- Network Bypass
+if not getgenv().NetworkBypassed then
+    getgenv().NetworkBypassed = true
+    task.spawn(function()
+        while true do
+            pcall(function()
+                sethiddenproperty(vu7, "SimulationRadius", math.huge)
+            end)
+            vu10.Heartbeat:Wait()
+        end
+    end)
+end
+
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
 
 --  3. JANELA PRINCIPAL
@@ -1243,14 +1671,15 @@ Window:AddMinimizeButton({
     Corner = { CornerRadius = UDim.new(35, 1) },
 })
 
-local Tab1 = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://15309138473"})
+local Tab1 = Window:MakeTab({ Title = "Informações 1", Icon = "rbxassetid://15309138473"})
+local InfoTab = Window:MakeTab({Title = "Informações 2", Icon = "rbxassetid://15309138473"})
 local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
 local TrollTab = Window:MakeTab({ Title = "Troll Scripts", Icon = "rbxassetid://13364900349" })
 local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
 local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
 local TabTP = Window:MakeTab({" Teleportes", "map"})
 local Tab3 = Window:MakeTab({"Avatar", "shirt"})
-local TabAntis = Window:MakeTab({"Antis", "shield"})
+local TabAntis = Window:MakeTab({"Proteção", "shield"})
 local TabLag = Window:MakeTab({"Lag Server", "bomb"})
 local Tab5 = Window:MakeTab({"Carro", "car"})
 local Tabscript = Window:MakeTab({"Scripts", "scroll"})
@@ -2214,7 +2643,86 @@ end
 end)
 end
 })
+TabTroll:AddSection({ "Fling Ônibus (Teste)" })
 
+local PlayerDrop = TabTroll:AddDropdown({
+    Name = "Lista de jogadores",
+    Options = updatePlayerList(),
+    Default = "Nenhum Jogador No Servidor",
+    Callback = function(v) 
+        _G.SelectedPlayer = v 
+    end
+})
+
+TabTroll:AddButton({
+    Name = "Atualizar Lista de jogadores", 
+    Callback = function() 
+        PlayerDrop:Set(updatePlayerList()) 
+    end
+})
+
+-- ====================================================================
+-- TOGGLE: VISUALIZAR JOGADOR (VIEW)
+-- ====================================================================
+local viewPlayerConnection = nil
+TabTroll:AddToggle({
+    Name = "Visualizar Jogador (View)",
+    Description = "Observa o jogador selecionado em tempo real",
+    Default = false,
+    Callback = function(state)
+        viewEnabled = state
+        if state then
+            if viewPlayerConnection then
+                viewPlayerConnection:Disconnect()
+            end
+            
+            viewPlayerConnection = RunService.RenderStepped:Connect(function()
+                if viewEnabled and _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                    local target = Players:FindFirstChild(_G.SelectedPlayer)
+                    if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                        Camera.CameraSubject = target.Character.Humanoid
+                    end
+                end
+            end)
+        else
+            if viewPlayerConnection then
+                viewPlayerConnection:Disconnect()
+                viewPlayerConnection = nil
+            end
+            
+            -- Restaura a câmera para o seu personagem
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                Camera.CameraSubject = LocalPlayer.Character.Humanoid
+            end
+        end
+    end
+})
+
+flingToggle = TabTroll:AddToggle({
+    Name = "Inicia Fling (Ônibus Teste)",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if _G.SelectedPlayer and _G.SelectedPlayer ~= "" then
+                local target = vu6:FindFirstChild(_G.SelectedPlayer)
+                if target then
+                    running = true
+                    task.spawn(function()
+                        flingWithBus(target)
+                    end)
+                else
+                    warn("Jogador não encontrado!")
+                    if flingToggle then flingToggle:Set(false) end
+                end
+            else
+                warn("Selecione um jogador primeiro!")
+                if flingToggle then flingToggle:Set(false) end
+            end
+        else
+            StopTestFling()
+        end
+    end
+})
 
 Window:SelectTab(TabTroll)
 local Section = TrollTab:AddSection({"Funções"})
