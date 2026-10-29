@@ -5786,59 +5786,78 @@ TabLag:AddParagraph({
 -- ===================================================================
 -- ABA: CARROS
 -- ====================================================================
--- VariÃ¡veis
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- Variáveis de compatibilidade seguras
+local vu7 = LocalPlayer
+local vu8 = ReplicatedStorage
+local vu9 = Workspace
+
 local carSpeed = 25
 local turboValue = "25"
 local selectedMusic = ""
-local selectedVehicle = nil
 local isColorChanging = false
 
--- ==================== VELOCIDADE E TURBO ====================
-Tab5:AddSection({"Velocidade Sem <GamePass>"})
+-- ==================== SEÇÃO: VELOCIDADE E TURBO ====================
+pcall(function()
+    Tab5:AddSection({"Velocidade Sem GamePass"})
+end)
 
-Tab5:AddTextBox({
-    Name = "Definir Velocidade",
-    PlaceholderText = "Velocidade: EX",
-    Callback = function(v)
-        carSpeed = tonumber(v) or carSpeed
-    end
-})
+pcall(function()
+    Tab5:AddTextBox({
+        Name = "Definir Velocidade",
+        PlaceholderText = "Velocidade: 200",
+        Callback = function(v)
+            carSpeed = tonumber(v) or carSpeed
+        end
+    })
+end)
 
-Tab5:AddTextBox({
-    Name = "Definir Turbo",
-    PlaceholderText = "Turbo: EX",
-    Callback = function(v)
-        turboValue = tostring(v)
-    end
-})
+pcall(function()
+    Tab5:AddTextBox({
+        Name = "Definir Turbo",
+        PlaceholderText = "Turbo: 200",
+        Callback = function(v)
+            turboValue = tostring(v)
+        end
+    })
+end)
 
-Tab5:AddButton({
-    Name = "Aplicar Velocidade e Turbo",
-    Callback = function()
-        local car = vu9.Vehicles:FindFirstChild(vu7.Name .. "Car")
-        if not car then return end
+pcall(function()
+    Tab5:AddButton({
+        Name = "Aplicar Velocidade e Turbo",
+        Callback = function()
+            local car = Workspace.Vehicles:FindFirstChild(LocalPlayer.Name .. "Car")
+            if not car then return end
 
-        local function apply(seat)
-            if seat then
-                local ms = seat:FindFirstChild("MaxSpeed") or seat:FindFirstChild("TopSpeed")
-                if ms then ms.Value = carSpeed end
-                
-                local tb = seat:FindFirstChild("Turbo")
-                if tb then tb.Value = turboValue end
+            local function apply(seat)
+                if seat then
+                    local ms = seat:FindFirstChild("MaxSpeed") or seat:FindFirstChild("TopSpeed")
+                    if ms then ms.Value = carSpeed end
+                    
+                    local tb = seat:FindFirstChild("Turbo")
+                    if tb then tb.Value = turboValue end
+                end
             end
-        end
 
-        if car:FindFirstChild("Seats") then
-            apply(car.Seats:FindFirstChild("VehicleSeat"))
-        end
-        if car:FindFirstChild("Body") then
-            apply(car.Body:FindFirstChild("VehicleSeat"))
-        end
+            if car:FindFirstChild("Seats") then
+                apply(car.Seats:FindFirstChild("VehicleSeat"))
+            end
+            if car:FindFirstChild("Body") then
+                apply(car.Body:FindFirstChild("VehicleSeat"))
+            end
 
-        game.StarterGui:SetCore("SendNotification", {
+            StarterGui:SetCore("SendNotification", {
                 Title = "Sucesso ✅",
-                Text = "Velocidade e Turbo Aplicados ",
-                Duration = 5
+                Text = "Velocidade e Turbo Aplicados",
+                Duration = 4
             })
         end
-})
+    })
+end)
