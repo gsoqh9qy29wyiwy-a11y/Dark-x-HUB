@@ -5840,3 +5840,60 @@ TabLag:AddParagraph({
             end
         })
     end)
+    -- ==================== 2. MÚSICA NO CARRO ====================
+    pcall(function()
+        Tab5:AddSection({"Música no Carro (GamePass)"})
+
+        local MusicsList = {
+            { Name = "Pac Man Phonk", Id = 120889371113999 },
+            { Name = "Batalla de bombas", Id = 71995582569283 },
+            { Name = "Mtg uh uh ha ha", Id = 122697381252723 },
+            { Name = "fa3 renitch", Id = 128934903242385 },
+            { Name = "Kawaii", Id = 13067828528278 },
+            { Name = "Feeling", Id = 120764084521465 },
+            { Name = "Aura + Egp", Id = 97841988407875 },
+            { Name = "Mtg Balada", Id = 83797836818857 },
+            { Name = "tomagi mo tão", Id = 111668097052966 },
+            { Name = "mtg terra bela funk", Id = 134770548505933 },
+            { Name = "The Twelve", Id = 126153082683694 },
+            { Name = "PASSO BEM SOLTO", Id = 119936139925486 },
+            { Name = "phonkV2", Id = 97279560249940 },
+            { Name = "phonkV3", Id = 74697049223758 },
+            { Name = "favela venceu", Id = 97097857368633 },
+            { Name = "Kerosene Crystal Castles", Id = 17647322226 },
+            { Name = "Phonk Brasil", Id = 111281710445018 },
+            { Name = "Mídia", Id = 105832154444494 }
+        }
+
+        local MusicNames = {}
+        local MusicIds = {}
+        for _, m in ipairs(MusicsList) do
+            table.insert(MusicNames, m.Name)
+            MusicIds[m.Name] = m.Id
+        end
+
+        Tab5:AddDropdown({
+            Name = "Selecionar Música",
+            Options = MusicNames,
+            Default = "Selecione...",
+            Callback = function(v)
+                selectedMusic = v
+            end
+        })
+
+        Tab5:AddButton({
+            Name = "Tocar Música",
+            Callback = function()
+                local id = MusicIds[selectedMusic]
+                if id then
+                    local events = {"PickingVehicleMusicText", "PickingCarMusicText", "PickingScooterMusicText"}
+                    local carRemote = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Player1sCa1r")
+                    if carRemote then
+                        for _, ev in ipairs(events) do
+                            pcall(function() carRemote:FireServer(ev, id) end)
+                        end
+                    end
+                end
+            end
+        })
+    end)
