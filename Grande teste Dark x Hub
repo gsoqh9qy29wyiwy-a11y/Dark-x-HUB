@@ -165,8 +165,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
 local TextChatService = game:GetService("TextChatService")
 local Camera = Workspace.CurrentCamera
 
