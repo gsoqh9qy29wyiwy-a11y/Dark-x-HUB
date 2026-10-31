@@ -2,31 +2,6 @@
 --                        DARK X HUB - BROOKHAVEN                       --
 --                          by HACKELINDOO                              --
 --====================================================================--
--- ====================================================================
--- 1. SERVIÇOS E VARIÁVEIS INICIAIS
--- ====================================================================
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local TextChatService = game:GetService("TextChatService")
-local Camera = Workspace.CurrentCamera
-
-local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
-
--- ====================================================================
--- 2. TELA DE CARREGAMENTO (LOADING SCREEN)
--- ====================================================================
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local StarterGui = game:GetService("StarterGui")
-local RunService = game:GetService("RunService")
-local lp = Players.LocalPlayer
 
 -- ====================================================================
 -- TELA DE CARREGAMENTO (LOADING SCREEN)
@@ -180,6 +155,33 @@ end
 
 local loadingPromise = createLoadingScreen()
 waitForPromise(loadingPromise)
+
+-- ====================================================================
+-- 1. SERVIÇOS E VARIÁVEIS INICIAIS
+-- ====================================================================
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local TextChatService = game:GetService("TextChatService")
+local Camera = Workspace.CurrentCamera
+
+local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
+
+-- ====================================================================
+-- 2. TELA DE CARREGAMENTO (LOADING SCREEN)
+-- ====================================================================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
 
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
 local viewEnabled = false
@@ -5846,90 +5848,3 @@ TabLag:AddParagraph({
             end
         })
     end)
-    local ESPCarEnabled = false
-    local selectedCarColor = "Verde"
-    local CoresESP = {
-        ["Verde"] = Color3.fromRGB(0, 255, 100), ["Vermelho"] = Color3.fromRGB(255, 50, 50),
-        ["Azul"] = Color3.fromRGB(50, 150, 255), ["Amarelo"] = Color3.fromRGB(255, 255, 50),
-        ["Branco"] = Color3.fromRGB(255, 255, 255), ["Roxo"] = Color3.fromRGB(180, 50, 255)
-    }
-
-    local function getCarPart(car)
-        if not car then return nil end
-        return car.PrimaryPart or car:FindFirstChildWhichIsA("VehicleSeat", true) or car:FindFirstChildWhichIsA("BasePart", true)
-    end
-
-    -- Loop Centralizado do ESP de Carros
-    task.spawn(function()
-        while true do
-            if ESPCarEnabled then
-                pcall(function()
-                    local vehicles = Workspace:FindFirstChild("Vehicles")
-                    local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    local cor = (selectedCarColor == "RGB" and Color3.fromHSV((tick() % 4)/4, 1, 1)) or CoresESP[selectedCarColor] or Color3.fromRGB(0, 255, 100)
-
-                    if vehicles and myHRP then
-                        for _, car in ipairs(vehicles:GetChildren()) do
-                            if car:IsA("Model") then
-                                local part = getCarPart(car)
-                                if part then
-                                    local esp = car:FindFirstChild("CarESP")
-                                    if not esp then
-                                        local bg = Instance.new("BillboardGui", car)
-                                        bg.Name = "CarESP"
-                                        bg.Adornee = part
-                                        bg.Size = UDim2.new(0, 160, 0, 30)
-                                        bg.StudsOffset = Vector3.new(0, 3, 0)
-                                        bg.AlwaysOnTop = true
-                                        local lbl = Instance.new("TextLabel", bg)
-                                        lbl.Name = "Text"
-                                        lbl.Size = UDim2.new(1, 0, 1, 0)
-                                        lbl.BackgroundTransparency = 1
-                                        lbl.Font = Enum.Font.GothamBold
-                                        lbl.TextSize = 13
-                                        lbl.TextStrokeTransparency = 0.2
-                                        esp = bg
-                                    end
-                                    local lbl = esp:FindFirstChild("Text")
-                                    if lbl then
-                                        lbl.TextColor3 = cor
-                                        local dist = math.floor((myHRP.Position - part.Position).Magnitude)
-                                        lbl.Text = car.Name .. " [" .. dist .. "m]"
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end)
-            end
-            task.wait(0.04)
-        end
-    end)
-
-    pcall(function()
-        Tab5:AddSection({"ESP de Carros"})
-
-        Tab5:AddToggle({
-            Name = "Ativar ESP Carros",
-            Default = false,
-            Callback = function(s)
-                ESPCarEnabled = s
-                if not s then
-                    local v = Workspace:FindFirstChild("Vehicles")
-                    if v then
-                        for _, c in ipairs(v:GetChildren()) do
-                            if c:FindFirstChild("CarESP") then c.CarESP:Destroy() end
-                        end
-                    end
-                end
-            end
-        })
-
-        Tab5:AddDropdown({
-            Name = "Cor do ESP",
-            Options = {"Verde", "RGB", "Vermelho", "Azul", "Amarelo", "Branco", "Roxo"},
-            Default = "Verde",
-            Callback = function(c) selectedCarColor = c end
-        })
-    end)
-end
