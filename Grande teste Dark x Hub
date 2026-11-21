@@ -10,7 +10,6 @@ local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
-
 -- ====================================================================
 -- TELA DE CARREGAMENTO (LOADING SCREEN)
 -- ====================================================================
