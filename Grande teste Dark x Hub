@@ -7055,6 +7055,453 @@ Tabscript:AddButton({
     end
 })
 
+Tabscript:AddSection({"Bugatti Chiron"})
+Tabscript:AddButton({
+    Name = "Bugatti Chiron Tool",
+    Description = "Bugatti Chiron com rodas que giram, volante animado e assento",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local UserInputService = game:GetService("UserInputService")
+        local player = Players.LocalPlayer
+        local camera = workspace.CurrentCamera
+
+        -- Limpeza
+        local pGui = player:WaitForChild("PlayerGui")
+        if pGui:FindFirstChild("BugattiGui") then pGui.BugattiGui:Destroy() end
+        if player.Backpack:FindFirstChild("Bugatti Chiron") then player.Backpack["Bugatti Chiron"]:Destroy() end
+        if player.Character and player.Character:FindFirstChild("Bugatti Chiron") then player.Character["Bugatti Chiron"]:Destroy() end
+
+        local carModel, carChassis, seat = nil, nil, nil
+        local carBV, carBG = nil, nil
+        local steeringMotor, baseVolanteC0 = nil, nil
+        local moveConn = nil
+
+        local throttle, steer = 0, 0
+        local steerSmooth = 0
+        local carYaw = 0
+        local currentVel = Vector3.zero
+        local cameraMode = "3P"
+
+        -- Controle de Rotação das Rodas
+        local wheelMotors = {}
+        local wheelSpinAngle = 0
+
+        local currentSpeed = 70
+        local currentDrift = 35
+
+        -- GUI de Controles
+        local gui = Instance.new("ScreenGui", pGui)
+        gui.Name = "BugattiGui"
+        gui.ResetOnSpawn = false
+        gui.Enabled = false
+
+        local function addCorner(obj, r)
+            local c = Instance.new("UICorner", obj)
+            c.CornerRadius = UDim.new(0, r or 8)
+            return c
+        end
+
+        local function mkHoldBtn(parent, pos, sz, txt, color, onDown, onUp)
+            local btn = Instance.new("TextButton", parent)
+            btn.Position, btn.Size, btn.Text = pos, sz, txt
+            btn.TextColor3, btn.TextSize, btn.Font = Color3.new(1, 1, 1), 22, Enum.Font.GothamBold
+            btn.BackgroundColor3 = color or Color3.fromRGB(25, 30, 40)
+            btn.Active, btn.AutoButtonColor = true, true
+            addCorner(btn, 12)
+
+            local stroke = Instance.new("UIStroke", btn)
+            stroke.Color, stroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+
+            btn.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 130, 220)
+                    onDown()
+                end
+            end)
+
+            btn.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    btn.BackgroundColor3 = color or Color3.fromRGB(25, 30, 40)
+                    onUp()
+                end
+            end)
+            return btn
+        end
+
+        -- Painel Esquerdo (Direção: ◀ e ▶)
+        local leftFrame = Instance.new("Frame", gui)
+        leftFrame.Position, leftFrame.Size, leftFrame.BackgroundTransparency = UDim2.new(0.04, 0, 0.72, 0), UDim2.new(0, 160, 0, 75), 1
+        mkHoldBtn(leftFrame, UDim2.new(0, 0, 0, 0), UDim2.new(0, 75, 0, 75), "◀", Color3.fromRGB(20, 25, 35),
+            function() steer = 1 end,
+            function() if steer == 1 then steer = 0 end end
+        )
+        mkHoldBtn(leftFrame, UDim2.new(0, 85, 0, 0), UDim2.new(0, 75, 0, 75), "▶", Color3.fromRGB(20, 25, 35),
+            function() steer = -1 end,
+            function() if steer == -1 then steer = 0 end end
+        )
+
+        -- Painel Direito (Aceleração: ▲ e ▼)
+        local rightFrame = Instance.new("Frame", gui)
+        rightFrame.Position, rightFrame.Size, rightFrame.BackgroundTransparency = UDim2.new(0.96, -160, 0.72, 0), UDim2.new(0, 160, 0, 75), 1
+        mkHoldBtn(rightFrame, UDim2.new(0, 0, 0, 0), UDim2.new(0, 75, 0, 75), "▲", Color3.fromRGB(0, 160, 80),
+            function() throttle = 1 end,
+            function() if throttle == 1 then throttle = 0 end end
+        )
+        mkHoldBtn(rightFrame, UDim2.new(0, 85, 0, 0), UDim2.new(0, 75, 0, 75), "▼", Color3.fromRGB(180, 40, 40),
+            function() throttle = -1 end,
+            function() if throttle == -1 then throttle = 0 end end
+        )
+
+        -- Botões de Câmera (1ª Pessoa e 3ª Pessoa)
+        local camFrame = Instance.new("Frame", gui)
+        camFrame.Position, camFrame.Size, camFrame.BackgroundTransparency = UDim2.new(0.04, 0, 0.58, 0), UDim2.new(0, 160, 0, 36), 1
+
+        local btn1P = Instance.new("TextButton", camFrame)
+        btn1P.Size, btn1P.Text = UDim2.new(0.48, 0, 1, 0), "1ª Pessoa"
+        btn1P.TextColor3, btn1P.Font, btn1P.TextSize = Color3.new(1, 1, 1), Enum.Font.GothamBold, 11
+        btn1P.BackgroundColor3 = Color3.fromRGB(30, 35, 50)
+        addCorner(btn1P, 8)
+
+        local btn3P = Instance.new("TextButton", camFrame)
+        btn3P.Position, btn3P.Size, btn3P.Text = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), "3ª Pessoa"
+        btn3P.TextColor3, btn3P.Font, btn3P.TextSize = Color3.fromRGB(0, 180, 255), Enum.Font.GothamBold, 11
+        btn3P.BackgroundColor3 = Color3.fromRGB(15, 20, 30)
+        addCorner(btn3P, 8)
+
+        btn1P.MouseButton1Click:Connect(function()
+            cameraMode = "1P"
+            btn1P.TextColor3 = Color3.fromRGB(0, 180, 255)
+            btn3P.TextColor3 = Color3.new(1, 1, 1)
+        end)
+
+        btn3P.MouseButton1Click:Connect(function()
+            cameraMode = "3P"
+            btn3P.TextColor3 = Color3.fromRGB(0, 180, 255)
+            btn1P.TextColor3 = Color3.new(1, 1, 1)
+            camera.CameraType = Enum.CameraType.Custom
+            if carChassis then camera.CameraSubject = carChassis end
+        end)
+
+        -- Botão [X] Deletar Carro
+        local closeBtn = Instance.new("TextButton", gui)
+        closeBtn.Position, closeBtn.Size = UDim2.new(1, -65, 0, 20), UDim2.new(0, 45, 0, 45)
+        closeBtn.Text, closeBtn.TextColor3 = "✕", Color3.new(1, 1, 1)
+        closeBtn.TextSize, closeBtn.Font = 22, Enum.Font.GothamBold
+        closeBtn.BackgroundColor3 = Color3.fromRGB(210, 35, 35)
+        addCorner(closeBtn, 99)
+
+        -- Sliders
+        local sliderPanel = Instance.new("Frame", gui)
+        sliderPanel.Position, sliderPanel.Size = UDim2.new(0.5, -130, 0, 15), UDim2.new(0, 260, 0, 95)
+        sliderPanel.BackgroundColor3 = Color3.fromRGB(15, 18, 26)
+        addCorner(sliderPanel, 10)
+        local spStroke = Instance.new("UIStroke", sliderPanel)
+        spStroke.Color, spStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+
+        local function createSlider(yPos, title, initVal, onChange)
+            local label = Instance.new("TextLabel", sliderPanel)
+            label.Position, label.Size = UDim2.new(0, 12, 0, yPos), UDim2.new(1, -24, 0, 14)
+            label.BackgroundTransparency = 1
+            label.Font, label.TextSize, label.TextColor3 = Enum.Font.GothamBold, 11, Color3.fromRGB(210, 230, 255)
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Text = title .. ": " .. math.floor(initVal)
+
+            local barBg = Instance.new("Frame", sliderPanel)
+            barBg.Position, barBg.Size = UDim2.new(0, 12, 0, yPos + 18), UDim2.new(1, -24, 0, 14)
+            barBg.BackgroundColor3 = Color3.fromRGB(30, 36, 50)
+            addCorner(barBg, 99)
+
+            local barFill = Instance.new("Frame", barBg)
+            barFill.Size = UDim2.new(initVal / 100, 0, 1, 0)
+            barFill.BackgroundColor3 = Color3.fromRGB(0, 160, 255)
+            addCorner(barFill, 99)
+
+            local dragging = false
+            local function update(input)
+                local relX = math.clamp(input.Position.X - barBg.AbsolutePosition.X, 0, barBg.AbsoluteSize.X)
+                local pct = math.clamp(relX / barBg.AbsoluteSize.X, 0, 1)
+                barFill.Size = UDim2.new(pct, 0, 1, 0)
+                local val = math.floor(pct * 100)
+                label.Text = title .. ": " .. val
+                onChange(val)
+            end
+
+            barBg.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true; update(i)
+                end
+            end)
+            UserInputService.InputChanged:Connect(function(i)
+                if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+                    update(i)
+                end
+            end)
+            UserInputService.InputEnded:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                end
+            end)
+        end
+
+        createSlider(8, "⚡ Velocidade", currentSpeed, function(v) currentSpeed = v end)
+        createSlider(50, "💨 Drift", currentDrift, function(v) currentDrift = v end)
+
+        local function deleteCar()
+            if moveConn then moveConn:Disconnect(); moveConn = nil end
+
+            local char = player.Character
+            if char then
+                local rShoulder = char:FindFirstChild("Right Shoulder", true) or char:FindFirstChild("RightShoulder", true)
+                local lShoulder = char:FindFirstChild("Left Shoulder", true) or char:FindFirstChild("LeftShoulder", true)
+                if rShoulder and rShoulder:GetAttribute("OldTransform") then rShoulder.Transform = CFrame.new() end
+                if lShoulder and lShoulder:GetAttribute("OldTransform") then lShoulder.Transform = CFrame.new() end
+
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.Sit = false
+                    camera.CameraType = Enum.CameraType.Custom
+                    camera.CameraSubject = hum
+                end
+            end
+
+            if carModel then carModel:Destroy(); carModel = nil end
+            gui.Enabled = false
+            throttle, steer, steerSmooth = 0, 0, 0
+            wheelMotors = {}
+            wheelSpinAngle = 0
+        end
+
+        closeBtn.MouseButton1Click:Connect(deleteCar)
+
+        local function mkPart(parent, size, cframe, color, mat, canCollide)
+            local p = Instance.new("Part", parent)
+            p.Size = size
+            p.CFrame = cframe
+            p.Color = color
+            p.Material = mat or Enum.Material.SmoothPlastic
+            p.CanCollide = (canCollide == true)
+            p.CastShadow = true
+            return p
+        end
+
+        local function weld(p0, p1)
+            local w = Instance.new("WeldConstraint", p0)
+            w.Part0, w.Part1 = p0, p1
+            return w
+        end
+
+        local function spawnBugatti()
+            deleteCar()
+
+            local char = player.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+            local hrp = char.HumanoidRootPart
+
+            carModel = Instance.new("Model", workspace)
+            carModel.Name = "Bugatti_Chiron_" .. player.Name
+
+            local blueColor = Color3.fromRGB(0, 140, 245)
+            local carbonColor = Color3.fromRGB(15, 17, 22)
+            local chromeColor = Color3.fromRGB(225, 230, 240)
+
+            -- Chassi
+            carChassis = mkPart(carModel, Vector3.new(6.4, 1.1, 13.6), hrp.CFrame * CFrame.new(0, 1.8, -12), carbonColor, Enum.Material.SmoothPlastic, true)
+            carChassis.Name = "Chassis"
+            carChassis.CustomPhysicalProperties = PhysicalProperties.new(1.3, 0.4, 0.2, 100, 100)
+            carModel.PrimaryPart = carChassis
+
+            -- Carroceria e Detalhes
+            local hood = mkPart(carModel, Vector3.new(5.8, 0.8, 5.2), carChassis.CFrame * CFrame.new(0, 0.55, -4.2), blueColor, Enum.Material.Glass)
+            weld(carChassis, hood)
+
+            local grill = mkPart(carModel, Vector3.new(1.8, 1.2, 0.4), carChassis.CFrame * CFrame.new(0, -0.05, -6.9), Color3.fromRGB(5, 5, 5), Enum.Material.DiamondPlate)
+            weld(carChassis, grill)
+            local grillRim = mkPart(carModel, Vector3.new(2.1, 1.4, 0.2), carChassis.CFrame * CFrame.new(0, -0.05, -6.8), chromeColor, Enum.Material.Metal)
+            weld(carChassis, grillRim)
+
+            for side = -1, 1, 2 do
+                for i = 1, 4 do
+                    local led = mkPart(carModel, Vector3.new(0.28, 0.22, 0.3), carChassis.CFrame * CFrame.new(side * (1.6 + (i * 0.3)), 0.42, -6.65), Color3.fromRGB(230, 245, 255), Enum.Material.Neon)
+                    weld(carChassis, led)
+                end
+            end
+
+            for side = -1, 1, 2 do
+                local cLine = mkPart(carModel, Vector3.new(0.2, 2.2, 5.6), carChassis.CFrame * CFrame.new(side * 3.15, 0.65, 0.2), chromeColor, Enum.Material.Metal)
+                weld(carChassis, cLine)
+                local sideDoor = mkPart(carModel, Vector3.new(0.3, 1.8, 5.2), carChassis.CFrame * CFrame.new(side * 3.05, 0.6, 0.2), blueColor, Enum.Material.SmoothPlastic)
+                weld(carChassis, sideDoor)
+            end
+
+            local roof = mkPart(carModel, Vector3.new(4.4, 0.2, 4.4), carChassis.CFrame * CFrame.new(0, 2.1, -0.2), carbonColor, Enum.Material.SmoothPlastic)
+            weld(carChassis, roof)
+            local windshield = mkPart(carModel, Vector3.new(4.6, 1.4, 3.2), carChassis.CFrame * CFrame.new(0, 1.45, -2.2) * CFrame.Angles(math.rad(-25), 0, 0), Color3.fromRGB(20, 25, 35), Enum.Material.Glass)
+            windshield.Transparency = 0.4
+            weld(carChassis, windshield)
+
+            local rearLight = mkPart(carModel, Vector3.new(5.6, 0.15, 0.2), carChassis.CFrame * CFrame.new(0, 0.6, 6.75), Color3.fromRGB(255, 20, 30), Enum.Material.Neon)
+            weld(carChassis, rearLight)
+            local spoiler = mkPart(carModel, Vector3.new(5.8, 0.2, 1.4), carChassis.CFrame * CFrame.new(0, 1.5, 6.2), carbonColor, Enum.Material.SmoothPlastic)
+            weld(carChassis, spoiler)
+
+            -- ----------------------------------------------------
+            -- RODAS ARTICULADAS (COM GIRO E ESTERÇAMENTO)
+            -- ----------------------------------------------------
+            local wheelData = {
+                {pos = Vector3.new(-3.1, -0.3, -4.2), isFront = true,  side = -1}, -- Dianteira Esquerda
+                {pos = Vector3.new(3.1, -0.3, -4.2),  isFront = true,  side = 1},  -- Dianteira Direita
+                {pos = Vector3.new(-3.1, -0.3, 4.2),  isFront = false, side = -1}, -- Traseira Esquerda
+                {pos = Vector3.new(3.1, -0.3, 4.2),   isFront = false, side = 1}   -- Traseira Direita
+            }
+
+            wheelMotors = {}
+            for _, info in ipairs(wheelData) do
+                -- Peça do Pneu
+                local w = mkPart(carModel, Vector3.new(0.85, 2.1, 2.1), carChassis.CFrame * CFrame.new(info.pos), Color3.fromRGB(20, 20, 20), Enum.Material.Rubber, true)
+                local rim = mkPart(carModel, Vector3.new(0.9, 1.4, 1.4), w.CFrame, chromeColor, Enum.Material.Metal)
+                weld(w, rim)
+
+                -- Motor6D conectando o pneu ao Chassi para permitir girar dinamicamente
+                local m = Instance.new("Motor6D")
+                m.Part0 = carChassis
+                m.Part1 = w
+                m.C0 = CFrame.new(info.pos)
+                m.C1 = CFrame.new()
+                m.Parent = carChassis
+
+                table.insert(wheelMotors, {
+                    motor = m,
+                    baseC0 = CFrame.new(info.pos),
+                    isFront = info.isFront,
+                    side = info.side
+                })
+            end
+
+            -- Assento e Volante
+            seat = Instance.new("Seat", carModel)
+            seat.Size = Vector3.new(2, 0.6, 2)
+            seat.CFrame = carChassis.CFrame * CFrame.new(-1.25, 0.25, -0.2)
+            seat.Color = Color3.fromRGB(25, 25, 30)
+            seat.CanCollide = false
+            weld(carChassis, seat)
+
+            local dash = mkPart(carModel, Vector3.new(2.4, 0.8, 1.2), carChassis.CFrame * CFrame.new(-1.25, 1.1, -1.8), Color3.fromRGB(15, 15, 20))
+            weld(carChassis, dash)
+
+            local baseVolante = mkPart(carModel, Vector3.new(0.2, 0.2, 0.4), dash.CFrame * CFrame.new(0, 0.2, 0.6))
+            weld(dash, baseVolante)
+
+            local volante = mkPart(carModel, Vector3.new(1.1, 1.1, 0.15), baseVolante.CFrame * CFrame.new(0, 0, 0.2), Color3.fromRGB(10, 10, 15), Enum.Material.Metal)
+            volante.Name = "Volante"
+
+            steeringMotor = Instance.new("Motor6D")
+            steeringMotor.Name = "SteeringMotor"
+            steeringMotor.Part0 = baseVolante
+            steeringMotor.Part1 = volante
+            steeringMotor.C0 = CFrame.new(0, 0, 0.2)
+            steeringMotor.Parent = baseVolante
+            baseVolanteC0 = steeringMotor.C0
+
+            -- Física Arcade
+            carBV = Instance.new("BodyVelocity", carChassis)
+            carBV.MaxForce = Vector3.new(1e6, 0, 1e6)
+            carBV.Velocity = Vector3.zero
+
+            local _, startYaw, _ = carChassis.CFrame:ToOrientation()
+            carYaw = math.deg(startYaw)
+
+            carBG = Instance.new("BodyGyro", carChassis)
+            carBG.MaxTorque = Vector3.new(1e5, 1e6, 1e5)
+            carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
+
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then seat:Sit(hum) end
+
+            gui.Enabled = true
+            camera.CameraSubject = carChassis
+
+            -- Loop de Movimento, Rotação das Rodas e Animações
+            moveConn = RunService.RenderStepped:Connect(function(dt)
+                if not carChassis or not carChassis.Parent then return end
+
+                local maxSpeed = (currentSpeed / 100) * 140
+                local drift = currentDrift / 100
+                local grip = math.clamp(0.24 - (drift * 0.20), 0.03, 0.3)
+                local turnSpeed = 65 + (drift * 75)
+
+                steerSmooth = steerSmooth + (steer - steerSmooth) * math.clamp(dt * 12, 0, 1)
+
+                -- Girar o Volante
+                if steeringMotor then
+                    steeringMotor.C0 = baseVolanteC0 * CFrame.Angles(0, 0, math.rad(-steerSmooth * 140))
+                end
+
+                -- Braços do Personagem
+                local rShoulder = char:FindFirstChild("Right Shoulder", true) or char:FindFirstChild("RightShoulder", true)
+                local lShoulder = char:FindFirstChild("Left Shoulder", true) or char:FindFirstChild("LeftShoulder", true)
+                if rShoulder and lShoulder and hum.Sit then
+                    rShoulder.Transform = CFrame.Angles(math.rad(-75 - (steerSmooth * 25)), math.rad(-15), math.rad(10))
+                    lShoulder.Transform = CFrame.Angles(math.rad(-75 + (steerSmooth * 25)), math.rad(15), math.rad(-10))
+                end
+
+                -- ----------------------------------------------------
+                -- ANIMAÇÃO DAS RODAS (GIRO + ESTERÇAMENTO)
+                -- ----------------------------------------------------
+                local forwardVelocity = -carChassis.CFrame.LookVector:Dot(carChassis.AssemblyLinearVelocity)
+                local wheelRadius = 1.05
+                -- Calcula quantos radianos a roda girou com base na distância percorrida
+                local spinDelta = (forwardVelocity * dt) / wheelRadius
+                wheelSpinAngle = wheelSpinAngle + spinDelta
+
+                for _, wData in ipairs(wheelMotors) do
+                    local steerAngle = (wData.isFront and math.rad(-steerSmooth * 32)) or 0
+                    -- Rotação combinada: Yaw (esterçar) + Pitch (girar para frente/trás)
+                    wData.motor.C0 = wData.baseC0 
+                        * CFrame.Angles(0, steerAngle, 0) 
+                        * CFrame.Angles(wheelSpinAngle, 0, 0)
+                end
+
+                -- Câmera
+             if cameraMode == "1P" and seat then
+                    camera.CameraType = Enum.CameraType.Scriptable
+                    camera.CFrame = seat.CFrame * CFrame.new(0, 1.8, -0.3)
+                elseif cameraMode == "3P" then
+                    camera.CameraType = Enum.CameraType.Custom
+                    if camera.CameraSubject ~= carChassis then
+                        camera.CameraSubject = carChassis
+                    end
+                end
+
+                -- Física de Condução
+                if throttle ~= 0 then
+                    carYaw = carYaw + (steer * turnSpeed * (throttle > 0 and 1 or -1) * dt)
+                elseif steer ~= 0 and currentVel.Magnitude > 3 then
+                    carYaw = carYaw + (steer * turnSpeed * dt)
+                end
+
+                carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
+                local targetDir = carChassis.CFrame.LookVector * (throttle * maxSpeed)
+                currentVel = currentVel:Lerp(targetDir, grip)
+                carBV.Velocity = Vector3.new(currentVel.X, carChassis.AssemblyLinearVelocity.Y, currentVel.Z)
+            end)
+        end
+
+        local tool = Instance.new("Tool")
+        tool.Name = "Bugatti Chiron"
+        tool.RequiresHandle = false
+        tool.CanBeDropped = false
+        tool.TextureId = "rbxassetid://9822649646"
+
+        tool.Activated:Connect(function()
+            spawnBugatti()
+        end)
+
+        tool.Parent = player:WaitForChild("Backpack")
+    end
+})
+
+
 Tabscript:AddSection({"UNIVERSAL COMMANDS ADMIN 🔨"})
 
 Tabscript:AddButton({
