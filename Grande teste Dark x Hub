@@ -7680,9 +7680,10 @@ Tabscript:AddButton({
 })
 
 Tabscript:AddSection({"Bugatti Chiron"})
+
 Tabscript:AddButton({
     Name = "Bugatti Chiron Tool",
-    Description = "Bugatti Chiron com Cadeira Gamer 3D, sem flutuar e controles corrigidos",
+    Description = "Bugatti Chiron com física de chão travada, ladeiras e sem voar",
     Callback = function()
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
@@ -7690,9 +7691,10 @@ Tabscript:AddButton({
         local player = Players.LocalPlayer
         local camera = workspace.CurrentCamera
 
-        -- Limpa versões antigas da mochila e tela
+        -- Limpeza
         local pGui = player:WaitForChild("PlayerGui")
         if pGui:FindFirstChild("BugattiGui") then pGui.BugattiGui:Destroy() end
+        if pGui:FindFirstChild("BugattiEnterGui") then pGui.BugattiEnterGui:Destroy() end
         if player.Backpack:FindFirstChild("Carro 🚗") then player.Backpack["Carro 🚗"]:Destroy() end
         if player.Backpack:FindFirstChild("Bugatti Chiron") then player.Backpack["Bugatti Chiron"]:Destroy() end
         if player.Character then
@@ -7706,6 +7708,7 @@ Tabscript:AddButton({
         local moveConn = nil
         local isDriverSeated = false
         local sitTrack = nil
+        local rayParams = nil
 
         local throttle, steer = 0, 0
         local steerSmooth = 0
@@ -7719,17 +7722,37 @@ Tabscript:AddButton({
         local currentSpeed = 75
         local currentDrift = 30
 
-        -- GUI de Controles
-        local gui = Instance.new("ScreenGui", pGui)
-        gui.Name = "BugattiGui"
-        gui.ResetOnSpawn = false
-        gui.Enabled = false
-
         local function addCorner(obj, r)
             local c = Instance.new("UICorner", obj)
             c.CornerRadius = UDim.new(0, r or 8)
             return c
         end
+
+        -- BOTÃO FLUTUANTE DE ENTRAR NO CARRO (FORA DO CARRO)
+        local enterGui = Instance.new("ScreenGui", pGui)
+        enterGui.Name = "BugattiEnterGui"
+        enterGui.ResetOnSpawn = false
+        enterGui.Enabled = false
+
+        local enterBtn = Instance.new("TextButton", enterGui)
+        enterBtn.Size = UDim2.new(0, 180, 0, 48)
+        enterBtn.Position = UDim2.new(0.5, -90, 0.82, 0)
+        enterBtn.Text = "🚗 Dirigir Bugatti"
+        enterBtn.TextColor3 = Color3.new(1, 1, 1)
+        enterBtn.TextSize = 16
+        enterBtn.Font = Enum.Font.GothamBold
+        enterBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 80)
+        addCorner(enterBtn, 12)
+
+        local enterStroke = Instance.new("UIStroke", enterBtn)
+        enterStroke.Color = Color3.fromRGB(120, 255, 160)
+        enterStroke.Thickness = 2
+
+        -- PAINEL PRINCIPAL DE CONTROLES
+        local gui = Instance.new("ScreenGui", pGui)
+        gui.Name = "BugattiGui"
+        gui.ResetOnSpawn = false
+        gui.Enabled = false
 
         local function mkHoldBtn(parent, pos, sz, txt, color, onDown, onUp)
             local btn = Instance.new("TextButton", parent)
@@ -7758,7 +7781,7 @@ Tabscript:AddButton({
             return btn
         end
 
-        -- Painel de Direção (◀ e ▶)
+        -- Direção (◀ e ▶)
         local leftFrame = Instance.new("Frame", gui)
         leftFrame.Position, leftFrame.Size, leftFrame.BackgroundTransparency = UDim2.new(0.04, 0, 0.72, 0), UDim2.new(0, 160, 0, 75), 1
         mkHoldBtn(leftFrame, UDim2.new(0, 0, 0, 0), UDim2.new(0, 75, 0, 75), "◀", Color3.fromRGB(20, 25, 35),
@@ -7770,7 +7793,7 @@ Tabscript:AddButton({
             function() if steer == -1 then steer = 0 end end
         )
 
-        -- Painel de Tração (▲ e ▼)
+        -- Aceleração (▲ e ▼)
         local rightFrame = Instance.new("Frame", gui)
         rightFrame.Position, rightFrame.Size, rightFrame.BackgroundTransparency = UDim2.new(0.96, -160, 0.72, 0), UDim2.new(0, 160, 0, 75), 1
         mkHoldBtn(rightFrame, UDim2.new(0, 0, 0, 0), UDim2.new(0, 75, 0, 75), "▲", Color3.fromRGB(0, 160, 80),
@@ -7782,7 +7805,7 @@ Tabscript:AddButton({
             function() if throttle == -1 then throttle = 0 end end
         )
 
-        -- Câmeras
+        -- Câmeras 1P / 3P
         local camFrame = Instance.new("Frame", gui)
         camFrame.Position, camFrame.Size, camFrame.BackgroundTransparency = UDim2.new(0.04, 0, 0.58, 0), UDim2.new(0, 160, 0, 36), 1
 
@@ -7812,10 +7835,10 @@ Tabscript:AddButton({
             if carChassis then camera.CameraSubject = carChassis end
         end)
 
-        -- Botão Sair do Carro
+        -- Sair do Carro
         local exitBtn = Instance.new("TextButton", gui)
-        exitBtn.Position = UDim2.new(0.5, -55, 0.85, 0)
-        exitBtn.Size = UDim2.new(0, 110, 0, 38)
+        exitBtn.Position = UDim2.new(0.5, -60, 0.78, 0)
+        exitBtn.Size = UDim2.new(0, 120, 0, 40)
         exitBtn.Text = "🚪 Sair do Carro"
         exitBtn.TextColor3 = Color3.new(1, 1, 1)
         exitBtn.TextSize = 13
@@ -7823,7 +7846,7 @@ Tabscript:AddButton({
         exitBtn.BackgroundColor3 = Color3.fromRGB(180, 45, 45)
         addCorner(exitBtn, 8)
 
-        -- Botão [X] Deletar Carro
+        -- Deletar Carro
         local closeBtn = Instance.new("TextButton", gui)
         closeBtn.Position, closeBtn.Size = UDim2.new(1, -65, 0, 20), UDim2.new(0, 45, 0, 45)
         closeBtn.Text, closeBtn.TextColor3 = "✕", Color3.new(1, 1, 1)
@@ -7887,9 +7910,42 @@ Tabscript:AddButton({
         createSlider(8, "⚡ Velocidade", currentSpeed, function(v) currentSpeed = v end)
         createSlider(50, "💨 Drift", currentDrift, function(v) currentDrift = v end)
 
+        local function enterDriverSeat()
+            local char = player.Character
+            if not char or not seat then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hum or not hrp then return end
+
+            isDriverSeated = true
+            enterGui.Enabled = false
+            gui.Enabled = true
+
+            hrp.CFrame = seat.CFrame * CFrame.new(0, 0.8, -0.1)
+
+            pcall(function()
+                hum.Sit = true
+                local anim = Instance.new("Animation")
+                anim.AnimationId = (hum.RigType == Enum.HumanoidRigType.R15) and "rbxassetid://2506281703" or "rbxassetid://178130996"
+                sitTrack = hum:LoadAnimation(anim)
+                sitTrack:Play()
+            end)
+
+            if cameraMode == "3P" then
+                camera.CameraType = Enum.CameraType.Custom
+                camera.CameraSubject = carChassis
+            end
+        end
+
+        enterBtn.MouseButton1Click:Connect(enterDriverSeat)
+
         local function exitSeat()
             isDriverSeated = false
             gui.Enabled = false
+            if carModel and carModel.Parent then
+                enterGui.Enabled = true
+            end
+
             if sitTrack then
                 pcall(function() sitTrack:Stop() end)
                 sitTrack = nil
@@ -7905,7 +7961,6 @@ Tabscript:AddButton({
                     camera.CameraSubject = hum
                 end
                 if hrp and carChassis then
-                    -- Desce do carro ao lado da porta
                     hrp.CFrame = carChassis.CFrame * CFrame.new(-4.5, 1, 0)
                 end
 
@@ -7921,6 +7976,7 @@ Tabscript:AddButton({
 
         local function deleteCar()
             exitSeat()
+            enterGui.Enabled = false
             if moveConn then moveConn:Disconnect(); moveConn = nil end
             if carModel then carModel:Destroy(); carModel = nil end
             wheelMotors = {}
@@ -7945,38 +8001,32 @@ Tabscript:AddButton({
             return w
         end
 
-        -- Constrói a Cadeira Gamer Fiel à Imagem 2 (Preta e Vermelha)
+        -- Cadeira Gamer 3D
         local function buildGamerChair(parent, baseCFrame)
             local blackColor = Color3.fromRGB(20, 20, 22)
             local redColor = Color3.fromRGB(210, 25, 30)
 
-            -- Assento acolchoado base
             local chairBase = mkPart(parent, Vector3.new(1.8, 0.4, 1.8), baseCFrame, blackColor, Enum.Material.SmoothPlastic, false)
             chairBase.Name = "GamerChairBase"
 
-            -- Abas laterais vermelhas do assento
             local leftBolster = mkPart(parent, Vector3.new(0.3, 0.5, 1.8), chairBase.CFrame * CFrame.new(-0.85, 0.15, 0), redColor, nil, false)
             weld(chairBase, leftBolster)
             local rightBolster = mkPart(parent, Vector3.new(0.3, 0.5, 1.8), chairBase.CFrame * CFrame.new(0.85, 0.15, 0), redColor, nil, false)
             weld(chairBase, rightBolster)
 
-            -- Encosto Alto Gamer (Costas)
             local backrest = mkPart(parent, Vector3.new(1.8, 2.7, 0.35), chairBase.CFrame * CFrame.new(0, 1.4, 0.8) * CFrame.Angles(math.rad(6), 0, 0), blackColor, nil, false)
             weld(chairBase, backrest)
 
-            -- Abas laterais esportivas vermelhas do encosto
             local bLeftWing = mkPart(parent, Vector3.new(0.35, 2.7, 0.45), backrest.CFrame * CFrame.new(-0.85, 0, 0.05), redColor, nil, false)
             weld(chairBase, bLeftWing)
             local bRightWing = mkPart(parent, Vector3.new(0.35, 2.7, 0.45), backrest.CFrame * CFrame.new(0.85, 0, 0.05), redColor, nil, false)
             weld(chairBase, bRightWing)
 
-            -- Almofada de Pescoço Preta e Vermelha
             local pillow = mkPart(parent, Vector3.new(1.1, 0.5, 0.35), backrest.CFrame * CFrame.new(0, 0.9, -0.2), blackColor, nil, false)
             weld(chairBase, pillow)
             local pillowStripe = mkPart(parent, Vector3.new(0.4, 0.15, 0.38), pillow.CFrame, redColor, nil, false)
             weld(chairBase, pillowStripe)
 
-            -- Apoios de Braço Acolchoados
             for side = -1, 1, 2 do
                 local armPost = mkPart(parent, Vector3.new(0.15, 0.9, 0.2), chairBase.CFrame * CFrame.new(side * 1.05, 0.5, 0), blackColor, nil, false)
                 weld(chairBase, armPost)
@@ -7984,42 +8034,12 @@ Tabscript:AddButton({
                 weld(chairBase, armPad)
             end
 
-            -- Pistão de Elevação e Base com Rodinhas
             local piston = mkPart(parent, Vector3.new(0.3, 0.6, 0.3), chairBase.CFrame * CFrame.new(0, -0.45, 0), Color3.fromRGB(10, 10, 10), Enum.Material.Metal, false)
             weld(chairBase, piston)
 
             return chairBase
         end
 
-        local function enterDriverSeat()
-            local char = player.Character
-            if not char or not seat then return end
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hum or not hrp then return end
-
-            isDriverSeated = true
-            gui.Enabled = true
-
-            -- Posiciona o jogador sentado exatamente no assento da cadeira
-            hrp.CFrame = seat.CFrame * CFrame.new(0, 0.8, -0.1)
-
-            -- Animação de sentar personalizada anti-bloqueio do Brookhaven
-            pcall(function()
-                hum.Sit = true
-                local anim = Instance.new("Animation")
-                anim.AnimationId = (hum.RigType == Enum.HumanoidRigType.R15) and "rbxassetid://2506281703" or "rbxassetid://178130996"
-                sitTrack = hum:LoadAnimation(anim)
-                sitTrack:Play()
-            end)
-
-            if cameraMode == "3P" then
-                camera.CameraType = Enum.CameraType.Custom
-                camera.CameraSubject = carChassis
-            end
-        end
-
-        -- Construtor do Carro
         local function spawnBugatti()
             deleteCar()
 
@@ -8027,32 +8047,29 @@ Tabscript:AddButton({
             if not char or not char:FindFirstChild("HumanoidRootPart") then return end
             local hrp = char.HumanoidRootPart
 
-            -- RAYCAST: Encontra a altura real do asfalto para não flutuar
-            local rayOrigin = hrp.Position + (hrp.CFrame.LookVector * 11) + Vector3.new(0, 5, 0)
-            local rayParams = RaycastParams.new()
-            rayParams.FilterDescendantsInstances = {char}
-            rayParams.FilterType = Enum.RaycastFilterType.Exclude
-
-            local rayResult = workspace:Raycast(rayOrigin, Vector3.new(0, -50, 0), rayParams)
-            local groundY = rayResult and rayResult.Position.Y or (hrp.Position.Y - 2.8)
-
             carModel = Instance.new("Model", workspace)
             carModel.Name = "Bugatti_Chiron_" .. player.Name
+
+            -- CONFIGURAÇÃO CRUCIAL DO RAYCAST: IGNORA O PERSONAGEM E O PRÓPRIO CARRO!
+            rayParams = RaycastParams.new()
+            rayParams.FilterDescendantsInstances = {char, carModel}
+            rayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+            local rayOrigin = hrp.Position + (hrp.CFrame.LookVector * 11) + Vector3.new(0, 4, 0)
+            local rayResult = workspace:Raycast(rayOrigin, Vector3.new(0, -30, 0), rayParams)
+            local groundY = rayResult and rayResult.Position.Y or (hrp.Position.Y - 2.8)
 
             local blueColor = Color3.fromRGB(0, 140, 245)
             local carbonColor = Color3.fromRGB(15, 17, 22)
             local chromeColor = Color3.fromRGB(225, 230, 240)
 
-            -- Spawn posicionado na altura exata das rodas tocando no chão
             local spawnCFrame = CFrame.new(rayOrigin.X, groundY + 1.25, rayOrigin.Z) * CFrame.Angles(0, math.rad(hrp.Orientation.Y), 0)
 
-            -- Chassi
             carChassis = mkPart(carModel, Vector3.new(6.4, 1.1, 13.6), spawnCFrame, carbonColor, Enum.Material.SmoothPlastic, true)
             carChassis.Name = "Chassis"
             carChassis.CustomPhysicalProperties = PhysicalProperties.new(1.3, 0.4, 0.2, 100, 100)
             carModel.PrimaryPart = carChassis
-    -- Carroceria Externa
-            local hood = mkPart(carModel, Vector3.new(5.8, 0.8, 5.2), carChassis.CFrame * CFrame.new(0, 0.55, -4.2), blueColor, Enum.Material.Glass, false)
+local hood = mkPart(carModel, Vector3.new(5.8, 0.8, 5.2), carChassis.CFrame * CFrame.new(0, 0.55, -4.2), blueColor, Enum.Material.Glass, false)
             weld(carChassis, hood)
 
             local grill = mkPart(carModel, Vector3.new(1.8, 1.2, 0.4), carChassis.CFrame * CFrame.new(0, -0.05, -6.9), Color3.fromRGB(5, 5, 5), Enum.Material.DiamondPlate, false)
@@ -8074,7 +8091,6 @@ Tabscript:AddButton({
                 weld(carChassis, sideDoor)
             end
 
-            -- Teto e para-brisas sem colisão interna
             local roof = mkPart(carModel, Vector3.new(4.4, 0.2, 4.4), carChassis.CFrame * CFrame.new(0, 2.3, -0.2), carbonColor, Enum.Material.SmoothPlastic, false)
             weld(carChassis, roof)
             local windshield = mkPart(carModel, Vector3.new(4.6, 1.4, 3.2), carChassis.CFrame * CFrame.new(0, 1.45, -2.2) * CFrame.Angles(math.rad(-25), 0, 0), Color3.fromRGB(20, 25, 35), Enum.Material.Glass, false)
@@ -8086,7 +8102,6 @@ Tabscript:AddButton({
             local spoiler = mkPart(carModel, Vector3.new(5.8, 0.2, 1.4), carChassis.CFrame * CFrame.new(0, 1.5, 6.2), carbonColor, Enum.Material.SmoothPlastic, false)
             weld(carChassis, spoiler)
 
-            -- Rodas Cilíndricas Redondas
             local wheelData = {
                 {pos = Vector3.new(-3.1, -0.2, -4.2), isFront = true,  side = -1},
                 {pos = Vector3.new(3.1, -0.2, -4.2),  isFront = true,  side = 1},
@@ -8112,7 +8127,10 @@ Tabscript:AddButton({
                 rim.Color = chromeColor
                 rim.Material = Enum.Material.Metal
                 rim.CanCollide = false
-                weld(w, rim)
+
+                local rw = Instance.new("Weld", w)
+                rw.Part0, rw.Part1 = w, rim
+                rw.C0, rw.C1 = CFrame.new(), CFrame.new()
 
                 local m = Instance.new("Motor6D")
                 m.Part0, m.Part1 = carChassis, w
@@ -8127,25 +8145,13 @@ Tabscript:AddButton({
                 })
             end
 
-            -- ----------------------------------------------------
-            -- CADEIRA GAMER INSTALADA (Foto 2)
-            -- ----------------------------------------------------
             local chairCFrame = carChassis.CFrame * CFrame.new(-1.25, 0.45, -0.1)
             seat = buildGamerChair(carModel, chairCFrame)
             weld(carChassis, seat)
 
-            -- Botão Interativo de Entrar (ProximityPrompt)
-            local proxPrompt = Instance.new("ProximityPrompt", seat)
-            proxPrompt.ActionText = "Dirigir Bugatti"
-            proxPrompt.ObjectText = "Cadeira Gamer"
-            proxPrompt.HoldDuration = 0
-            proxPrompt.MaxActivationDistance = 16
-            proxPrompt.RequiresLineOfSight = false
-            proxPrompt.Triggered:Connect(function(plr)
-                if plr == player then enterDriverSeat() end
-            end)
+            -- Atualiza a lista do Raycast com o carro completo
+            rayParams.FilterDescendantsInstances = {char, carModel}
 
-            -- Painel e Volante
             local dash = mkPart(carModel, Vector3.new(2.4, 0.8, 1.2), carChassis.CFrame * CFrame.new(-1.25, 1.1, -1.8), Color3.fromRGB(15, 15, 20), nil, false)
             weld(carChassis, dash)
 
@@ -8162,26 +8168,28 @@ Tabscript:AddButton({
             steeringMotor.Parent = baseVolante
             baseVolanteC0 = steeringMotor.C0
 
-            -- FÍSICA ANTI-FLUTUAÇÃO (BodyPosition no eixo Y mantém o carro no asfalto)
+            -- FÍSICA ESTABILIZADA: Trava vertical no asfalto com amortecimento
             carBV = Instance.new("BodyVelocity", carChassis)
             carBV.MaxForce = Vector3.new(1e6, 0, 1e6)
             carBV.Velocity = Vector3.zero
 
             carBP = Instance.new("BodyPosition", carChassis)
-            carBP.MaxForce = Vector3.new(0, 1e6, 0) -- Força vertical que prende no chão
-            carBP.Position = Vector3.new(0, groundY + 1.25, 0)
+            carBP.MaxForce = Vector3.new(0, 4e5, 0) -- Força moderada (não voa nem se bater)
+            carBP.D = 1200                          -- Alto amortecimento contra pulos
+            carBP.P = 15000
+            carBP.Position = Vector3.new(carChassis.Position.X, groundY + 1.25, carChassis.Position.Z)
 
             local _, startYaw, _ = carChassis.CFrame:ToOrientation()
             carYaw = math.deg(startYaw)
 
             carBG = Instance.new("BodyGyro", carChassis)
-            carBG.MaxTorque = Vector3.new(1e5, 1e6, 1e5)
+            carBG.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
             carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
 
-            -- Senta o personagem automaticamente
-            enterDriverSeat()
+            -- Ativa apenas o botão verde na tela
+            enterGui.Enabled = true
 
-            -- Loop de Direção e Altura do Solo em Tempo Real
+            -- LOOP PRINCIPAL: FÍSICA DE CHÃO REAL E LADEIRAS
             moveConn = RunService.RenderStepped:Connect(function(dt)
                 if not carChassis or not carChassis.Parent then return end
 
@@ -8192,12 +8200,10 @@ Tabscript:AddButton({
 
                 steerSmooth = steerSmooth + (steer - steerSmooth) * math.clamp(dt * 12, 0, 1)
 
-                -- Girar Volante
                 if steeringMotor then
                     steeringMotor.C0 = baseVolanteC0 * CFrame.Angles(0, 0, math.rad(-steerSmooth * 140))
                 end
 
-                -- Braços e Mãos no Volante
                 if isDriverSeated and player.Character then
                     local rShoulder = player.Character:FindFirstChild("Right Shoulder", true) or player.Character:FindFirstChild("RightShoulder", true)
                     local lShoulder = player.Character:FindFirstChild("Left Shoulder", true) or player.Character:FindFirstChild("LeftShoulder", true)
@@ -8212,23 +8218,47 @@ Tabscript:AddButton({
                     end
                 end
 
-                -- Rotação das Rodas Redondas
+                -- Rotação e Esterçamento das Rodas
                 local moveDirSpeed = carChassis.CFrame.LookVector:Dot(currentVel)
                 local wheelRadius = 1.05
                 local spinDelta = -(moveDirSpeed * dt) / wheelRadius
                 wheelSpinAngle = wheelSpinAngle + spinDelta
 
                 for _, wData in ipairs(wheelMotors) do
-                    local steerAngle = (wData.isFront and math.rad(-steerSmooth * 32)) or 0
+                    local steerAngle = (wData.isFront and math.rad(steerSmooth * 35)) or 0
                     wData.motor.C0 = wData.baseC0 
                         * CFrame.Angles(0, steerAngle, 0) 
                         * CFrame.Angles(wheelSpinAngle, 0, 0)
                 end
 
-                -- Atualiza a altura do solo em movimento (Anti-Levitação contínuo)
-                local downRay = workspace:Raycast(carChassis.Position, Vector3.new(0, -15, 0), rayParams)
+                -- DETECTOR DE CHÃO E LADEIRAS (IGNORA O PRÓPRIO CARRO)
+                local rayCastOrigin = carChassis.Position + Vector3.new(0, 1, 0)
+                local downRay = workspace:Raycast(rayCastOrigin, Vector3.new(0, -25, 0), rayParams)
+                
                 if downRay then
-                    carBP.Position = Vector3.new(0, downRay.Position.Y + 1.25, 0)
+                    local surfaceNormal = downRay.Normal
+                    
+                    -- Alinha o chassi com a ladeira se não for uma parede vertical
+                    if surfaceNormal.Y > 0.45 then
+                        local yawCFrame = CFrame.Angles(0, math.rad(carYaw), 0)
+                        local forwardDir = yawCFrame.LookVector
+                        local rightDir = forwardDir:Cross(surfaceNormal).Unit
+                        local slopeForward = surfaceNormal:Cross(rightDir).Unit
+
+                        carBG.CFrame = CFrame.fromMatrix(carChassis.Position, rightDir, surfaceNormal, -slopeForward)
+                    else
+                        carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
+                    end
+
+                    local targetGroundY = downRay.Position.Y + 1.25
+                    carBP.Position = Vector3.new(carChassis.Position.X, targetGroundY, carChassis.Position.Z)
+
+                    -- TRAVA DE SEGURANÇA: Se por algum motivo tentar decolar, puxa de volta pro chão
+                    if carChassis.Position.Y > targetGroundY + 3.5 then
+                        carChassis.CFrame = CFrame.new(carChassis.Position.X, targetGroundY, carChassis.Position.Z) * carChassis.CFrame.Rotation
+                    end
+                else
+                    carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
                 end
 
                 -- Câmeras
@@ -8242,7 +8272,7 @@ Tabscript:AddButton({
                     end
                 end
 
-                -- Movimento
+                -- Tração apenas quando sentado
                 if isDriverSeated then
                     if throttle ~= 0 then
                         carYaw = carYaw + (steer * turnSpeed * (throttle > 0 and 1 or -1) * dt)
@@ -8254,7 +8284,6 @@ Tabscript:AddButton({
                     steer = 0
                 end
 
-                carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
                 local targetDir = carChassis.CFrame.LookVector * (throttle * maxSpeed)
                 currentVel = currentVel:Lerp(targetDir, grip)
                 carBV.Velocity = Vector3.new(currentVel.X, 0, currentVel.Z)
@@ -8274,6 +8303,7 @@ Tabscript:AddButton({
         tool.Parent = player:WaitForChild("Backpack")
     end
 })
+
 Tabscript:AddSection({"UNIVERSAL COMMANDS ADMIN 🔨"})
 
 Tabscript:AddButton({
