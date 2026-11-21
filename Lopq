@@ -314,5 +314,4 @@ InfoTab:AddButton({
 -- ====================================================================
 -- ABA: TROLL 
 -- ====================================================================
-TabTroll:AddSection({ "Selecione qualquer função para Trolar os Jogadores" })
 
