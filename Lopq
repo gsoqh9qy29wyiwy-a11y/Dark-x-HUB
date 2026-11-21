@@ -3,6 +3,13 @@
 --                          by HACKELINDOO                              --
 --====================================================================--
 
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
 -- ====================================================================
 -- TELA DE CARREGAMENTO (LOADING SCREEN)
 -- ====================================================================
@@ -170,16 +177,6 @@ local Camera = Workspace.CurrentCamera
 
 -- Atalhos de compatibilidade
 local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
-
--- ====================================================================
--- 2. TELA DE CARREGAMENTO (LOADING SCREEN)
--- ====================================================================
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local StarterGui = game:GetService("StarterGui")
-local RunService = game:GetService("RunService")
-local lp = Players.LocalPlayer
 
 -- Variáveis de Controle
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
