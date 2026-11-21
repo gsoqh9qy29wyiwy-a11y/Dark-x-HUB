@@ -6722,6 +6722,339 @@ Tabscript:AddButton({
     end
 })
 
+Tabscript:AddButton({
+    Name = "Carro tool",
+    Description = "Somente para Brookhaven",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local UserInputService = game:GetService("UserInputService")
+        local TweenService = game:GetService("TweenService")
+        local player = Players.LocalPlayer
+        local camera = workspace.CurrentCamera
+
+        -- Limpa versões antigas da Tool e da Interface se existirem
+        local pGui = player:WaitForChild("PlayerGui")
+        if pGui:FindFirstChild("CarroControlGui") then pGui.CarroControlGui:Destroy() end
+        if player.Backpack:FindFirstChild("Carro 🚗") then player.Backpack["Carro 🚗"]:Destroy() end
+        if player.Character and player.Character:FindFirstChild("Carro 🚗") then player.Character["Carro 🚗"]:Destroy() end
+
+        -- Configurações e Estados
+        local carModel = nil
+        local carChassis = nil
+        local carBV = nil
+        local carBG = nil
+        local moveConn = nil
+
+        local throttle = 0   -- 1 = Frente, -1 = Ré, 0 = Parado
+        local steer = 0      -- 1 = Esquerda, -1 = Direita, 0 = Reto
+        local carYaw = 0
+        local currentVel = Vector3.zero
+
+        local currentSpeed = 50  -- Slider 0 a 100
+        local currentDrift = 25  -- Slider 0 a 100
+
+        -- GUI dos Controles
+        local gui = Instance.new("ScreenGui", pGui)
+        gui.Name = "CarroControlGui"
+        gui.ResetOnSpawn = false
+        gui.Enabled = false
+
+        -- Função auxiliar para cantos arredondados
+        local function addCorner(obj, r)
+            local c = Instance.new("UICorner", obj)
+            c.CornerRadius = UDim.new(0, r or 8)
+            return c
+        end
+
+        -- Função auxiliar para criar botões com suporte a Segurar (Mobile + PC)
+        local function mkHoldBtn(parent, pos, sz, txt, color, onDown, onUp)
+            local btn = Instance.new("TextButton", parent)
+            btn.Position = pos
+            btn.Size = sz
+            btn.Text = txt
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.TextSize = 22
+            btn.Font = Enum.Font.GothamBold
+            btn.BackgroundColor3 = color or Color3.fromRGB(30, 35, 45)
+            btn.Active = true
+            btn.AutoButtonColor = true
+            addCorner(btn, 12)
+
+            local stroke = Instance.new("UIStroke", btn)
+            stroke.Color = Color3.fromRGB(0, 170, 255)
+            stroke.Thickness = 1.5
+
+            btn.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 140, 220)
+                    onDown()
+                end
+            end)
+
+            btn.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    btn.BackgroundColor3 = color or Color3.fromRGB(30, 35, 45)
+                    onUp()
+                end
+            end)
+
+            return btn
+        end
+
+        -- Painel de Direção (Esquerda da tela: Esquerda / Direita)
+        local leftFrame = Instance.new("Frame", gui)
+        leftFrame.Position = UDim2.new(0.04, 0, 0.72, 0)
+        leftFrame.Size = UDim2.new(0, 160, 0, 75)
+        leftFrame.BackgroundTransparency = 1
+
+        mkHoldBtn(leftFrame, UDim2.new(0, 0, 0, 0), UDim2.new(0, 75, 0, 75), "◀", Color3.fromRGB(25, 30, 42),
+            function() steer = 1 end,
+            function() if steer == 1 then steer = 0 end end
+        )
+
+        mkHoldBtn(leftFrame, UDim2.new(0, 85, 0, 0), UDim2.new(0, 75, 0, 75), "▶", Color3.fromRGB(25, 30, 42),
+            function() steer = -1 end,
+            function() if steer == -1 then steer = 0 end end
+        )
+
+        -- Painel de Tração (Direita da tela: Frente / Ré)
+        local rightFrame = Instance.new("Frame", gui)
+        rightFrame.Position = UDim2.new(0.96, -160, 0.72, 0)
+        rightFrame.Size = UDim2.new(0, 160, 0, 75)
+        rightFrame.BackgroundTransparency = 1
+
+        mkHoldBtn(rightFrame, UDim2.new(0, 0, 0, 0), UDim2.new(0, 75, 0, 75), "▲", Color3.fromRGB(0, 150, 80),
+            function() throttle = 1 end,
+            function() if throttle == 1 then throttle = 0 end end
+        )
+
+        mkHoldBtn(rightFrame, UDim2.new(0, 85, 0, 0), UDim2.new(0, 75, 0, 75), "▼", Color3.fromRGB(180, 50, 50),
+            function() throttle = -1 end,
+            function() if throttle == -1 then throttle = 0 end end
+        )
+
+        -- Botão [X] para Deletar Carro (Topo direito)
+        local closeBtn = Instance.new("TextButton", gui)
+        closeBtn.Position = UDim2.new(1, -65, 0, 20)
+        closeBtn.Size = UDim2.new(0, 45, 0, 45)
+        closeBtn.Text = "✕"
+        closeBtn.TextColor3 = Color3.new(1, 1, 1)
+        closeBtn.TextSize = 20
+        closeBtn.Font = Enum.Font.GothamBold
+        closeBtn.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+        addCorner(closeBtn, 99)
+
+        -- Painel dos Sliders (Centro superior da tela)
+        local sliderPanel = Instance.new("Frame", gui)
+        sliderPanel.Position = UDim2.new(0.5, -130, 0, 15)
+        sliderPanel.Size = UDim2.new(0, 260, 0, 95)
+        sliderPanel.BackgroundColor3 = Color3.fromRGB(18, 22, 32)
+        addCorner(sliderPanel, 10)
+        local spStroke = Instance.new("UIStroke", sliderPanel)
+        spStroke.Color = Color3.fromRGB(0, 170, 255)
+        spStroke.Thickness = 1.5
+
+        -- Função para criar Sliders (0 a 100)
+        local function createSlider(yPos, title, initVal, onChange)
+            local label = Instance.new("TextLabel", sliderPanel)
+            label.Position = UDim2.new(0, 12, 0, yPos)
+            label.Size = UDim2.new(1, -24, 0, 14)
+            label.BackgroundTransparency = 1
+            label.Font = Enum.Font.GothamBold
+            label.TextSize = 11
+            label.TextColor3 = Color3.fromRGB(210, 230, 255)
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Text = title .. ": " .. math.floor(initVal)
+
+            local barBg = Instance.new("Frame", sliderPanel)
+            barBg.Position = UDim2.new(0, 12, 0, yPos + 18)
+            barBg.Size = UDim2.new(1, -24, 0, 14)
+            barBg.BackgroundColor3 = Color3.fromRGB(35, 42, 58)
+            addCorner(barBg, 99)
+
+            local barFill = Instance.new("Frame", barBg)
+            barFill.Size = UDim2.new(initVal / 100, 0, 1, 0)
+            barFill.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+            addCorner(barFill, 99)
+
+            local dragging = false
+            local function update(input)
+                local relX = math.clamp(input.Position.X - barBg.AbsolutePosition.X, 0, barBg.AbsoluteSize.X)
+                local pct = math.clamp(relX / barBg.AbsoluteSize.X, 0, 1)
+                barFill.Size = UDim2.new(pct, 0, 1, 0)
+                local val = math.floor(pct * 100)
+                label.Text = title .. ": " .. val
+                onChange(val)
+            end
+
+            barBg.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    update(input)
+                end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    update(input)
+                end
+            end)
+
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                end
+            end)
+        end
+
+        createSlider(8, "⚡ Velocidade", currentSpeed, function(v) currentSpeed = v end)
+        createSlider(50, "💨 Drift", currentDrift, function(v) currentDrift = v end)
+
+        -- Função para Destruir o Carro e Restaurar a Câmera
+        local function deleteCar()
+            if moveConn then
+                moveConn:Disconnect()
+                moveConn = nil
+            end
+
+            if carModel then
+                carModel:Destroy()
+                carModel = nil
+                carChassis = nil
+            end
+
+            gui.Enabled = false
+            throttle = 0
+            steer = 0
+
+            -- Retorna a Câmera para o Personagem
+            local char = player.Character
+            if char and char:FindFirstChildOfClass("Humanoid") then
+                camera.CameraSubject = char:FindFirstChildOfClass("Humanoid")
+            end
+        end
+
+        closeBtn.MouseButton1Click:Connect(deleteCar)
+
+        -- Função para Construir o Modelo do Carro
+        local function spawnCar()
+            deleteCar()
+
+            local char = player.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+            local hrp = char.HumanoidRootPart
+
+            carModel = Instance.new("Model", workspace)
+            carModel.Name = "Carro_Client_" .. player.Name
+
+            -- Chassi principal do Carro
+            carChassis = Instance.new("Part", carModel)
+            carChassis.Name = "Chassis"
+            carChassis.Size = Vector3.new(5.5, 1.4, 10.5)
+            carChassis.CFrame = hrp.CFrame * CFrame.new(0, 2, -10)
+            carChassis.Color = Color3.fromRGB(20, 20, 25)
+            carChassis.Material = Enum.Material.SmoothPlastic
+            carChassis.CanCollide = true
+            carChassis.CustomPhysicalProperties = PhysicalProperties.new(1.2, 0.4, 0.2, 100, 100)
+            carModel.PrimaryPart = carChassis
+
+            -- Teto / Vidros do Carro
+            local cabin = Instance.new("Part", carModel)
+            cabin.Size = Vector3.new(4.8, 1.2, 5)
+            cabin.CFrame = carChassis.CFrame * CFrame.new(0, 1.2, -0.5)
+            cabin.Color = Color3.fromRGB(0, 160, 255)
+            cabin.Material = Enum.Material.Glass
+            cabin.Transparency = 0.3
+            cabin.CanCollide = false
+            local wCabin = Instance.new("WeldConstraint", carChassis)
+            wCabin.Part0, wCabin.Part1 = carChassis, cabin
+
+            -- Faróis dianteiros de Neon
+            local light = Instance.new("Part", carModel)
+            light.Size = Vector3.new(4.8, 0.5, 0.2)
+            light.CFrame = carChassis.CFrame * CFrame.new(0, 0.2, -5.3)
+            light.Color = Color3.fromRGB(240, 255, 255)
+            light.Material = Enum.Material.Neon
+            light.CanCollide = false
+            local wLight = Instance.new("WeldConstraint", carChassis)
+            wLight.Part0, wLight.Part1 = carChassis, light
+
+            -- 4 Rodas decorativas soldadas
+            local wheelOffsets = {
+                Vector3.new(2.8, -0.4, 3.2), Vector3.new(-2.8, -0.4, 3.2),
+                Vector3.new(2.8, -0.4, -3.2), Vector3.new(-2.8, -0.4, -3.2)
+            }
+            for _, off in ipairs(wheelOffsets) do
+                local w = Instance.new("Part", carModel)
+                w.Size = Vector3.new(0.8, 2, 2)
+                w.CFrame = carChassis.CFrame * CFrame.new(off)
+                w.Color = Color3.fromRGB(15, 15, 15)
+                w.Material = Enum.Material.Rubber
+                w.CanCollide = true
+                local wc = Instance.new("WeldConstraint", carChassis)
+                wc.Part0, wc.Part1 = carChassis, w
+            end
+
+            -- Forças de movimentação física Arcade
+            carBV = Instance.new("BodyVelocity", carChassis)
+            carBV.MaxForce = Vector3.new(1e6, 0, 1e6) -- Não anula a gravidade no Y
+            carBV.Velocity = Vector3.zero
+
+            local _, startYaw, _ = carChassis.CFrame:ToOrientation()
+            carYaw = math.deg(startYaw)
+
+            carBG = Instance.new("BodyGyro", carChassis)
+            carBG.MaxTorque = Vector3.new(1e5, 1e6, 1e5)
+            carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
+
+            -- Transfere a Câmera para o Carro e Exibe a UI
+            camera.CameraSubject = carChassis
+            gui.Enabled = true
+            currentVel = Vector3.zero
+
+            -- Loop de Direção e Física (com suporte a Drift)
+            moveConn = RunService.RenderStepped:Connect(function(dt)
+                if not carChassis or not carChassis.Parent then return end
+
+                local maxSpeedStuds = (currentSpeed / 100) * 110
+                local driftFactor = currentDrift / 100
+
+                -- Aderência (Grip): Quanto mais drift, mais o carro desliza lateralmente
+                local grip = math.clamp(0.25 - (driftFactor * 0.22), 0.03, 0.3)
+                local turnSpeed = 65 + (driftFactor * 65)
+
+                if throttle ~= 0 then
+                    carYaw = carYaw + (steer * turnSpeed * (throttle > 0 and 1 or -1) * dt)
+                elseif steer ~= 0 and currentVel.Magnitude > 3 then
+                    carYaw = carYaw + (steer * turnSpeed * dt)
+                end
+
+                carBG.CFrame = CFrame.Angles(0, math.rad(carYaw), 0)
+
+                local targetDirection = carChassis.CFrame.LookVector * (throttle * maxSpeedStuds)
+                currentVel = currentVel:Lerp(targetDirection, grip)
+
+                carBV.Velocity = Vector3.new(currentVel.X, carChassis.AssemblyLinearVelocity.Y, currentVel.Z)
+            end)
+        end
+
+        -- Criação da Tool na Mochila do Jogador
+        local tool = Instance.new("Tool")
+        tool.Name = "Carro 🚗"
+        tool.RequiresHandle = false
+        tool.CanBeDropped = false
+
+        tool.Activated:Connect(function()
+            spawnCar()
+        end)
+
+        tool.Parent = player:WaitForChild("Backpack")
+
+        print("Carro Tool entregue com sucesso! Equipe o item e clique no chão para colocar o carro.")
+    end
+})
+
 Tabscript:AddSection({"UNIVERSAL COMMANDS ADMIN 🔨"})
 
 Tabscript:AddButton({
