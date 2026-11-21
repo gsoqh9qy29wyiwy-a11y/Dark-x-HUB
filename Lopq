@@ -163,6 +163,35 @@ end
 local loadingPromise = createLoadingScreen()
 waitForPromise(loadingPromise)
 
+-- ====================================================================
+-- 1. SERVIÇOS E VARIÁVEIS INICIAIS
+-- ====================================================================
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local TextChatService = game:GetService("TextChatService")
+local Camera = Workspace.CurrentCamera
+
+-- Atalhos de compatibilidade
+local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
+
+-- Variáveis de Controle
+local walkSpeed, jumpPower, gravity = 16, 50, 192.2
+local viewEnabled = false
+_G.SelectedPlayer = ""
+_G.AutoBringCouch = false
+_G.AutoKillCouch = false
+_G.AutoFlingCouch = false
+_G.AntiSit = false
+_G.AntiVoid = false
+_G.AntiFling = false
+_G.AntiLag = false 
+_G.RGBName = false
+_G.RainbowBio = false
+
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
 
 --  3. JANELA PRINCIPAL
@@ -200,3 +229,45 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
+
+-- ====================================================================
+-- ABA: CREDITS 
+-- ====================================================================
+Tab1:AddSection({"Informação do Hub"})
+Tab1:AddDiscordInvite({
+    Name = "Dark x hub",
+    Description = "Servidor oficial",
+    Logo = "rbxassetid://113088956809836",
+    Invite = "",
+})
+local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
+Tab1:AddParagraph({"Executor", executorName})
+Tab1:AddSection({"Versão do Hub 1.1"})
+Tab1:AddParagraph({"Criadores", "HACKELINDOO"})
+
+Tab1:AddButton({
+    Name = "Copiar @ do Tik Tok",
+    Callback = function()
+        setclipboard("@HACKELINDOO") -- Copia o user
+        
+        -- Opcional: Notificação para avisar que copiou
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Tik Tok @HACKELINDOO copiado!",
+            Duration = 3
+        })
+    end
+})
+
+Tab1:AddButton({
+    Name = "Copiar Link do Tik Tok",
+    Callback = function()
+        setclipboard("https://www.instagram.com/carlolx7/") -- Copia o link completo
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Link do Tik Tok copiado!",
+            Duration = 3
+        })
+    end
+})
