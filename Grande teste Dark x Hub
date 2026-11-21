@@ -5923,3 +5923,891 @@ Tabscript:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ryanVictor123/-Nevliz-Hub-BROOKHAVEN-/refs/heads/main/Nevliz%20Hub%20by%20team%20nevliz"))()
     end
 })
+
+Tabscript:AddSection({"Script do Bankai god edition"})
+
+Tabscript:AddButton({
+    Name = "Bankai God Edition",
+    Description = "Carrega a interface Bankai (Spam, Ferramentas e Proteções)",
+    Callback = function()
+        -- BANKAI GOD EDITION (3 TABS + AUTO RAINBOW RP + LAG-FREE PROTECT + NO FLY)
+        local Players, RS, TCS, RunS, TS, VU, Lighting, WS =
+            game:GetService("Players"), game:GetService("ReplicatedStorage"), game:GetService("TextChatService"),
+            game:GetService("RunService"), game:GetService("TweenService"), game:GetService("VirtualUser"),
+            game:GetService("Lighting"), game:GetService("Workspace")
+
+        local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+
+        local function getRoot()
+            local ok, root = pcall(function() return gethui and gethui() or game:GetService("CoreGui") end)
+            if ok and root and pcall(function() local f = Instance.new("Folder", root); f:Destroy() end) then
+                return root
+            end
+            return player:WaitForChild("PlayerGui")
+        end
+
+        local GuiRoot = getRoot()
+        pcall(function() if GuiRoot:FindFirstChild("BankaiGodUI") then GuiRoot.BankaiGodUI:Destroy() end end)
+
+        local rpTag = "🏴‍☠️ BANKAI GOD EDITION 🏴‍☠️"
+        local prot = {
+            afk = false, sit = false, fling = false, ball = false, door = false, void = false,
+            rag = false, kb = false, anc = false, tool = false, blind = false, pop = false, cam = false, rp = true, chat = false
+        }
+
+        local function matchesRPKey(s)
+            local l = string.lower(s or "")
+            return l:find("rp", 1, true) or l:find("name", 1, true) or l:find("tag", 1, true)
+                or l:find("bio", 1, true) or l:find("title", 1, true) or l:find("nick", 1, true) or l:find("roleplay", 1, true)
+        end
+
+        local function applyRP(txt)
+            rpTag = (txt and txt ~= "") and txt or rpTag
+            pcall(function()
+                for _, v in ipairs(RS:GetDescendants()) do
+                    if matchesRPKey(v.Name) then
+                        if v:IsA("RemoteEvent") then
+                            v:FireServer("RolePlayName", rpTag)
+                            v:FireServer("RPName", rpTag)
+                            v:FireServer("SetName", rpTag)
+                            v:FireServer(rpTag)
+                        elseif v:IsA("RemoteFunction") then
+                            task.spawn(function()
+                                pcall(function() v:InvokeServer("RolePlayName", rpTag) end)
+                                pcall(function() v:InvokeServer(rpTag) end)
+                            end)
+                        end
+                    end
+                end
+
+                local pg = player:FindFirstChild("PlayerGui")
+                if pg then
+                    for _, g in ipairs(pg:GetDescendants()) do
+                        if not g:IsDescendantOf(GuiRoot) then
+                            if g:IsA("TextBox") and (matchesRPKey(g.Name) or matchesRPKey(g.PlaceholderText)) then
+                                g.Text = rpTag
+                            elseif g:IsA("TextLabel") and matchesRPKey(g.Name) then
+                                g.Text = rpTag
+                            end
+                        end
+                    end
+                end
+
+                local ch = player.Character
+                if ch then
+                    for _, d in ipairs(ch:GetDescendants()) do
+                        if d:IsA("TextLabel") and matchesRPKey(d.Name) then
+                            d.Text = rpTag
+                        end
+                    end
+                end
+            end)
+        end
+
+        local function applyRainbowRPColor(col)
+            pcall(function()
+                local ch = player.Character
+                if ch then
+                    for _, d in ipairs(ch:GetDescendants()) do
+                        if d:IsA("TextLabel") and (matchesRPKey(d.Name) or d:FindFirstAncestorOfClass("BillboardGui")) then
+                            d.TextColor3 = col
+                        end
+                    end
+                end
+                local pg = player:FindFirstChild("PlayerGui")
+                if pg then
+                    for _, g in ipairs(pg:GetDescendants()) do
+                        if not g:IsDescendantOf(GuiRoot) and g:IsA("TextLabel") and matchesRPKey(g.Name) then
+                            g.TextColor3 = col
+                        end
+                    end
+                end
+            end)
+        end
+
+        local function chat(msg)
+            task.spawn(function()
+                pcall(function()
+                    if TCS.ChatVersion == Enum.ChatVersion.TextChatService then
+                        local ch = TCS:FindFirstChild("TextChannels") and TCS.TextChannels:FindFirstChild("RBXGeneral")
+                        if ch then ch:SendAsync(msg) end
+                    else
+                        local ev = RS:FindFirstChild("DefaultChatSystemChatEvents") and RS.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+                        if ev then ev:FireServer(msg, "All") end
+                    end
+                end)
+            end)
+        end
+
+        local function num(txt, lo, hi)
+            local n = tonumber((txt or ""):gsub("[,_%s]", ""))
+            return n and n == n and math.clamp(n, lo or 0, hi or 1e16) or nil
+        end
+
+        local function addCorner(o, r)
+            Instance.new("UICorner", o).CornerRadius = UDim.new(0, r or 6)
+        end
+
+        local function mkBtn(p, pos, sz, txt, col, tsz)
+            local b = Instance.new("TextButton", p)
+            b.Position, b.Size, b.Text, b.TextColor3, b.TextSize = pos, sz, txt, col or Color3.fromRGB(220, 235, 255), tsz or 12
+            b.BackgroundColor3, b.Font, b.Active, b.AutoButtonColor = Color3.fromRGB(25, 35, 50), Enum.Font.GothamBold, true, true
+            addCorner(b, 6)
+            return b
+        end
+
+        local function mkBox(p, pos, sz, ph, txt)
+            local tb = Instance.new("TextBox", p)
+            tb.Position, tb.Size, tb.PlaceholderText, tb.Text = pos, sz, ph, txt or ""
+            tb.BackgroundColor3, tb.TextColor3, tb.TextSize, tb.Font, tb.ClearTextOnFocus = Color3.fromRGB(25, 35, 50), Color3.new(1, 1, 1), 12, Enum.Font.Gotham, false
+            addCorner(tb, 6)
+            return tb
+        end
+
+        local function mkLbl(p, pos, sz, txt, col, tsz)
+            local l = Instance.new("TextLabel", p)
+            l.Position, l.Size, l.Text, l.TextColor3, l.TextSize = pos, sz, txt, col or Color3.fromRGB(180, 200, 220), tsz or 11
+            l.BackgroundTransparency, l.Font, l.TextXAlignment = 1, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+            return l
+        end
+
+        -- GUI + LOADER
+        local gui = Instance.new("ScreenGui", GuiRoot)
+        gui.Name, gui.ResetOnSpawn, gui.ZIndexBehavior = "BankaiGodUI", false, Enum.ZIndexBehavior.Sibling
+        gui.DisplayOrder = 999
+
+        local loadScr = Instance.new("Frame", gui)
+        loadScr.Size, loadScr.BackgroundColor3, loadScr.BorderSizePixel, loadScr.ZIndex = UDim2.fromScale(1, 1), Color3.fromRGB(8, 12, 20), 0, 100
+
+        local card = Instance.new("Frame", loadScr)
+        card.AnchorPoint, card.Position, card.Size, card.BackgroundColor3, card.ZIndex = Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5), UDim2.fromOffset(400, 175), Color3.fromRGB(15, 22, 36), 101
+        addCorner(card, 14)
+
+        local lStroke = Instance.new("UIStroke", card)
+        lStroke.Thickness = 2.5
+
+        local lTitle = mkLbl(card, UDim2.fromOffset(10, 34), UDim2.new(1, -20, 0, 34), "BANKAI GOD EDITION", Color3.new(1, 1, 1), 22)
+        lTitle.TextXAlignment, lTitle.ZIndex = Enum.TextXAlignment.Center, 102
+
+        local lStat = mkLbl(card, UDim2.fromOffset(10, 74), UDim2.new(1, -20, 0, 20), "LOADING...", Color3.fromRGB(200, 225, 255), 12)
+        lStat.TextXAlignment, lStat.ZIndex = Enum.TextXAlignment.Center, 102
+
+        local barBg = Instance.new("Frame", card)
+        barBg.Position, barBg.Size, barBg.BackgroundColor3, barBg.ZIndex = UDim2.fromOffset(30, 112), UDim2.new(1, -60, 0, 14), Color3.fromRGB(25, 35, 55), 102
+        addCorner(barBg, 99)
+
+        local barFill = Instance.new("Frame", barBg)
+        barFill.Size, barFill.ZIndex = UDim2.fromScale(0, 1), 103
+        addCorner(barFill, 99)
+
+        local toggle = mkBtn(gui, UDim2.fromScale(0.08, 0.15), UDim2.fromOffset(56, 56), "🏴‍☠️", Color3.fromRGB(0, 180, 255), 24)
+        toggle.Draggable, toggle.Visible, toggle.ZIndex = true, false, 30
+        addCorner(toggle, 99)
+        local tStroke = Instance.new("UIStroke", toggle)
+        tStroke.Thickness = 2
+
+        local main = Instance.new("Frame", gui)
+        main.Position, main.Size, main.BackgroundColor3, main.ZIndex = UDim2.new(0.5, -210, 0.5, -225), UDim2.fromOffset(420, 450), Color3.fromRGB(15, 20, 30), 15
+        main.Visible, main.Draggable, main.Active = false, true, false
+        addCorner(main, 10)
+        local mStroke = Instance.new("UIStroke", main)
+        mStroke.Thickness = 1.5
+
+        local mTitle = mkLbl(main, UDim2.fromOffset(40, 8), UDim2.fromOffset(340, 22), "🏴‍☠️ BANKAI GOD EDITION 💙", Color3.new(1, 1, 1), 14)
+        mTitle.TextXAlignment, mTitle.ZIndex = Enum.TextXAlignment.Center, 16
+
+        local closeBtn = mkBtn(main, UDim2.fromOffset(384, 6), UDim2.fromOffset(28, 24), "✕", Color3.fromRGB(255, 110, 110), 12)
+        closeBtn.ZIndex = 17
+        local function closeMain() main.Visible = false end
+        closeBtn.MouseButton1Click:Connect(closeMain)
+        closeBtn.TouchTap:Connect(closeMain)
+
+        local function toggleMain() main.Visible = not main.Visible end
+        toggle.MouseButton1Click:Connect(toggleMain)
+        toggle.TouchTap:Connect(toggleMain)
+
+        task.spawn(function()
+            local lastRP = 0
+            while gui.Parent do
+                local now = tick()
+                local c = Color3.fromHSV((now % 5) / 5, 1, 1)
+                pcall(function()
+                    tStroke.Color, mStroke.Color, mTitle.TextColor3, lStroke.Color, lTitle.TextColor3, barFill.BackgroundColor3 = c, c, c, c, c, c
+                    if prot.rp and (now - lastRP) >= 0.08 then
+                        lastRP = now
+                        applyRainbowRPColor(c)
+                    end
+                end)
+                RunS.RenderStepped:Wait()
+            end
+        end)
+
+        -- Transição do Loader para liberar o botão flutuante e o menu
+        task.spawn(function()
+            TS:Create(barFill, TweenInfo.new(1.2, Enum.EasingStyle.Quad), {Size = UDim2.fromScale(1, 1)}):Play()
+            task.wait(1.2)
+            loadScr:Destroy()
+            toggle.Visible = true
+            main.Visible = true
+        end)
+
+        -- 3 TABS: SPAM, TOOLS, PROTECT
+        local tabBar = Instance.new("Frame", main)
+        tabBar.Position, tabBar.Size, tabBar.BackgroundColor3, tabBar.ZIndex = UDim2.fromOffset(14, 34), UDim2.fromOffset(392, 32), Color3.fromRGB(20, 28, 42), 16
+        addCorner(tabBar, 6)
+
+        local pages, tabBtns = {}, {}
+        local function makePage()
+            local sf = Instance.new("ScrollingFrame", main)
+            sf.Position, sf.Size, sf.BackgroundTransparency, sf.ScrollBarThickness, sf.ZIndex = UDim2.fromOffset(0, 72), UDim2.new(1, 0, 1, -74), 1, 6, 16
+            sf.ScrollBarImageColor3, sf.CanvasSize, sf.ClipsDescendants, sf.ScrollingEnabled = Color3.fromRGB(0, 180, 255), UDim2.fromOffset(0, 420), true, true
+            return sf
+        end
+        for i = 1, 3 do
+            pages[i] = makePage()
+            pages[i].Visible = (i == 1)
+        end
+
+        local function setTab(idx)
+            for i, p in ipairs(pages) do
+                p.Visible = (i == idx)
+                tabBtns[i].BackgroundColor3 = (i == idx) and Color3.fromRGB(0, 140, 220) or Color3.fromRGB(25, 35, 50)
+            end
+        end
+for i, name in ipairs({"💬 Spam", "⚡ Tools", "🛡️ Protect"}) do
+            local b = mkBtn(tabBar, UDim2.new((i - 1) / 3, 3, 0, 3), UDim2.new(1 / 3, -4, 1, -6), name, Color3.new(1, 1, 1), 12)
+            b.ZIndex = 17
+            local function openTab() setTab(i) end
+            b.MouseButton1Click:Connect(openTab)
+            b.TouchTap:Connect(openTab)
+            tabBtns[i] = b
+        end
+
+        -- TAB 1: SPAM
+        local boxes, lines = {}, {
+            "DRAGON 🐉 ULTIMATE POWER FIRE 🔥 BLUE COLOUR FIRE ULTIMATE 🔥 💙",
+            "NINJA H2R BIKE KA 🔥 CYLSER ULTIMATE TOP SPEED 400 🏴‍☠️",
+            "MEGA LEG 🦵 UNIVERSE BIGGEST LEG 🦵 ULTRA POWER SPEED",
+            "BANKAI CLAN MEMBER KA 💙 BIGGEST POWER ULTIMATE SPEED"
+        }
+        for i = 1, 4 do
+            local lbl = mkLbl(pages[1], UDim2.fromOffset(20, 4 + (i - 1) * 48), UDim2.fromOffset(376, 14), "Line " .. i .. ":")
+            lbl.ZIndex = 17
+            boxes[i] = mkBox(pages[1], UDim2.fromOffset(20, 19 + (i - 1) * 48), UDim2.fromOffset(376, 28), "Line " .. i .. " text...")
+            boxes[i].ZIndex = 17
+        end
+
+        local delaySec, sent, spamming = 1.5, 0, false
+        local dLbl = mkLbl(pages[1], UDim2.fromOffset(20, 202), UDim2.fromOffset(376, 18), "Delay: 1.5s")
+        dLbl.ZIndex = 17
+
+        for i, s in ipairs({2, 1.5, 1, 0.5, 0.1, 0.01}) do
+            local sb = mkBtn(pages[1], UDim2.fromOffset(20 + (i - 1) * 61.5, 222), UDim2.fromOffset(56, 28), s .. "s", Color3.fromRGB(0, 180, 255), 11)
+            sb.ZIndex = 17
+            local function pickDelay()
+                delaySec = s
+                dLbl.Text = "Delay: " .. s .. "s"
+            end
+            sb.MouseButton1Click:Connect(pickDelay)
+            sb.TouchTap:Connect(pickDelay)
+        end
+
+        local cntLbl = mkLbl(pages[1], UDim2.fromOffset(20, 256), UDim2.fromOffset(376, 18), "Messages Sent: 0", Color3.fromRGB(0, 220, 255), 12)
+        cntLbl.TextXAlignment, cntLbl.ZIndex = Enum.TextXAlignment.Center, 17
+
+        local spamBtn = mkBtn(pages[1], UDim2.fromOffset(20, 280), UDim2.fromOffset(376, 38), "💬 Start / Stop Spam", Color3.fromRGB(255, 100, 100), 13)
+        spamBtn.ZIndex = 17
+
+        local clrBtn = mkBtn(pages[1], UDim2.fromOffset(20, 324), UDim2.fromOffset(376, 34), "🧹 Clear Boxes")
+        clrBtn.ZIndex = 17
+        local function clearBoxes()
+            for _, b in ipairs(boxes) do b.Text = "" end
+        end
+        clrBtn.MouseButton1Click:Connect(clearBoxes)
+        clrBtn.TouchTap:Connect(clearBoxes)
+
+        local function toggleSpam()
+            spamming = not spamming
+            spamBtn.TextColor3 = spamming and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+            if spamming then
+                applyRP()
+                task.spawn(function()
+                    local idx, k = 1, 0
+                    while spamming do
+                        pcall(function()
+                            k = (k % 9) + 1
+                            local extra = (boxes[idx].Text ~= "" and boxes[idx].Text or boxes[1].Text)
+                            local msg = string.rep("@", 16) .. " TMX " .. extra .. " " .. lines[idx] .. string.rep(" ", k) .. " " .. string.rep("@", 16)
+                            if #msg > 198 then msg = msg:sub(1, 198) end
+                            idx = (idx % #lines) + 1
+                            chat(msg)
+                            sent += 1
+                            cntLbl.Text = "Messages Sent: " .. sent
+                        end)
+                        task.wait(delaySec)
+                    end
+                end)
+            end
+        end
+        spamBtn.MouseButton1Click:Connect(toggleSpam)
+        spamBtn.TouchTap:Connect(toggleSpam)
+
+        -- TAB 2: TOOLS
+        local rpLbl = mkLbl(pages[2], UDim2.fromOffset(20, 4), UDim2.fromOffset(376, 16), "RP Tag (Auto + Rainbow):")
+        rpLbl.ZIndex = 17
+
+        local rpBox = mkBox(pages[2], UDim2.fromOffset(20, 22), UDim2.fromOffset(262, 30), "RP Tag", rpTag)
+        rpBox.ZIndex = 17
+
+        local applyBtn = mkBtn(pages[2], UDim2.fromOffset(289, 22), UDim2.fromOffset(107, 30), "Apply Tag", Color3.new(1, 1, 1))
+        applyBtn.ZIndex = 17
+        local function doApplyTag()
+            applyRP(rpBox.Text)
+            applyBtn.Text = "Applied!"
+            task.delay(0.8, function()
+                if applyBtn and applyBtn.Parent then applyBtn.Text = "Apply Tag" end
+            end)
+        end
+        applyBtn.MouseButton1Click:Connect(doApplyTag)
+        applyBtn.TouchTap:Connect(doApplyTag)
+
+        local spdBox = mkBox(pages[2], UDim2.fromOffset(20, 62), UDim2.fromOffset(262, 30), "Speed (max 1e16)")
+        spdBox.ZIndex = 17
+        local spdBtn = mkBtn(pages[2], UDim2.fromOffset(289, 62), UDim2.fromOffset(107, 30), "Set Speed", Color3.new(1, 1, 1))
+        spdBtn.ZIndex = 17
+        local function doSetSpeed()
+            local v = num(spdBox.Text, 0, 1e16)
+            local h = v and player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+            if h then h.WalkSpeed = v end
+        end
+        spdBtn.MouseButton1Click:Connect(doSetSpeed)
+        spdBtn.TouchTap:Connect(doSetSpeed)
+
+        local jmpBox = mkBox(pages[2], UDim2.fromOffset(20, 102), UDim2.fromOffset(262, 30), "Jump (max 1e16)")
+        jmpBox.ZIndex = 17
+        local jmpBtn = mkBtn(pages[2], UDim2.fromOffset(289, 102), UDim2.fromOffset(107, 30), "Set Jump", Color3.new(1, 1, 1))
+        jmpBtn.ZIndex = 17
+        local function doSetJump()
+            local v = num(jmpBox.Text, 0, 1e16)
+            local h = v and player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+            if h then h.UseJumpPower = true; h.JumpPower = v end
+        end
+        jmpBtn.MouseButton1Click:Connect(doSetJump)
+        jmpBtn.TouchTap:Connect(doSetJump)
+
+        local gpsLbl = mkLbl(pages[2], UDim2.fromOffset(20, 144), UDim2.fromOffset(262, 34), "📍 GPS: 0, 0, 0", Color3.fromRGB(0, 220, 255), 11)
+        gpsLbl.BackgroundColor3, gpsLbl.BackgroundTransparency, gpsLbl.ZIndex = Color3.fromRGB(20, 28, 42), 0, 17
+        addCorner(gpsLbl, 6)
+
+        local gpsStr = "0, 0, 0"
+        local cpBtn = mkBtn(pages[2], UDim2.fromOffset(289, 144), UDim2.fromOffset(107, 34), "Copy GPS", Color3.new(1, 1, 1))
+        cpBtn.ZIndex = 17
+        local function doCopyGps()
+            if setclipboard then
+                setclipboard(gpsStr)
+                cpBtn.Text = "Copied!"
+                task.delay(1, function() if cpBtn and cpBtn.Parent then cpBtn.Text = "Copy GPS" end end)
+            end
+        end
+        cpBtn.MouseButton1Click:Connect(doCopyGps)
+        cpBtn.TouchTap:Connect(doCopyGps)
+
+        local lagBtn = mkBtn(pages[2], UDim2.fromOffset(20, 188), UDim2.fromOffset(376, 36), "⚡ Ultra Reduce Lag", Color3.fromRGB(0, 220, 255), 13)
+        lagBtn.ZIndex = 17
+        local function doReduceLag()
+            pcall(function()
+                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+                Lighting.GlobalShadows, Lighting.FogEnd = false, 1e9
+                for _, o in ipairs(WS:GetDescendants()) do
+                    if o:IsA("ParticleEmitter") or o:IsA("Trail") or o:IsA("Smoke") or o:IsA("Fire") or o:IsA("Light") then
+                        o.Enabled = false
+                    elseif o:IsA("BasePart") then
+                        o.Material, o.CastShadow = Enum.Material.SmoothPlastic, false
+                    end
+                end
+            end)
+        end
+        lagBtn.MouseButton1Click:Connect(doReduceLag)
+        lagBtn.TouchTap:Connect(doReduceLag)
+        
+        local rstBtn = mkBtn(pages[2], UDim2.fromOffset(20, 232), UDim2.fromOffset(376, 36), "🌀 Reset Character", Color3.new(1, 1, 1), 13)
+        rstBtn.ZIndex = 17
+        local function doReset()
+            if player.Character then player.Character:BreakJoints() end
+        end
+        rstBtn.MouseButton1Click:Connect(doReset)
+        rstBtn.TouchTap:Connect(doReset)
+
+        -- TAB 3: PROTECT (EVENT-DRIVEN + THROTTLED, ZERO LAG)
+        local function applyCharacterProt(ch)
+            if not ch then return end
+            local hum = ch:FindFirstChildOfClass("Humanoid")
+            if hum then
+                if prot.sit then hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false); hum.Sit = false end
+                if prot.rag then
+                    hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+                end
+            end
+            if prot.anc then
+                for _, p in ipairs(ch:GetChildren()) do
+                    if p:IsA("BasePart") then p.Anchored = false end
+                end
+            end
+        end
+
+        local pHolder = Instance.new("Frame", pages[3])
+        pHolder.Position, pHolder.Size, pHolder.BackgroundTransparency, pHolder.ZIndex = UDim2.fromOffset(16, 4), UDim2.new(1, -38, 0, 700), 1, 17
+
+        local pLay = Instance.new("UIListLayout", pHolder)
+        pLay.Padding = UDim.new(0, 6)
+
+        local pList = {
+            {"🛡️ Anti-AFK", "afk"}, {"🪑 Anti-Sit", "sit"}, {"🌪️ Anti-Fling", "fling"}, {"⚽ Anti-Ball Fling", "ball"},
+            {"🚪 Anti-Door Fling", "door"}, {"🕳️ Anti-Void", "void"}, {"🦴 Anti-Ragdoll", "rag"}, {"💥 Anti-Knockback", "kb"},
+            {"⚓ Anti-Anchor", "anc"}, {"🎒 Anti-Tool Drop", "tool"}, {"🕶️ Anti-Blind", "blind"}, {"🪟 Anti-Popups", "pop"},
+            {"📷 Anti-Cam Lock", "cam"}, {"🏷️ Anti-RP Reset", "rp"}, {"🔇 Anti-Chat Clutter", "chat"}
+        }
+
+        for i, item in ipairs(pList) do
+            local initOn = prot[item[2]]
+            local b = mkBtn(pHolder, UDim2.new(), UDim2.new(1, 0, 0, 38), item[1] .. (initOn and ": ON" or ": OFF"), initOn and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100), 12)
+            b.LayoutOrder, b.ZIndex = i, 18
+            local function toggleProt()
+                prot[item[2]] = not prot[item[2]]
+                local on = prot[item[2]]
+                b.Text, b.TextColor3 = item[1] .. (on and ": ON" or ": OFF"), on and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+                if item[2] == "rp" and on then applyRP(rpTag) end
+                if (item[2] == "sit" or item[2] == "rag" or item[2] == "anc") and on then
+                    applyCharacterProt(player.Character)
+                end
+            end
+            b.MouseButton1Click:Connect(toggleProt)
+            b.TouchTap:Connect(toggleProt)
+        end
+
+        pLay:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            pHolder.Size = UDim2.new(1, -38, 0, pLay.AbsoluteContentSize.Y)
+            pages[3].CanvasSize = UDim2.fromOffset(0, pLay.AbsoluteContentSize.Y + 24)
+        end)
+
+        player.Idled:Connect(function()
+            if prot.afk then VU:CaptureController(); VU:ClickButton2(Vector2.new()) end
+        end)
+
+        local function hookChar(ch)
+            if not ch then return end
+            ch.ChildAdded:Connect(function(o)
+                if prot.anc and o:IsA("BasePart") then o.Anchored = false end
+            end)
+            local hum = ch:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Seated:Connect(function(active)
+                    if prot.sit and active then hum.Sit = false end
+                end)
+            end
+            applyCharacterProt(ch)
+        end
+
+        if player.Character then hookChar(player.Character) end
+
+        applyRP(rpTag)
+        player.CharacterAdded:Connect(function(ch)
+            hookChar(ch)
+            task.wait(0.8)
+            applyRP(rpTag)
+        end)
+
+        -- LIGHTWEIGHT HEARTBEAT LOOP (Linha final completada corretamente)
+        local safeCF, lastSlowTick = nil, 0
+        RunS.Heartbeat:Connect(function()
+            local ch = player.Character
+            local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+        end)
+    end
+})
+
+Tabscript:AddSection({"Script da Lyra Hub"})
+
+Tabscript:AddButton({ 
+    Name = "Lyra Hub",
+    Callback = function()
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/kayrus999/Lyrapainel/refs/heads/main/Lyrabrookhaven"))()
+     end
+})
+
+Tabscript:AddSection({"Script do Rechaud Ctx"})
+
+Tabscript:AddButton({ 
+    Name = "Rechaud Ctx",
+    Callback = function()
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/ran20434-alt/ZANE-RECHAT/refs/heads/main/Ctx%20rechat"))()
+     end
+})
+
+Tabscript:AddSection({"Meus Script"})
+
+Tabscript:AddButton({
+    Name = "FPV 3D Acro Drone",
+    Description = "Inicia o simulador de drone acrobático 3D com câmera e controles",
+    Callback = function()
+        -- FPV 3D ACRO DRONE (FIXED SLIDER + NO TELEPORT + CAMERA TILT SLIDER)
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local UserInputService = game:GetService("UserInputService")
+        local GuiService = game:GetService("GuiService")
+
+        local player = Players.LocalPlayer
+        local camera = workspace.CurrentCamera
+
+        -- Remove versão anterior da GUI se já tiver sido executada
+        local playerGui = player:WaitForChild("PlayerGui")
+        if playerGui:FindFirstChild("DroneGuiAcro3D") then
+            playerGui.DroneGuiAcro3D:Destroy()
+        end
+
+        -- CONFIGURAZIONE ACRO
+        local STICK_SENSITIVITY = 300   
+        local ROLL_MULTIPLIER = 1.5   
+        local EXPO = 1.2              
+        local THROTTLE_MAX_POWER = 130  
+
+        -- FISICA
+        local DRAG = 0.992             
+        local GRAVITY_FORCE = 45     
+        local CAMERA_TILT = 30
+        local DEADZONE = 0.15          
+        local BOUNCE_ELASTICITY = 0.2 
+        local SLIDE_BOOST = 50 
+        local SLIDE_FRICTION = 0.98
+
+        -- STATO
+        local active = false
+        local unarmed = false 
+        local velocity = Vector3.new()
+        local currentPos = camera.CFrame.Position
+        local droneRotation = CFrame.new()
+
+        -- GUI SETUP
+        local screenGui = Instance.new("ScreenGui", playerGui)
+        screenGui.Name = "DroneGuiAcro3D"
+        screenGui.ResetOnSpawn = false
+
+        local toggleBtn = Instance.new("TextButton", screenGui)
+        toggleBtn.Size = UDim2.new(0, 160, 0, 40)
+        toggleBtn.Position = UDim2.new(1, -180, 0, 20)
+        toggleBtn.Text = "3D ACRO: OFF (Y)"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        toggleBtn.TextColor3 = Color3.new(1, 1, 1)
+        toggleBtn.Font = Enum.Font.SourceSansBold
+        toggleBtn.TextSize = 14
+        Instance.new("UICorner", toggleBtn)
+
+        -- SLIDER SPEED (ORIGINALE)
+        local sliderFrame = Instance.new("Frame", screenGui)
+        sliderFrame.Size = UDim2.new(0, 160, 0, 25)
+        sliderFrame.Position = UDim2.new(1, -180, 0, 65)
+        sliderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", sliderFrame)
+
+        local sliderBar = Instance.new("Frame", sliderFrame)
+        sliderBar.Size = UDim2.new(THROTTLE_MAX_POWER/500, 0, 1, 0)
+        sliderBar.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
+        Instance.new("UICorner", sliderBar)
+
+        local sliderLabel = Instance.new("TextLabel", sliderFrame)
+        sliderLabel.Size = UDim2.new(1, 0, 1, 0)
+        sliderLabel.BackgroundTransparency = 1
+        sliderLabel.Text = "SPEED: " .. math.floor(THROTTLE_MAX_POWER)
+        sliderLabel.TextColor3 = Color3.new(1, 1, 1)
+        sliderLabel.Font = Enum.Font.SourceSansBold
+        sliderLabel.TextSize = 14
+        sliderLabel.ZIndex = 3
+
+        -- NUOVO SLIDER TILT (ANGOLO CAMERA)
+        local tiltFrame = Instance.new("Frame", screenGui)
+        tiltFrame.Size = UDim2.new(0, 160, 0, 25)
+        tiltFrame.Position = UDim2.new(1, -180, 0, 95)
+        tiltFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", tiltFrame)
+
+        local tiltBar = Instance.new("Frame", tiltFrame)
+        tiltBar.Size = UDim2.new(CAMERA_TILT/60, 0, 1, 0)
+        tiltBar.BackgroundColor3 = Color3.fromRGB(0, 120, 220)
+        Instance.new("UICorner", tiltBar)
+
+        local tiltLabel = Instance.new("TextLabel", tiltFrame)
+        tiltLabel.Size = UDim2.new(1, 0, 1, 0)
+        tiltLabel.BackgroundTransparency = 1
+        tiltLabel.Text = "TILT: " .. math.floor(CAMERA_TILT) .. "°"
+        tiltLabel.TextColor3 = Color3.new(1, 1, 1)
+        tiltLabel.Font = Enum.Font.SourceSansBold
+        tiltLabel.TextSize = 14
+        tiltLabel.ZIndex = 3
+
+        local unarmedLabel = Instance.new("TextLabel", screenGui)
+        unarmedLabel.Size = UDim2.new(0, 160, 0, 25)
+        unarmedLabel.Position = UDim2.new(1, -180, 0, 130)
+        unarmedLabel.Text = "ARMED"
+        unarmedLabel.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+        unarmedLabel.TextColor3 = Color3.new(1, 1, 1)
+        unarmedLabel.Font = Enum.Font.SourceSansBold
+        unarmedLabel.TextSize = 14
+        Instance.new("UICorner", unarmedLabel)
+
+        -- LOGICA SLIDERS
+        local isDraggingSpeed = false
+        local isDraggingTilt = false
+
+        local function updateSliders()
+            local mouseLocation = UserInputService:GetMouseLocation()
+            local inset = GuiService:GetGuiInset()
+            local adjustedMouseX = mouseLocation.X - inset.X
+            
+            if isDraggingSpeed then
+                local relativeX = adjustedMouseX - sliderFrame.AbsolutePosition.X
+                local percentage = math.clamp(relativeX / sliderFrame.AbsoluteSize.X, 0, 1)
+                sliderBar.Size = UDim2.new(percentage, 0, 1, 0)
+                THROTTLE_MAX_POWER = percentage * 500
+                sliderLabel.Text = "SPEED: " .. math.floor(THROTTLE_MAX_POWER)
+            elseif isDraggingTilt then
+                local relativeX = adjustedMouseX - tiltFrame.AbsolutePosition.X
+                local percentage = math.clamp(relativeX / tiltFrame.AbsoluteSize.X, 0, 1)
+                tiltBar.Size = UDim2.new(percentage, 0, 1, 0)
+                CAMERA_TILT = percentage * 60
+                tiltLabel.Text = "TILT: " .. math.floor(CAMERA_TILT) .. "°"
+            end
+        end
+
+        sliderFrame.InputBegan:Connect(function(i) 
+            if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
+                isDraggingSpeed = true 
+                updateSliders()
+            end 
+        end)
+
+        tiltFrame.InputBegan:Connect(function(i) 
+            if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
+                isDraggingTilt = true 
+                updateSliders()
+            end 
+        end)
+
+        UserInputService.InputEnded:Connect(function(i) 
+            if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
+                isDraggingSpeed = false
+                isDraggingTilt = false
+            end 
+        end)
+
+-- LOGICA ATTIVAZIONE (NO TELEPORT)
+        local function toggle()
+            active = not active
+            local char = player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            
+            if active then
+                if hrp then 
+                    hrp.Anchored = true 
+                    currentPos = hrp.Position + Vector3.new(0, 5, 0)
+                else
+                    currentPos = camera.CFrame.Position
+                end
+                velocity = Vector3.new()
+                droneRotation = camera.CFrame * CFrame.Angles(math.rad(-CAMERA_TILT), 0, 0)
+                droneRotation = droneRotation - droneRotation.Position
+                camera.CameraType = Enum.CameraType.Scriptable
+                UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+                toggleBtn.Text = "3D ACRO: ON"
+                toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            else
+                if hrp then hrp.Anchored = false end
+                camera.CameraType = Enum.CameraType.Custom
+                toggleBtn.Text = "3D ACRO: OFF (Y)"
+                toggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+            end
+        end
+
+        -- LOGICA UNARMED
+        local function toggleUnarmed()
+            unarmed = not unarmed
+            if unarmed then
+                unarmedLabel.Text = "UNARMED (SLIDE)"
+                unarmedLabel.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+            else
+                unarmedLabel.Text = "ARMED"
+                unarmedLabel.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+            end
+        end
+
+        -- FISICA RAYCAST
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+        local function updateFilter(char) 
+            if char then 
+                raycastParams.FilterDescendantsInstances = {char} 
+            end 
+        end
+        updateFilter(player.Character or player.CharacterAdded:Wait())
+        player.CharacterAdded:Connect(updateFilter)
+
+        local function applyExpo(value)
+            local sign = value > 0 and 1 or -1
+            return sign * (math.abs(value) ^ EXPO)
+        end
+
+        -- LOOP PRINCIPALE
+        RunService.RenderStepped:Connect(function(dt)
+            if isDraggingSpeed or isDraggingTilt then updateSliders() end
+            if not active then return end
+
+            local pitch, roll, yaw = 0, 0, 0
+            local throttleInput = 0
+            
+            local gpts = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
+            for _, input in pairs(gpts) do
+                local pos = input.Position
+                if input.KeyCode == Enum.KeyCode.Thumbstick1 then
+                    if math.abs(pos.X) > DEADZONE then yaw = applyExpo(-pos.X) end
+                    if math.abs(pos.Y) > DEADZONE then throttleInput = pos.Y end
+                elseif input.KeyCode == Enum.KeyCode.Thumbstick2 then
+                    if math.abs(pos.Y) > DEADZONE then pitch = applyExpo(-pos.Y) end
+                    if math.abs(pos.X) > DEADZONE then roll = applyExpo(pos.X) end
+                end
+            end
+
+            local thrust = Vector3.new()
+            if not unarmed then
+                thrust = droneRotation.UpVector * (throttleInput * THROTTLE_MAX_POWER)
+            end
+            
+            velocity = (velocity + (thrust * dt) + (Vector3.new(0, -GRAVITY_FORCE, 0) * dt)) * math.pow(DRAG, dt * 60)
+            
+            local move = velocity * dt
+            if move.Magnitude > 0.01 then
+                local hit = workspace:Raycast(currentPos, move + (move.Unit * 1.2), raycastParams)
+                if hit then
+                    local reflect = velocity - 2 * velocity:Dot(hit.Normal) * hit.Normal
+                    velocity = reflect * BOUNCE_ELASTICITY
+                    currentPos = hit.Position + hit.Normal * 0.2
+                end
+            end
+
+            local groundRay = workspace:Raycast(currentPos, Vector3.new(0, -2.5, 0), raycastParams)
+            if groundRay and unarmed then
+                local normal = groundRay.Normal
+                if normal.Y < 0.9999 then 
+                    local slideDir = (Vector3.new(0, -1, 0) - (normal * Vector3.new(0, -1, 0):Dot(normal))).Unit
+                    velocity = (velocity + (slideDir * (GRAVITY_FORCE + SLIDE_BOOST) * dt)) * SLIDE_FRICTION
+                end
+            end
+
+            local rotDelta = CFrame.Angles(math.rad(pitch * STICK_SENSITIVITY * dt), math.rad(yaw * STICK_SENSITIVITY * dt), math.rad(-roll * (STICK_SENSITIVITY * ROLL_MULTIPLIER) * dt))
+            droneRotation = droneRotation * rotDelta
+            currentPos = currentPos + velocity * dt
+            camera.CFrame = CFrame.new(currentPos) * droneRotation * CFrame.Angles(math.rad(CAMERA_TILT), 0, 0)
+        end)
+
+        UserInputService.InputBegan:Connect(function(input, processed)
+            if processed then return end
+            if input.KeyCode == Enum.KeyCode.ButtonY or input.KeyCode == Enum.KeyCode.Y then 
+                toggle()
+            elseif input.KeyCode == Enum.KeyCode.ButtonB or input.KeyCode == Enum.KeyCode.B then 
+                toggleUnarmed() 
+            end
+        end)
+
+        toggleBtn.MouseButton1Click:Connect(toggle)
+    end
+})
+
+Tabscript:AddSection({"UNIVERSAL COMMANDS ADMIN 🔨"})
+
+Tabscript:AddButton({
+    Name = "Nameless Admin",
+    Description = "Nameless Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-Universal-73082"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Infinite Yield",
+    Description = "Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yeild-93384"))()
+    end
+})
+
+Tabscript:AddSection({"Scrips Universais"})
+
+Tabscript:AddButton({
+    Name = "FE Jerk Off Hub Matrix",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ExploitFin/AquaMatrix/refs/heads/AquaMatrix/AquaMatrix"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "FE HUGG",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/JSFKGBASDJKHIOAFHDGHIUODSGBJKLFGDKSB/fe/refs/heads/main/FEHUGG"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Buraco Negro",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Bac0nHck/Scripts/main/BringFlingPlayers"))("More Scripts: t.me/arceusxscripts")
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Roships",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-rochips-universal-18294"))()
+    end
+})
+
+Tabscript:AddButton({
+    Name = "Reverso",
+    Description = "Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe./main/L"))()
+    end
+})
+
+Tabscript:AddSection({"Fly GUI"})
+
+Tabscript:AddButton({
+    Name = "Fly Gui",
+    Callback = function()
+        loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
+    end
+})
+
+Tabscript:AddSection({"Script do Ghost Hub"})
+
+Tabscript:AddButton({
+    Name = "Ghost Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh11/spicy/refs/heads/main/GhostHub.lua"))()
+    end
+})
+
+Tabscript:AddSection({"Scripts Visuais."})
+
+Tabscript:AddSection({"Só você poderá ver"})
+
+Tabscript:AddButton({
+    Name = "C00lkidd Gui",
+    Description = "Aviso: somente o cliente poderá ver",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-coolkid-gui-15453"))()
+    end
+})
