@@ -5847,31 +5847,9 @@ TabLag:AddParagraph({
 -- ====================================================================
 Tabscript:AddSection({"Scripts👾Exploits"})
 
-Tabscript:AddButton({
-    Name = "FE Jerk Off Hub Matrix",
-    Description = "Universal",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ExploitFin/AquaMatrix/refs/heads/AquaMatrix/AquaMatrix"))()
-    end
-})
+Tabscript:AddSection({"Scripts Brookhaven 🏡"})
 
-Tabscript:AddButton({
-    Name = "FE HUGG",
-    Description = "Universal",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/JSFKGBASDJKHIOAFHDGHIUODSGBJKLFGDKSB/fe/refs/heads/main/FEHUGG"))()
-    end
-})
-
-Tabscript:AddButton({
-    Name = "Buraco Negro",
-    Description = "Universal",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Bac0nHck/Scripts/main/BringFlingPlayers"))("More Scripts: t.me/arceusxscripts")
-    end
-})
-
-Tabscript:AddSection({"System Broochk e VoidProtection"})
+Tabscript:AddSection({"Script do System Broochk e VoidProtection"})
 
 Tabscript:AddButton({
     Name = "System Broochk",
@@ -5881,13 +5859,7 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddButton({
-    Name = "Roships",
-    Description = "Universal",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-rochips-universal-18294"))()
-    end
-})
+Tabscript:AddSection({"Script do Sander X"})
 
 Tabscript:AddButton({
     Name = "Sander X",
@@ -5897,13 +5869,7 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddButton({
-    Name = "Reverso",
-    Description = "Universal",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe./main/L"))()
-    end
-})
+Tabscript:AddSection({"Script do RD4"})
 
 Tabscript:AddButton({
     Name = "RD4",
@@ -5913,65 +5879,47 @@ Tabscript:AddButton({
     end
 })
 
-Tabscript:AddSection({"Fly GUI"})
-
-Tabscript:AddButton({
-    Name = "Fly Gui",
-    Callback = function()
-        loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Fly-v3-7412"))()
-    end
-})
-
-Tabscript:AddSection({"Script do Ghost Hub"})
-
-Tabscript:AddButton({
-    Name = "Ghost Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GhostHub-16534"))()
-    end
-})
-
 Tabscript:AddSection({"Script do Rael Hub"})
 
 Tabscript:AddButton({
-    Name = "Abrir Rael Hub",
+    Name = "Rael Hub",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/rael-develop3r/rael-hub/refs/heads/main/others/universal.lua"))()
     end
 })
 
-Tabscript:AddSection({"Script Do Brutus"})
+Tabscript:AddSection({"Script Do Hexagon"})
 
 Tabscript:AddButton({
-    Name = "Abrir BRUTUS HUB",
+    Name = "Hexagon Client",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/codenixstudios/brutus-hub/script/Games/brookhaven.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/nxvap/hexagon/main/brookhaven"))()
     end
 })
 
 Tabscript:AddSection({"Script do Coquette Hub"})
 
 Tabscript:AddButton({
-    Name = "Abrir Coquette Hub",
+    Name = "Coquette Hub",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Daivd977/Deivd999/refs/heads/main/pessal"))()
+        loadstring(game:HttpGet("https://coquette-hub.com/r/5753a035c626"))()
     end
 })
 
 Tabscript:AddSection({"Script do Cartola Hub"})
 
 Tabscript:AddButton({
-    Name = "Abrir Cartola Hub",
+    Name = "Cartola Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Davi999z/Cartola-Hub/refs/heads/main/Brookhaven"))()
     end
 })
 
-Tabscript:AddSection({"Script do Pacote Fantasma"})
+Tabscript:AddSection({"NEVLIZ HUB"})
 
 Tabscript:AddButton({
-    Name = "Abrir Pacote Fantasma",
+    Name = "NEVLIZ HUB",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/RHOFICIAL01/Projetos./refs/heads/main/Pacote.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ryanVictor123/-Nevliz-Hub-BROOKHAVEN-/refs/heads/main/Nevliz%20Hub%20by%20team%20nevliz"))()
     end
 })
