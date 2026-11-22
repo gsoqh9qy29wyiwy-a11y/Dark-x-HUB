@@ -8305,8 +8305,8 @@ local hood = mkPart(carModel, Vector3.new(5.8, 0.8, 5.2), carChassis.CFrame * CF
 })
 
 Tabscript:AddButton({
-    Name = "Boneco Mech de Props",
-    Description = "Boneco com Cadeira Gamer no topo, passos animados, auto-degrau e controle por props",
+    Name = "Boneco de Props (Apenas Cadeira)",
+    Description = "Cadeira Gamer nos Props, sem blocos pretos, sem voar e sem cair do assento",
     Callback = function()
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
@@ -8314,25 +8314,20 @@ Tabscript:AddButton({
         local player = Players.LocalPlayer
         local camera = workspace.CurrentCamera
 
-        -- Limpeza prévia
+        -- Limpeza
         local pGui = player:WaitForChild("PlayerGui")
         if pGui:FindFirstChild("BonecoGui") then pGui.BonecoGui:Destroy() end
         if pGui:FindFirstChild("BonecoEnterGui") then pGui.BonecoEnterGui:Destroy() end
         if player.Backpack:FindFirstChild("Boneco Mech") then player.Backpack["Boneco Mech"]:Destroy() end
         if player.Character and player.Character:FindFirstChild("Boneco Mech") then player.Character["Boneco Mech"]:Destroy() end
 
-        local bonecoModel, torso, seat = nil, nil, nil
+        local bonecoModel, seat = nil, nil
         local bonecoBV, bonecoBG, bonecoBP = nil, nil, nil
         local moveConn = nil
         local isDriverSeated = false
         local sitTrack = nil
+        local sitWeld = nil
         local rayParams = nil
-
-        -- Membros e Juntas para Animação de Andar
-        local leftHip, rightHip = nil, nil
-        local leftShoulder, rightShoulder = nil, nil
-        local baseLHip, baseRHip = nil, nil
-        local baseLShoulder, baseRShoulder = nil, nil
 
         local throttle, steer = 0, 0
         local steerSmooth = 0
@@ -8345,7 +8340,7 @@ Tabscript:AddButton({
         local currentSpeed = 55
         local currentAgility = 40
 
-        -- CACHE E SYNC DOS PROPS DE BROOKHAVEN
+        -- CACHE DOS PROPS DE BROOKHAVEN
         local meusPropsCache = {}
         local function AtualizarCacheProps()
             table.clear(meusPropsCache)
@@ -8385,7 +8380,7 @@ Tabscript:AddButton({
         enterStroke.Thickness = 2
 
         -- ----------------------------------------------------
-        -- GUI 2: PAINEL DE CONTROLES DO BONECO
+        -- GUI 2: PAINEL DE CONTROLES
         -- ----------------------------------------------------
         local gui = Instance.new("ScreenGui", pGui)
         gui.Name = "BonecoGui"
@@ -8470,10 +8465,10 @@ Tabscript:AddButton({
             btn3P.TextColor3 = Color3.fromRGB(0, 180, 255)
             btn1P.TextColor3 = Color3.new(1, 1, 1)
             camera.CameraType = Enum.CameraType.Custom
-            if torso then camera.CameraSubject = torso end
+            if seat then camera.CameraSubject = seat end
         end)
 
-        -- Sair do Boneco
+        -- Descer do Boneco
         local exitBtn = Instance.new("TextButton", gui)
         exitBtn.Position = UDim2.new(0.5, -65, 0.78, 0)
         exitBtn.Size = UDim2.new(0, 130, 0, 40)
@@ -8484,7 +8479,7 @@ Tabscript:AddButton({
         exitBtn.BackgroundColor3 = Color3.fromRGB(180, 45, 45)
         addCorner(exitBtn, 8)
 
-        -- Deletar Boneco
+        -- Deletar
         local closeBtn = Instance.new("TextButton", gui)
         closeBtn.Position, closeBtn.Size = UDim2.new(1, -65, 0, 20), UDim2.new(0, 45, 0, 45)
         closeBtn.Text, closeBtn.TextColor3 = "✕", Color3.new(1, 1, 1)
@@ -8492,7 +8487,7 @@ Tabscript:AddButton({
         closeBtn.BackgroundColor3 = Color3.fromRGB(210, 35, 35)
         addCorner(closeBtn, 99)
 
-        -- Sliders (Velocidade e Agilidade dos Passos)
+        -- Sliders
         local sliderPanel = Instance.new("Frame", gui)
         sliderPanel.Position, sliderPanel.Size = UDim2.new(0.5, -130, 0, 15), UDim2.new(0, 260, 0, 95)
         sliderPanel.BackgroundColor3 = Color3.fromRGB(15, 18, 26)
@@ -8559,7 +8554,15 @@ Tabscript:AddButton({
             enterGui.Enabled = false
             gui.Enabled = true
 
-            hrp.CFrame = seat.CFrame * CFrame.new(0, 0.8, -0.1)
+            -- Posiciona e SOLDA com firmeza (WeldConstraint) para nunca cair ou descer
+            hrp.CFrame = seat.CFrame * CFrame.new(0, 0.6, -0.1)
+
+            if sitWeld then sitWeld:Destroy() end
+            sitWeld = Instance.new("WeldConstraint")
+            sitWeld.Name = "SeatLockWeld"
+            sitWeld.Part0 = seat
+            sitWeld.Part1 = hrp
+            sitWeld.Parent = seat
 
             pcall(function()
                 hum.Sit = true
@@ -8571,7 +8574,7 @@ Tabscript:AddButton({
 
             if cameraMode == "3P" then
                 camera.CameraType = Enum.CameraType.Custom
-                camera.CameraSubject = torso
+                camera.CameraSubject = seat
             end
         end
 
@@ -8582,6 +8585,12 @@ Tabscript:AddButton({
             gui.Enabled = false
             if bonecoModel and bonecoModel.Parent then
                 enterGui.Enabled = true
+            end
+
+            -- Remove a solda de fixação
+            if sitWeld then
+                sitWeld:Destroy()
+                sitWeld = nil
             end
 
             if sitTrack then
@@ -8598,8 +8607,8 @@ Tabscript:AddButton({
                     camera.CameraType = Enum.CameraType.Custom
                     camera.CameraSubject = hum
                 end
-                if hrp and torso then
-                    hrp.CFrame = torso.CFrame * CFrame.new(-4.5, -2, 0)
+                if hrp and seat then
+                    hrp.CFrame = seat.CFrame * CFrame.new(-3.5, -2, 0)
                 end
             end
             throttle, steer = 0, 0
@@ -8633,34 +8642,35 @@ Tabscript:AddButton({
             return w
         end
 
-        -- CADEIRA GAMER INSTALADA NO TOPO DO BONECO
+        -- CONSTRÓI APENAS A CADEIRA GAMER (Fiel à foto, sem boneco preto!)
         local function buildGamerChair(parent, baseCFrame)
             local blackColor = Color3.fromRGB(20, 20, 22)
             local redColor = Color3.fromRGB(210, 25, 30)
 
-            local chairBase = mkPart(parent, Vector3.new(1.8, 0.4, 1.8), baseCFrame, blackColor, Enum.Material.SmoothPlastic, false)
+            local chairBase = mkPart(parent, Vector3.new(2, 0.4, 2), baseCFrame, blackColor, Enum.Material.SmoothPlastic, true)
             chairBase.Name = "GamerChairBase"
+            chairBase.CustomPhysicalProperties = PhysicalProperties.new(1.4, 0.5, 0.2, 100, 100)
 
-            local leftBolster = mkPart(parent, Vector3.new(0.3, 0.5, 1.8), chairBase.CFrame * CFrame.new(-0.85, 0.15, 0), redColor, nil, false)
+            local leftBolster = mkPart(parent, Vector3.new(0.35, 0.5, 2), chairBase.CFrame * CFrame.new(-0.95, 0.15, 0), redColor, nil, false)
             weld(chairBase, leftBolster)
-            local rightBolster = mkPart(parent, Vector3.new(0.3, 0.5, 1.8), chairBase.CFrame * CFrame.new(0.85, 0.15, 0), redColor, nil, false)
+            local rightBolster = mkPart(parent, Vector3.new(0.35, 0.5, 2), chairBase.CFrame * CFrame.new(0.95, 0.15, 0), redColor, nil, false)
             weld(chairBase, rightBolster)
 
-            local backrest = mkPart(parent, Vector3.new(1.8, 2.7, 0.35), chairBase.CFrame * CFrame.new(0, 1.4, 0.8) * CFrame.Angles(math.rad(6), 0, 0), blackColor, nil, false)
+            local backrest = mkPart(parent, Vector3.new(2, 2.8, 0.35), chairBase.CFrame * CFrame.new(0, 1.45, 0.9) * CFrame.Angles(math.rad(6), 0, 0), blackColor, nil, false)
             weld(chairBase, backrest)
 
-            local bLeftWing = mkPart(parent, Vector3.new(0.35, 2.7, 0.45), backrest.CFrame * CFrame.new(-0.85, 0, 0.05), redColor, nil, false)
+            local bLeftWing = mkPart(parent, Vector3.new(0.35, 2.8, 0.45), backrest.CFrame * CFrame.new(-0.95, 0, 0.05), redColor, nil, false)
             weld(chairBase, bLeftWing)
-            local bRightWing = mkPart(parent, Vector3.new(0.35, 2.7, 0.45), backrest.CFrame * CFrame.new(0.85, 0, 0.05), redColor, nil, false)
+            local bRightWing = mkPart(parent, Vector3.new(0.35, 2.8, 0.45), backrest.CFrame * CFrame.new(0.95, 0, 0.05), redColor, nil, false)
             weld(chairBase, bRightWing)
 
-            local pillow = mkPart(parent, Vector3.new(1.1, 0.5, 0.35), backrest.CFrame * CFrame.new(0, 0.9, -0.2), blackColor, nil, false)
+            local pillow = mkPart(parent, Vector3.new(1.2, 0.5, 0.35), backrest.CFrame * CFrame.new(0, 0.95, -0.2), blackColor, nil, false)
             weld(chairBase, pillow)
             local pillowStripe = mkPart(parent, Vector3.new(0.4, 0.15, 0.38), pillow.CFrame, redColor, nil, false)
             weld(chairBase, pillowStripe)
 
             for side = -1, 1, 2 do
-                local armPost = mkPart(parent, Vector3.new(0.15, 0.9, 0.2), chairBase.CFrame * CFrame.new(side * 1.05, 0.5, 0), blackColor, nil, false)
+                local armPost = mkPart(parent, Vector3.new(0.15, 0.9, 0.2), chairBase.CFrame * CFrame.new(side * 1.15, 0.5, 0), blackColor, nil, false)
                 weld(chairBase, armPost)
                 local armPad = mkPart(parent, Vector3.new(0.3, 0.2, 1.1), armPost.CFrame * CFrame.new(0, 0.45, -0.1), blackColor, nil, false)
                 weld(chairBase, armPad)
@@ -8672,8 +8682,28 @@ Tabscript:AddButton({
             return chairBase
         end
 
-        -- CONSTRUÇÃO DO BONECO / MECH
-        local function spawnBoneco()
+        -- FUNÇÃO DE RAYCAST COM PENETRAÇÃO (IGNORA TODOS OS PROPS DE BROOKHAVEN)
+        local function getRealGround(originPos, maxDist)
+            local currentOrigin = originPos
+            local remainingDist = maxDist or 35
+            while remainingDist > 0 do
+                local hit = workspace:Raycast(currentOrigin, Vector3.new(0, -remainingDist, 0), rayParams)
+                if not hit then return nil end
+
+                -- Se atingiu um Prop do jogo, a cadeira ou o jogador, ignora e continua o raio para baixo
+                local isProp = hit.Instance:FindFirstAncestorWhichIsA("Model") and hit.Instance:FindFirstAncestorWhichIsA("Model"):FindFirstChild("SetCurrentCFrame")
+                if isProp or hit.Instance:IsDescendantOf(bonecoModel) or (player.Character and hit.Instance:IsDescendantOf(player.Character)) then
+                    local passed = (currentOrigin.Y - hit.Position.Y) + 0.1
+                    remainingDist = remainingDist - passed
+                    currentOrigin = hit.Position - Vector3.new(0, 0.1, 0)
+                else
+                    -- É o chão de verdade (asfalto, rua, calçada, grama)
+                    return hit
+                end
+            end
+            return nil
+        end
+local function spawnBoneco()
             deleteBoneco()
 
             local char = player.Character
@@ -8681,111 +8711,49 @@ Tabscript:AddButton({
             local hrp = char.HumanoidRootPart
 
             bonecoModel = Instance.new("Model", workspace)
-            bonecoModel.Name = "Boneco_Mech_" .. player.Name
+            bonecoModel.Name = "Boneco_Props_" .. player.Name
 
             rayParams = RaycastParams.new()
             rayParams.FilterDescendantsInstances = {char, bonecoModel}
             rayParams.FilterType = Enum.RaycastFilterType.Exclude
 
-            local rayOrigin = hrp.Position + (hrp.CFrame.LookVector * 10) + Vector3.new(0, 5, 0)
-            local rayResult = workspace:Raycast(rayOrigin, Vector3.new(0, -40, 0), rayParams)
-            local groundY = rayResult and rayResult.Position.Y or (hrp.Position.Y - 2.8)
+            local rayOrigin = hrp.Position + (hrp.CFrame.LookVector * 10) + Vector3.new(0, 4, 0)
+            local realGround = getRealGround(rayOrigin, 40)
+            local groundY = realGround and realGround.Position.Y or (hrp.Position.Y - 2.8)
 
-            local spawnPos = Vector3.new(rayOrigin.X, groundY + 4.8, rayOrigin.Z)
+            -- Apenas a Cadeira Gamer é criada (sem o boneco preto)
+            local spawnPos = Vector3.new(rayOrigin.X, groundY + 5.2, rayOrigin.Z)
             local spawnCF = CFrame.new(spawnPos) * CFrame.Angles(0, math.rad(hrp.Orientation.Y), 0)
 
-            local bodyColor = Color3.fromRGB(22, 24, 30)
-            local accentRed = Color3.fromRGB(220, 30, 40)
-            local neonCyan  = Color3.fromRGB(0, 200, 255)
-
-            -- 1. Tronco Principal do Boneco
-            torso = mkPart(bonecoModel, Vector3.new(3.8, 3.8, 2.2), spawnCF, bodyColor, Enum.Material.SmoothPlastic, true)
-            torso.Name = "Torso"
-            torso.CustomPhysicalProperties = PhysicalProperties.new(1.5, 0.5, 0.2, 100, 100)
-            bonecoModel.PrimaryPart = torso
-                -- Peito / Reator Neon do Boneco
-            local core = mkPart(bonecoModel, Vector3.new(1.4, 1.4, 0.4), torso.CFrame * CFrame.new(0, 0.2, -1.15), neonCyan, Enum.Material.Neon, false)
-            weld(torso, core)
-
-            -- 2. Cabeça do Boneco
-            local head = mkPart(bonecoModel, Vector3.new(2, 1.8, 1.8), torso.CFrame * CFrame.new(0, 2.6, 0), bodyColor, Enum.Material.SmoothPlastic, false)
-            weld(torso, head)
-            local visor = mkPart(bonecoModel, Vector3.new(1.6, 0.4, 0.3), head.CFrame * CFrame.new(0, 0.2, -0.95), neonCyan, Enum.Material.Neon, false)
-            weld(head, visor)
-
-            -- 3. Cadeira Gamer montada no topo do Boneco (Acima dos ombros)
-            local chairCF = torso.CFrame * CFrame.new(0, 3.2, 0.2)
-            seat = buildGamerChair(bonecoModel, chairCF)
-            weld(torso, seat)
-
-            -- 4. Pernas Articuladas com Motor6D (Animação de Passos)
-            local legL = mkPart(bonecoModel, Vector3.new(1.3, 4.2, 1.3), torso.CFrame * CFrame.new(-1.25, -3.8, 0), bodyColor, nil, true)
-            local legR = mkPart(bonecoModel, Vector3.new(1.3, 4.2, 1.3), torso.CFrame * CFrame.new(1.25, -3.8, 0), bodyColor, nil, true)
-
-            -- Detalhe vermelho nas pernas
-            local detailLL = mkPart(bonecoModel, Vector3.new(1.35, 1.2, 1.35), legL.CFrame * CFrame.new(0, -0.8, 0), accentRed, nil, false)
-            weld(legL, detailLL)
-            local detailRL = mkPart(bonecoModel, Vector3.new(1.35, 1.2, 1.35), legR.CFrame * CFrame.new(0, -0.8, 0), accentRed, nil, false)
-            weld(legR, detailRL)
-
-            leftHip = Instance.new("Motor6D")
-            leftHip.Part0, leftHip.Part1 = torso, legL
-            leftHip.C0 = CFrame.new(-1.25, -1.9, 0)
-            leftHip.C1 = CFrame.new(0, 1.9, 0)
-            leftHip.Parent = torso
-            baseLHip = leftHip.C0
-
-            rightHip = Instance.new("Motor6D")
-            rightHip.Part0, rightHip.Part1 = torso, legR
-            rightHip.C0 = CFrame.new(1.25, -1.9, 0)
-            rightHip.C1 = CFrame.new(0, 1.9, 0)
-            rightHip.Parent = torso
-            baseRHip = rightHip.C0
-
-            -- 5. Braços Articulados com Motor6D
-            local armL = mkPart(bonecoModel, Vector3.new(1.1, 3.6, 1.1), torso.CFrame * CFrame.new(-2.6, -0.2, 0), bodyColor, nil, false)
-            local armR = mkPart(bonecoModel, Vector3.new(1.1, 3.6, 1.1), torso.CFrame * CFrame.new(2.6, -0.2, 0), bodyColor, nil, false)
-
-            leftShoulder = Instance.new("Motor6D")
-            leftShoulder.Part0, leftShoulder.Part1 = torso, armL
-            leftShoulder.C0 = CFrame.new(-2.5, 1.2, 0)
-            leftShoulder.C1 = CFrame.new(0, 1.6, 0)
-            leftShoulder.Parent = torso
-            baseLShoulder = leftShoulder.C0
-
-            rightShoulder = Instance.new("Motor6D")
-            rightShoulder.Part0, rightShoulder.Part1 = torso, armR
-            rightShoulder.C0 = CFrame.new(2.5, 1.2, 0)
-            rightShoulder.C1 = CFrame.new(0, 1.6, 0)
-            rightShoulder.Parent = torso
-            baseRShoulder = rightShoulder.C0
+            seat = buildGamerChair(bonecoModel, spawnCF)
+            bonecoModel.PrimaryPart = seat
 
             rayParams.FilterDescendantsInstances = {char, bonecoModel}
 
-            -- Física de Movimentação do Boneco
-            bonecoBV = Instance.new("BodyVelocity", torso)
+            -- Física vertical travada no chão
+            bonecoBV = Instance.new("BodyVelocity", seat)
             bonecoBV.MaxForce = Vector3.new(1e6, 0, 1e6)
             bonecoBV.Velocity = Vector3.zero
 
-            bonecoBP = Instance.new("BodyPosition", torso)
-            bonecoBP.MaxForce = Vector3.new(0, 5e5, 0)
-            bonecoBP.D = 1400
+            bonecoBP = Instance.new("BodyPosition", seat)
+            bonecoBP.MaxForce = Vector3.new(0, 4.5e5, 0)
+            bonecoBP.D = 1500
             bonecoBP.P = 18000
-            bonecoBP.Position = Vector3.new(torso.Position.X, groundY + 4.8, torso.Position.Z)
+            bonecoBP.Position = Vector3.new(seat.Position.X, groundY + 5.2, seat.Position.Z)
 
-            local _, startYaw, _ = torso.CFrame:ToOrientation()
+            local _, startYaw, _ = seat.CFrame:ToOrientation()
             bonecoYaw = math.deg(startYaw)
 
-            bonecoBG = Instance.new("BodyGyro", torso)
+            bonecoBG = Instance.new("BodyGyro", seat)
             bonecoBG.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
             bonecoBG.CFrame = CFrame.Angles(0, math.rad(bonecoYaw), 0)
 
             enterGui.Enabled = true
 
-            -- LOOP PRINCIPAL: PASSOS, PULO DE DEGRAUS E SYNC COM OS PROPS
+            -- LOOP: POSICIONAMENTO DOS PROPS NOS MEMBROS, PASSOS E DETECTOR DE SOLO
             local lastPropSync = 0
             moveConn = RunService.RenderStepped:Connect(function(dt)
-                if not torso or not torso.Parent then return end
+                if not seat or not seat.Parent then return end
 
                 local maxSpeed = (currentSpeed / 100) * 85
                 local agility = currentAgility / 100
@@ -8793,49 +8761,31 @@ Tabscript:AddButton({
 
                 steerSmooth = steerSmooth + (steer - steerSmooth) * math.clamp(dt * 12, 0, 1)
 
-                -- ----------------------------------------------------
-                -- 1. ANIMAÇÃO DE ANDAR (PASSOS REALISTAS)
-                -- ----------------------------------------------------
-                local moveDirSpeed = torso.CFrame.LookVector:Dot(currentVel)
+                -- 1. CÁLCULO DOS PASSOS (ANIMADO)
+                local moveDirSpeed = seat.CFrame.LookVector:Dot(currentVel)
                 local isMoving = math.abs(moveDirSpeed) > 1.2
+                local legAngle = 0
+                local armAngle = 0
 
                 if isMoving then
                     walkCycle = walkCycle + dt * (math.abs(moveDirSpeed) * 0.28) * (1 + agility * 0.4)
-                    local legAngle = math.sin(walkCycle) * 0.65
-                    local armAngle = -math.sin(walkCycle) * 0.55
-
-                    -- Pernas balançando alternadas
-                    leftHip.C0 = baseLHip * CFrame.Angles(legAngle, 0, 0)
-                    rightHip.C0 = baseRHip * CFrame.Angles(-legAngle, 0, 0)
-
-                    -- Braços balançando no ritmo
-                    leftShoulder.C0 = baseLShoulder * CFrame.Angles(armAngle, 0, 0)
-                    rightShoulder.C0 = baseRShoulder * CFrame.Angles(-armAngle, 0, 0)
+                    legAngle = math.sin(walkCycle) * 0.65
+                    armAngle = -math.sin(walkCycle) * 0.55
                 else
-                    -- Repouso suave
-                    leftHip.C0 = leftHip.C0:Lerp(baseLHip, math.clamp(dt * 8, 0, 1))
-                    rightHip.C0 = rightHip.C0:Lerp(baseRHip, math.clamp(dt * 8, 0, 1))
-                    leftShoulder.C0 = leftShoulder.C0:Lerp(baseLShoulder, math.clamp(dt * 8, 0, 1))
-                    rightShoulder.C0 = rightShoulder.C0:Lerp(baseRShoulder, math.clamp(dt * 8, 0, 1))
+                    walkCycle = 0
                 end
 
-                -- ----------------------------------------------------
-                -- 2. SISTEMA DE AUTO-STEP (PULAR DEGRAUS E CALÇADAS)
-                -- ----------------------------------------------------
+                -- 2. AUTO-STEP (PULAR DEGRAUS E CALÇADAS)
                 local stepDetected = false
                 if throttle ~= 0 then
-                    local lookDir = torso.CFrame.LookVector * (throttle > 0 and 1 or -1)
-                    
-                    -- Raycast no pé (detecta calçada/degrau)
-                    local lowOrigin = torso.Position + (lookDir * 1.8) - Vector3.new(0, 3.8, 0)
-                    local lowRay = workspace:Raycast(lowOrigin, lookDir * 2.5, rayParams)
+                    local lookDir = seat.CFrame.LookVector * (throttle > 0 and 1 or -1)
+                    local lowOrigin = seat.Position + (lookDir * 1.8) - Vector3.new(0, 4.5, 0)
+                    local lowRay = getRealGround(lowOrigin, 3)
 
-                    -- Raycast no peito (verifica se é parede ou se dá pra passar)
-                    local highOrigin = torso.Position + (lookDir * 1.8) - Vector3.new(0, 0.5, 0)
-                    local highRay = workspace:Raycast(highOrigin, lookDir * 2.5, rayParams)
+                    local highOrigin = seat.Position + (lookDir * 1.8) - Vector3.new(0, 1.5, 0)
+                    local highRay = getRealGround(highOrigin, 3)
 
                     if lowRay and not highRay then
-                        -- Encontrou degrau transponível: eleva o boneco automaticamente!
                         stepDetected = true
                         stepHopBonus = math.clamp(stepHopBonus + dt * 14, 0, 2.2)
                     end
@@ -8845,12 +8795,8 @@ Tabscript:AddButton({
                     stepHopBonus = math.clamp(stepHopBonus - dt * 10, 0, 2.2)
                 end
 
-                -- ----------------------------------------------------
-                -- 3. DETECTOR DE CHÃO E INCLINAÇÃO
-                -- ----------------------------------------------------
-                local rayCastOrigin = torso.Position + Vector3.new(0, 1, 0)
-                local downRay = workspace:Raycast(rayCastOrigin, Vector3.new(0, -35, 0), rayParams)
-
+                -- 3. DETECTOR DE CHÃO REAL (NUNCA VOA, IGNORA PROPS)
+                local downRay = getRealGround(seat.Position + Vector3.new(0, 1, 0), 40)
                 if downRay then
                     local surfaceNormal = downRay.Normal
                     if surfaceNormal.Y > 0.45 then
@@ -8858,44 +8804,49 @@ Tabscript:AddButton({
                         local forwardDir = yawCFrame.LookVector
                         local rightDir = forwardDir:Cross(surfaceNormal).Unit
                         local slopeForward = surfaceNormal:Cross(rightDir).Unit
-                        bonecoBG.CFrame = CFrame.fromMatrix(torso.Position, rightDir, surfaceNormal, -slopeForward)
+                        bonecoBG.CFrame = CFrame.fromMatrix(seat.Position, rightDir, surfaceNormal, -slopeForward)
                     else
                         bonecoBG.CFrame = CFrame.Angles(0, math.rad(bonecoYaw), 0)
                     end
 
-                    -- Balanço leve vertical de caminhada + bônus de pular degrau
                     local bobbing = isMoving and (math.abs(math.sin(walkCycle * 2)) * 0.35) or 0
-                    local targetGroundY = downRay.Position.Y + 4.8 + bobbing + stepHopBonus
-                    bonecoBP.Position = Vector3.new(torso.Position.X, targetGroundY, torso.Position.Z)
+                    local targetGroundY = downRay.Position.Y + 5.2 + bobbing + stepHopBonus
+                    bonecoBP.Position = Vector3.new(seat.Position.X, targetGroundY, seat.Position.Z)
 
-                    if torso.Position.Y > targetGroundY + 4.5 then
-                        torso.CFrame = CFrame.new(torso.Position.X, targetGroundY, torso.Position.Z) * torso.CFrame.Rotation
+                    -- Trava de segurança anti-voo
+                    if seat.Position.Y > targetGroundY + 3.5 then
+                        seat.CFrame = CFrame.new(seat.Position.X, targetGroundY, seat.Position.Z) * seat.CFrame.Rotation
                     end
                 else
                     bonecoBG.CFrame = CFrame.Angles(0, math.rad(bonecoYaw), 0)
                 end
 
-                -- ----------------------------------------------------
-                -- 4. SINCRONIZAÇÃO COM OS PROPS DO BROOKHAVEN
-                -- ----------------------------------------------------
-                if tick() - lastPropSync > 0.1 then
+                -- 4. MAPEAMENTO DOS MEMBROS PARA OS PROPS DO JOGO (FORMAM O BONECO)
+                if tick() - lastPropSync > 0.08 then
                     lastPropSync = tick()
                     task.spawn(function()
                         pcall(AtualizarCacheProps)
                         if #meusPropsCache > 0 then
-                            local limbCFs = {
-                                torso.CFrame,
-                                head.CFrame,
-                                legL.CFrame,
-                                legR.CFrame,
-                                armL.CFrame,
-                                armR.CFrame,
-                                seat.CFrame
+                            -- Pontos dos membros calculados a partir da cadeira
+                            local propPositions = {
+                                -- Tronco (Abaixo da cadeira)
+                                seat.CFrame * CFrame.new(0, -1.8, 0),
+                                -- Cabeça (Atrás da almofada do encosto)
+                                seat.CFrame * CFrame.new(0, 1.2, 0.4),
+                                -- Perna Esquerda (Balança no passo)
+                                seat.CFrame * CFrame.new(-1.3, -4.2, 0) * CFrame.Angles(legAngle, 0, 0),
+                                -- Perna Direita (Balança alternada)
+                                seat.CFrame * CFrame.new(1.3, -4.2, 0) * CFrame.Angles(-legAngle, 0, 0),
+                                -- Braço Esquerdo (Balança)
+                                seat.CFrame * CFrame.new(-2.6, -1.8, 0) * CFrame.Angles(armAngle, 0, 0),
+                                -- Braço Direito (Balança)
+                                seat.CFrame * CFrame.new(2.6, -1.8, 0) * CFrame.Angles(-armAngle, 0, 0),
                             }
+
                             for i, prop in ipairs(meusPropsCache) do
                                 local remote = prop:FindFirstChild("SetCurrentCFrame")
                                 if remote then
-                                    local targetCF = limbCFs[((i - 1) % #limbCFs) + 1]
+                                    local targetCF = propPositions[((i - 1) % #propPositions) + 1]
                                     task.spawn(function()
                                         pcall(remote.InvokeServer, remote, targetCF)
                                     end)
@@ -8909,10 +8860,10 @@ Tabscript:AddButton({
                 if isDriverSeated then
                     if cameraMode == "1P" then
                         camera.CameraType = Enum.CameraType.Scriptable
-                        camera.CFrame = seat.CFrame * CFrame.new(0, 2.2, -0.4)
-                    elseif cameraMode == "3P" and camera.CameraSubject ~= torso then
+                        camera.CFrame = seat.CFrame * CFrame.new(0, 1.8, -0.3)
+                    elseif cameraMode == "3P" and camera.CameraSubject ~= seat then
                         camera.CameraType = Enum.CameraType.Custom
-                        camera.CameraSubject = torso
+                        camera.CameraSubject = seat
                     end
                 end
 
@@ -8928,7 +8879,7 @@ Tabscript:AddButton({
                     steer = 0
                 end
 
-                local targetDir = torso.CFrame.LookVector * (throttle * maxSpeed)
+                local targetDir = seat.CFrame.LookVector * (throttle * maxSpeed)
                 currentVel = currentVel:Lerp(targetDir, math.clamp(dt * 7, 0, 1))
                 bonecoBV.Velocity = Vector3.new(currentVel.X, 0, currentVel.Z)
             end)
@@ -8947,7 +8898,7 @@ Tabscript:AddButton({
         tool.Parent = player:WaitForChild("Backpack")
     end
 })
-
+                
 Tabscript:AddSection({"UNIVERSAL COMMANDS ADMIN 🔨"})
 
 Tabscript:AddButton({
