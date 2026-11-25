@@ -4,22 +4,11 @@
 --====================================================================--
 
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
-local lp = LocalPlayer
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local TextChatService = game:GetService("TextChatService")
-local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
-local Camera = Workspace.CurrentCamera
-
--- Atalhos de compatibilidade
-local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
+local lp = Players.LocalPlayer
 
 -- ====================================================================
 -- TELA DE CARREGAMENTO (LOADING SCREEN)
@@ -173,6 +162,24 @@ end
 
 local loadingPromise = createLoadingScreen()
 waitForPromise(loadingPromise)
+
+-- ====================================================================
+-- SERVIÇOS E VARIÁVEIS INICIAIS
+-- ====================================================================
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local TextChatService = game:GetService("TextChatService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Camera = Workspace.CurrentCamera
+
+-- Atalhos de compatibilidade
+local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
 
 -- ====================================================================
 -- VARIÁVEIS DE CONTROLE
