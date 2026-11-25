@@ -1174,6 +1174,44 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
+
+-- ====================================================================
+-- ABA: SERVIDORES 🌐 (SISTEMA COMPLETO DE CONEXÃO E GERENCIAMENTO)
+-- ====================================================================
+local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
+local ServidoresSalvos = {}
+local NomeDoServidorDigitado = ""
+local ServidorSelecionado = ""
+local JobIdManualDigitado = ""
+
+if isfile and isfile(ARQUIVO_SERVIDORES) then
+    local sucesso, resultado = pcall(function()
+        return HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
+    end)
+    if sucesso and type(resultado) == "table" then
+        ServidoresSalvos = resultado
+    end
+end
+
+local function SalvarDadosNoArquivo()
+    if writefile then
+        pcall(function()
+            writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos))
+        end)
+    end
+end
+
+local function ObterListaParaDropdown()
+    local lista = {}
+    for nome, _ in pairs(ServidoresSalvos) do
+        table.insert(lista, nome)
+    end
+    if #lista == 0 then
+        table.insert(lista, "Nenhum servidor salvo")
+    end
+    return lista
+end
+
 local TabServidores = Window:MakeTab({"Servidores 🌐", "globe"})
 
 -- ====================================================================
@@ -6835,46 +6873,6 @@ TabRGB:AddToggle({
         end
     end
 })
-
--- ====================================================================
--- ABA: SERVIDORES 🌐 (SISTEMA COMPLETO DE CONEXÃO E GERENCIAMENTO)
--- ====================================================================
-local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
-local ServidoresSalvos = {}
-local NomeDoServidorDigitado = ""
-local ServidorSelecionado = ""
-local JobIdManualDigitado = ""
-
-if isfile and isfile(ARQUIVO_SERVIDORES) then
-    local sucesso, resultado = pcall(function()
-        return HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
-    end)
-    if sucesso and type(resultado) == "table" then
-        ServidoresSalvos = resultado
-    end
-end
-
-local function SalvarDadosNoArquivo()
-    if writefile then
-        pcall(function()
-            writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos))
-        end)
-    end
-end
-
-local function ObterListaParaDropdown()
-    local lista = {}
-    for nome, _ in pairs(ServidoresSalvos) do
-        table.insert(lista, nome)
-    end
-    if #lista == 0 then
-        table.insert(lista, "Nenhum servidor salvo")
-    end
-    return lista
-end
-
--- CRIA A TAB NA INTERFACE (Fica embaixo da TabAdmin)
-local TabServidores = Window:MakeTab({"Servidores 🌐", "globe"})
 
 -- SEÇÃO: INFORMAÇÕES DO SERVIDOR
 TabServidores:AddSection({"Informações do Servidor"})
