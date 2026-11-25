@@ -1174,3 +1174,44 @@ local Tab2        = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab    = Window:MakeTab({"Criança", "baby"})
 local TabAdmin    = Window:MakeTab({"Admin👑", "home"})
 
+-- ====================================================================
+-- ABA: CREDITS 
+-- ====================================================================
+Tab1:AddSection({"Informação do Hub"})
+Tab1:AddDiscordInvite({
+    Name = "Dark x hub",
+    Description = "Servidor oficial",
+    Logo = "rbxassetid://113088956809836",
+    Invite = "",
+})
+local executorName = (identifyexecutor and identifyexecutor()) or "Desconhecido"
+Tab1:AddParagraph({"Executor", executorName})
+Tab1:AddSection({"Versão do Hub 1.1"})
+Tab1:AddParagraph({"Criadores", "HACKELINDOO"})
+
+Tab1:AddButton({
+    Name = "Copiar @ do Tik Tok",
+    Callback = function()
+        setclipboard("@HACKELINDOO") -- Copia o user
+        
+        -- Opcional: Notificação para avisar que copiou
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Tik Tok @HACKELINDOO copiado!",
+            Duration = 3
+        })
+    end
+})
+
+Tab1:AddButton({
+    Name = "Copiar Link do Tik Tok",
+    Callback = function()
+        setclipboard("https://www.instagram.com/carlolx7/") -- Copia o link completo
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Área de Transferência",
+            Text = "Link do Tik Tok copiado!",
+            Duration = 3
+        })
+    end
+})
