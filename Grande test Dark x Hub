@@ -1176,6 +1176,7 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2        = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab    = Window:MakeTab({"Criança", "baby"})
 local TabAdmin    = Window:MakeTab({"Admin👑", "home"})
+local TabServidores = Window:MakeTab({"Servidores 🌐", "globe"})
 
 -- ====================================================================
 -- ABA: CREDITS 
