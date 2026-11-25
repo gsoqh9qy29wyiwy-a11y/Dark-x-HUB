@@ -3,78 +3,23 @@
 --                          by HACKELINDOO                              --
 --====================================================================--
 
--- ====================================================================
--- 1. SERVIÇOS E INICIALIZAÇÃO BLINDADA
--- ====================================================================
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local lp = LocalPlayer
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
-local StarterGui = game:GetService("StarterGui")
-local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
 local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
-local Stats = game:GetService("Stats")
+local Camera = Workspace.CurrentCamera
 
--- Garante que o jogador carregou completamente antes de prosseguir
-local LocalPlayer = Players.LocalPlayer
-if not LocalPlayer then
-    repeat task.wait() until Players.LocalPlayer
-    LocalPlayer = Players.LocalPlayer
-end
-local lp = LocalPlayer -- Para compatibilidade com a tela de carregamento
-
--- Garante que a câmera existe
-local Camera = workspace.CurrentCamera
-if not Camera then
-    repeat task.wait() until workspace.CurrentCamera
-    Camera = workspace.CurrentCamera
-end
-
--- Atalhos de compatibilidade do script
-local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, workspace, RunService, Camera
-
--- ====================================================================
--- 2. SISTEMA DE SALVAMENTO DE SERVIDORES
--- ====================================================================
-local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
-local ServidoresSalvos = {}
-local NomeDoServidorDigitado = ""
-local ServidorSelecionado = ""
-local JobIdManualDigitado = ""
-
--- Carrega os servidores salvos do arquivo do executor
-if isfile and isfile(ARQUIVO_SERVIDORES) then
-    local sucesso, resultado = pcall(function()
-        return HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
-    end)
-    if sucesso and type(resultado) == "table" then
-        ServidoresSalvos = resultado
-    end
-end
-
--- Função interna para salvar a lista no dispositivo
-local function SalvarDadosNoArquivo()
-    if writefile then
-        pcall(function()
-            writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos))
-        end)
-    end
-end
-
--- Função para listar os servidores no Dropdown
-local function ObterListaParaDropdown()
-    local lista = {}
-    for nome, _ in pairs(ServidoresSalvos) do
-        table.insert(lista, nome)
-    end
-    if #lista == 0 then
-        table.insert(lista, "Nenhum servidor salvo")
-    end
-    return lista
-end
+-- Atalhos de compatibilidade
+local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
 
 -- ====================================================================
 -- TELA DE CARREGAMENTO (LOADING SCREEN)
@@ -1229,7 +1174,217 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
+
+-- ====================================================================
+-- ABA: SERVIDORES 🌐 (SISTEMA COMPLETO DE CONEXÃO E GERENCIAMENTO)
+-- ====================================================================
+local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
+local ServidoresSalvos = {}
+local NomeDoServidorDigitado = ""
+local ServidorSelecionado = ""
+local JobIdManualDigitado = ""
+
+if isfile and isfile(ARQUIVO_SERVIDORES) then
+    local sucesso, resultado = pcall(function()
+        return HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
+    end)
+    if sucesso and type(resultado) == "table" then
+        ServidoresSalvos = resultado
+    end
+end
+
+local function SalvarDadosNoArquivo()
+    if writefile then
+        pcall(function()
+            writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos))
+        end)
+    end
+end
+
+local function ObterListaParaDropdown()
+    local lista = {}
+    for nome, _ in pairs(ServidoresSalvos) do
+        table.insert(lista, nome)
+    end
+    if #lista == 0 then
+        table.insert(lista, "Nenhum servidor salvo")
+    end
+    return lista
+end
+
+-- CRIA A TAB NA INTERFACE (Fica embaixo da TabAdmin)
 local TabServidores = Window:MakeTab({"Servidores 🌐", "globe"})
+
+-- SEÇÃO: INFORMAÇÕES DO SERVIDOR
+TabServidores:AddSection({"Informações do Servidor"})
+
+TabServidores:AddParagraph({"Jogadores Online", tostring(#Players:GetPlayers()) .. " / " .. tostring(Players.MaxPlayers)})
+TabServidores:AddParagraph({"Place ID", tostring(game.PlaceId)})
+
+TabServidores:AddButton({
+    Name = "Copiar JobId do Servidor Atual",
+    Description = "Copia o código de conexão deste servidor",
+    Callback = function()
+        pcall(function()
+            setclipboard(tostring(game.JobId))
+        end)
+        SendNotification("Servidores", "JobId copiado com sucesso!", 3)
+    end
+})
+
+-- SEÇÃO: TROCA DE SERVIDOR
+TabServidores:AddSection({"Troca de Servidor"})
+
+TabServidores:AddButton({
+    Name = "Reconectar no Mesmo Servidor (Rejoin)",
+    Description = "Entra novamente no servidor atual",
+    Callback = function()
+        SendNotification("Servidores", "Reconectando...", 2)
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Trocar de Servidor (Server Hop)",
+    Description = "Entra em um servidor público diferente",
+    Callback = function()
+        SendNotification("Servidores", "Procurando servidor...", 3)
+        task.spawn(function()
+            local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
+            local success, res = pcall(function() return game:HttpGet(url) end)
+            if success and res then
+                local data = HttpService:JSONDecode(res)
+                if data and data.data then
+                    for _, s in ipairs(data.data) do
+                        if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+                            return
+                        end
+                    end
+                end
+            end
+            SendNotification("Servidores", "Nenhum outro servidor encontrado.", 3)
+        end)
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Entrar em Servidor Vazio (Small Server)",
+    Description = "Busca servidor com poucos jogadores",
+    Callback = function()
+        SendNotification("Servidores", "Procurando servidor vazio...", 3)
+        task.spawn(function()
+            local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+            local success, res = pcall(function() return game:HttpGet(url) end)
+            if success and res then
+                local data = HttpService:JSONDecode(res)
+                if data and data.data then
+                    for _, s in ipairs(data.data) do
+                        if s.playing > 0 and s.playing < s.maxPlayers and s.id ~= game.JobId then
+                            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+                            return
+                        end
+                    end
+                end
+            end
+            SendNotification("Servidores", "Nenhum servidor vazio encontrado.", 3)
+        end)
+    end
+})
+
+-- SEÇÃO: CONECTAR POR JOBID
+TabServidores:AddSection({"Entrar por JobId"})
+
+TabServidores:AddTextBox({
+    Name = "Digitar JobId do Servidor",
+    PlaceholderText = "Cole o JobId aqui...",
+    Callback = function(texto)
+        JobIdManualDigitado = texto
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Entrar no JobId Digitado",
+    Callback = function()
+        if JobIdManualDigitado and JobIdManualDigitado ~= "" then
+            SendNotification("Servidores", "Conectando ao servidor...", 3)
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, JobIdManualDigitado, LocalPlayer)
+        else
+            SendNotification("Aviso", "Digite um JobId válido primeiro!", 3)
+        end
+    end
+})
+
+-- SEÇÃO: SALVAR SERVIDORES
+TabServidores:AddSection({"Salvar Servidores"})
+
+TabServidores:AddTextBox({
+    Name = "Nome para Salvar o Servidor Atual",
+    PlaceholderText = "Ex: Servidor RP Legal",
+    Callback = function(texto)
+        NomeDoServidorDigitado = texto
+    end
+})
+
+local DropdownServidoresSalvos
+
+TabServidores:AddButton({
+    Name = "Salvar Servidor Atual",
+    Callback = function()
+        local nome = NomeDoServidorDigitado
+        if nome == "" then
+            nome = "Servidor " .. os.date("%d/%m %H:%M")
+        end
+        ServidoresSalvos[nome] = game.JobId
+        SalvarDadosNoArquivo()
+        if DropdownServidoresSalvos then
+            pcall(function()
+                DropdownServidoresSalvos:Set(ObterListaParaDropdown())
+            end)
+        end
+        SendNotification("Servidores", "Servidor '" .. nome .. "' salvo!", 3)
+    end
+})
+
+DropdownServidoresSalvos = TabServidores:AddDropdown({
+    Name = "Servidores Salvos",
+    Options = ObterListaParaDropdown(),
+    Default = "Selecione...",
+    Callback = function(valor)
+        ServidorSelecionado = valor
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Entrar no Servidor Salvo",
+    Callback = function()
+        local jobId = ServidoresSalvos[ServidorSelecionado]
+        if jobId then
+            SendNotification("Servidores", "Conectando ao servidor salvo...", 3)
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
+        else
+            SendNotification("Aviso", "Selecione um servidor salvo primeiro!", 3)
+        end
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Excluir Servidor Salvo",
+    Callback = function()
+        if ServidoresSalvos[ServidorSelecionado] then
+            ServidoresSalvos[ServidorSelecionado] = nil
+            SalvarDadosNoArquivo()
+            if DropdownServidoresSalvos then
+                pcall(function()
+                    DropdownServidoresSalvos:Set(ObterListaParaDropdown())
+                end)
+            end
+            SendNotification("Servidores", "Servidor excluído!", 3)
+        else
+            SendNotification("Aviso", "Selecione um servidor para excluir!", 3)
+        end
+    end
+})
 
 -- ====================================================================
 -- ABA: CREDITS 
