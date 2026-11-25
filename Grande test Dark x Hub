@@ -175,21 +175,6 @@ local loadingPromise = createLoadingScreen()
 waitForPromise(loadingPromise)
 
 -- ====================================================================
--- 1. SERVIÇOS E VARIÁVEIS INICIAIS
--- ====================================================================
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
-local TextChatService = game:GetService("TextChatService")
-local Camera = Workspace.CurrentCamera
-
--- Atalhos de compatibilidade
-local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
-
--- ====================================================================
 -- VARIÁVEIS DE CONTROLE
 -- ====================================================================
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
