@@ -283,93 +283,6 @@ local function ModernNotify(titleText, descText, duration, notifyType)
     end)
 end
 -- ====================================================================
--- SISTEMA CLICK SELECT PLAYER (SELECIONA NA TABTROLL)
--- ====================================================================
-local PlayerDrop = nil
-local PlayerDrop2 = nil
-local clickSelectActive = false
-
--- Função universal para selecionar o jogador atingido pelo clique
-local function SelecionarJogadorPorInstancia(instancia)
-    if not instancia then return end
-    local modelo = instancia:FindFirstAncestorOfClass("Model")
-    if not modelo then return end
-    local alvo = Players:GetPlayerFromCharacter(modelo)
-    
-    if alvo and alvo ~= LocalPlayer then
-        _G.SelectedPlayer = alvo.Name
-        
-        -- Atualiza os dropdowns da TabTroll na interface
-        pcall(function()
-            if PlayerDrop and PlayerDrop.Set then PlayerDrop:Set(alvo.Name) end
-            if PlayerDrop2 and PlayerDrop2.Set then PlayerDrop2:Set(alvo.Name) end
-        end)
-        
-        -- Atualiza a câmera se a opção de ver jogador estiver ativa
-        if viewEnabled then
-            updateCamera()
-        end
-        
-        ModernNotify("Jogador Selecionado", alvo.DisplayName .. " (@" .. alvo.Name .. ")", 3, "success")
-        return true
-    end
-    return false
-end
-
--- Detecção de clique na tela (Suporte Touch no Celular e Mouse no PC)
-local function ProcessarCliqueTela(posicaoTela)
-    local raio = Camera:ScreenPointToRay(posicaoTela.X, posicaoTela.Y)
-    local rayParams = RaycastParams.new()
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-    if LocalPlayer.Character then
-        rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
-    end
-    local hit = Workspace:Raycast(raio.Origin, raio.Direction * 1500, rayParams)
-    if hit and hit.Instance then
-        SelecionarJogadorPorInstancia(hit.Instance)
-    end
-end
-
-UserInputService.TouchTap:Connect(function(toques, processado)
-    if processado or not clickSelectActive then return end
-    if toques and toques[1] then
-        ProcessarCliqueTela(toques[1])
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input, processado)
-    if processado or not clickSelectActive then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        ProcessarCliqueTela(input.Position)
-    end
-end)
-
--- Função para dar a ferramenta Click Select na mochila
-local function DarToolClickSelect()
-    local NOME_TOOL = "Click Select Player"
-    local mochila = LocalPlayer:WaitForChild("Backpack")
-    
-    if mochila:FindFirstChild(NOME_TOOL) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(NOME_TOOL)) then
-        ModernNotify("Mochila", "Você já tem a ferramenta na mochila!", 2.5, "info")
-        return
-    end
-
-    local tool = Instance.new("Tool")
-    tool.Name = NOME_TOOL
-    tool.RequiresHandle = false
-    tool.CanBeDropped = false
-
-    tool.Activated:Connect(function()
-        local mouse = LocalPlayer:GetMouse()
-        if mouse and mouse.Target then
-            SelecionarJogadorPorInstancia(mouse.Target)
-        end
-    end)
-
-    tool.Parent = mochila
-    ModernNotify("Item Entregue", "Equipe o 'Click Select Player' e clique em qualquer jogador!", 3.5, "success")
-end
--- ====================================================================
 -- 4. FUNÇÕES DO FLING BALL, BLACK HOLE, COUCH E AUXILIARES
 -- ====================================================================
 local FlingBallAuto = false
@@ -1684,6 +1597,93 @@ if not getgenv().NetworkBypassed then
     end)
 end
 -- ====================================================================
+-- SISTEMA CLICK SELECT PLAYER (SELECIONA NA TABTROLL)
+-- ====================================================================
+local PlayerDrop = nil
+local PlayerDrop2 = nil
+local clickSelectActive = false
+
+-- Função universal para selecionar o jogador atingido pelo clique
+local function SelecionarJogadorPorInstancia(instancia)
+    if not instancia then return end
+    local modelo = instancia:FindFirstAncestorOfClass("Model")
+    if not modelo then return end
+    local alvo = Players:GetPlayerFromCharacter(modelo)
+    
+    if alvo and alvo ~= LocalPlayer then
+        _G.SelectedPlayer = alvo.Name
+        
+        -- Atualiza os dropdowns da TabTroll na interface
+        pcall(function()
+            if PlayerDrop and PlayerDrop.Set then PlayerDrop:Set(alvo.Name) end
+            if PlayerDrop2 and PlayerDrop2.Set then PlayerDrop2:Set(alvo.Name) end
+        end)
+        
+        -- Atualiza a câmera se a opção de ver jogador estiver ativa
+        if viewEnabled then
+            updateCamera()
+        end
+        
+        ModernNotify("Jogador Selecionado", alvo.DisplayName .. " (@" .. alvo.Name .. ")", 3, "success")
+        return true
+    end
+    return false
+end
+
+-- Detecção de clique na tela (Suporte Touch no Celular e Mouse no PC)
+local function ProcessarCliqueTela(posicaoTela)
+    local raio = Camera:ScreenPointToRay(posicaoTela.X, posicaoTela.Y)
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    if LocalPlayer.Character then
+        rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    end
+    local hit = Workspace:Raycast(raio.Origin, raio.Direction * 1500, rayParams)
+    if hit and hit.Instance then
+        SelecionarJogadorPorInstancia(hit.Instance)
+    end
+end
+
+UserInputService.TouchTap:Connect(function(toques, processado)
+    if processado or not clickSelectActive then return end
+    if toques and toques[1] then
+        ProcessarCliqueTela(toques[1])
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, processado)
+    if processado or not clickSelectActive then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        ProcessarCliqueTela(input.Position)
+    end
+end)
+
+-- Função para dar a ferramenta Click Select na mochila
+local function DarToolClickSelect()
+    local NOME_TOOL = "Click Select Player"
+    local mochila = LocalPlayer:WaitForChild("Backpack")
+    
+    if mochila:FindFirstChild(NOME_TOOL) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(NOME_TOOL)) then
+        ModernNotify("Mochila", "Você já tem a ferramenta na mochila!", 2.5, "info")
+        return
+    end
+
+    local tool = Instance.new("Tool")
+    tool.Name = NOME_TOOL
+    tool.RequiresHandle = false
+    tool.CanBeDropped = false
+
+    tool.Activated:Connect(function()
+        local mouse = LocalPlayer:GetMouse()
+        if mouse and mouse.Target then
+            SelecionarJogadorPorInstancia(mouse.Target)
+        end
+    end)
+
+    tool.Parent = mochila
+    ModernNotify("Item Entregue", "Equipe o 'Click Select Player' e clique em qualquer jogador!", 3.5, "success")
+end
+-- ====================================================================
 -- 6. CRIAÇÃO DA JANELA PRINCIPAL (REDZLIB)
 -- ====================================================================
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
@@ -2224,6 +2224,14 @@ TabTroll:AddToggle({
         if state then
             ModernNotify("Click Select Ativado", "Dê um toque em qualquer jogador para selecioná-lo!", 3, "info")
         end
+    end
+})
+
+TabTroll:AddButton({
+    Name = "Pegar Tool: Click Select Player",
+    Description = "Coloca uma ferramenta na sua mochila para selecionar clicando",
+    Callback = function()
+        DarToolClickSelect()
     end
 })
 
