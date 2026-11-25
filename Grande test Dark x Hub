@@ -1635,7 +1635,408 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
+
+-- ====================================================================
+-- ABA: SERVIDORES 🌐 (SISTEMA COMPLETO DE CONEXÃO E GERENCIAMENTO)
+-- ====================================================================
+
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local LocalPlayer = Players.LocalPlayer
+
+local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
+local ServidoresSalvos = {}
+local NomeDoServidorDigitado = ""
+local ServidorSelecionado = ""
+local JobIdManualDigitado = ""
+
+-- Carrega os servidores salvos do arquivo do executor
+if isfile and isfile(ARQUIVO_SERVIDORES) then
+    local sucesso, resultado = pcall(function()
+        return HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
+    end)
+    if sucesso and type(resultado) == "table" then
+        ServidoresSalvos = resultado
+    end
+end
+
+local function SalvarDadosNoArquivo()
+    if writefile then
+        pcall(function()
+            writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos))
+        end)
+    end
+end
+
+local function ObterListaParaDropdown()
+    local lista = {}
+    for nome, _ in pairs(ServidoresSalvos) do
+        table.insert(lista, nome)
+    end
+    if #lista == 0 then
+        table.insert(lista, "Nenhum servidor salvo")
+    end
+    return lista
+end
+
 local TabServidores = Window:MakeTab({"Servidores 🌐", "globe"})
+
+-- --------------------------------------------------------------------
+-- SEÇÃO 1: DIAGNÓSTICO E INFORMAÇÕES DO SERVIDOR
+-- --------------------------------------------------------------------
+TabServidores:AddSection({"Informações do Servidor Atual"})
+
+local ParagraphStatus = TabServidores:AddParagraph({
+    Title = "Status da Conexão",
+    Content = "Jogadores: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers ..
+              "\nJobId: " .. string.sub(game.JobId, 1, 14) .. "..."
+})
+
+-- Atualização periódica de status
+task.spawn(function()
+    while task.wait(3) do
+        pcall(function()
+            local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            local fps = math.floor(1 / math.max(RunService.RenderStepped:Wait(), 0.001))
+            local tempoUptime = math.floor(workspace.DistributedGameTime)
+            local mins = math.floor(tempoUptime / 60)
+            local segs = tempoUptime % 60
+
+            ParagraphStatus:SetTitle("Status da Conexão (" .. ping .. "ms | " .. fps .. " FPS)")
+            ParagraphStatus:SetContent(
+                "👥 Jogadores: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers ..
+                "\n⏱️ Tempo Ativo: " .. mins .. "m " .. segs .. "s" ..
+                "\n🆔 JobId: " .. string.sub(game.JobId, 1, 16) .. "..."
+            )
+        end)
+    end
+end)
+
+TabServidores:AddButton({
+    Name = "Copiar JobId Deste Servidor",
+    Description = "Copia o código de instância deste servidor",
+    Callback = function()
+        pcall(function()
+            setclipboard(game.JobId)
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Dark x Hub",
+                Text = "JobId copiado para a área de transferência!",
+                Duration = 3
+            })
+        end)
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Copiar PlaceId do Jogo",
+    Description = "Copia o ID deste jogo/mapa",
+    Callback = function()
+        pcall(function()
+            setclipboard(tostring(game.PlaceId))
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Dark x Hub",
+                Text = "PlaceId (" .. tostring(game.PlaceId) .. ") copiado!",
+                Duration = 3
+            })
+        end)
+    end
+})
+
+-- --------------------------------------------------------------------
+-- SEÇÃO 2: GERENCIADOR DE SERVIDORES SALVOS
+-- --------------------------------------------------------------------
+TabServidores:AddSection({"Salvar e Gerenciar Servidores"})
+
+TabServidores:AddTextBox({
+    Name = "Nome do Servidor",
+    Default = "",
+    PlaceholderText = "Ex: Servidor com amigos...",
+    ClearTextOnFocus = true,
+    Callback = function(texto)
+        NomeDoServidorDigitado = texto
+    end
+})
+
+local DropdownServidores
+
+local function VisualRefreshDropdown()
+    if DropdownServidores then
+        local novasOpcoes = ObterListaParaDropdown()
+        pcall(function()
+            if type(DropdownServidores.SetOptions) == "function" then
+                DropdownServidores:SetOptions(novasOpcoes)
+            elseif type(DropdownServidores.Refresh) == "function" then
+                DropdownServidores:Refresh(novasOpcoes)
+            elseif type(DropdownServidores.Update) == "function" then
+                DropdownServidores:Update(novasOpcoes)
+            end
+        end)
+    end
+end
+
+TabServidores:AddButton({
+    Name = "Salvar Servidor Atual",
+    Description = "Armazena este servidor com o nome digitado",
+    Callback = function()
+        if NomeDoServidorDigitado == "" or NomeDoServidorDigitado == nil then
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Aviso",
+                Text = "Digite um nome antes de salvar!",
+                Duration = 3
+            })
+            return
+        end
+
+        ServidoresSalvos[NomeDoServidorDigitado] = game.JobId
+        SalvarDadosNoArquivo()
+        VisualRefreshDropdown()
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Dark x Hub",
+            Text = "Servidor '" .. NomeDoServidorDigitado .. "' salvo!",
+            Duration = 3
+        })
+    end
+})
+
+DropdownServidores = TabServidores:AddDropdown({
+    Name = "Selecione um Servidor Salvo",
+    Options = ObterListaParaDropdown(),
+    Default = "",
+    Callback = function(opcao)
+        if opcao ~= "Nenhum servidor salvo" then
+            ServidorSelecionado = opcao
+        else
+            ServidorSelecionado = ""
+        end
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Entrar no Servidor Selecionado",
+    Callback = function()
+        if ServidorSelecionado == "" or not ServidoresSalvos[ServidorSelecionado] then
+            return
+        end
+        local targetJob = ServidoresSalvos[ServidorSelecionado]
+        pcall(function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, targetJob, LocalPlayer)
+        end)
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Copiar JobId do Servidor Salvo",
+    Callback = function()
+        if ServidorSelecionado ~= "" and ServidoresSalvos[ServidorSelecionado] then
+            setclipboard(ServidoresSalvos[ServidorSelecionado])
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Dark x Hub",
+                Text = "JobId de '" .. ServidorSelecionado .. "' copiado!",
+                Duration = 3
+            })
+        end
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Excluir Servidor Selecionado",
+    Callback = function()
+        if ServidorSelecionado == "" or not ServidoresSalvos[ServidorSelecionado] then
+            return
+        end
+        ServidoresSalvos[ServidorSelecionado] = nil
+        SalvarDadosNoArquivo()
+        ServidorSelecionado = ""
+        VisualRefreshDropdown()
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Dark x Hub",
+            Text = "Servidor excluído da lista!",
+            Duration = 3
+        })
+    end
+})
+
+-- --------------------------------------------------------------------
+-- SEÇÃO 3: ENTRAR DIRETO POR JOBID
+-- --------------------------------------------------------------------
+TabServidores:AddSection({"Conexão Direta por JobId"})
+
+TabServidores:AddTextBox({
+    Name = "Colar JobId",
+    Default = "",
+    PlaceholderText = "Cole o JobId aqui...",
+    ClearTextOnFocus = false,
+    Callback = function(texto)
+        JobIdManualDigitado = texto:gsub("%s+", "")
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Teleportar via JobId Digitado",
+    Callback = function()
+        if JobIdManualDigitado == "" then
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Dark x Hub",
+                Text = "Cole um JobId válido primeiro!",
+                Duration = 3
+            })
+            return
+        end
+        pcall(function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, JobIdManualDigitado, LocalPlayer)
+        end)
+    end
+})
+
+-- --------------------------------------------------------------------
+-- SEÇÃO 4: NAVEGAÇÃO E TROCA DE SERVIDOR (SERVER HOP)
+-- --------------------------------------------------------------------
+TabServidores:AddSection({"Troca de Servidor (Server Hop)"})
+
+TabServidores:AddButton({
+    Name = "Reentrar no Mesmo Servidor (Rejoin)",
+    Description = "Recarrega sua conexão neste mesmo servidor",
+    Callback = function()
+        pcall(function()
+            if #Players:GetPlayers() <= 1 then
+                TeleportService:Teleport(game.PlaceId, LocalPlayer)
+            else
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+            end
+        end)
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Trocar de Servidor (Aleatório)",
+    Description = "Procura qualquer outro servidor público",
+    Callback = function()
+        task.spawn(function()
+            pcall(function()
+                local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
+                local servidores = HttpService:JSONDecode(game:HttpGet(url))
+                if servidores and servidores.data then
+                    for _, s in ipairs(servidores.data) do
+                        if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+                            break
+                        end
+                    end
+                end
+            end)
+        end)
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Servidor Quase Vazio (Menos Players)",
+    Description = "Busca um servidor com o menor número de pessoas",
+    Callback = function()
+        task.spawn(function()
+            pcall(function()
+                local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+                local servidores = HttpService:JSONDecode(game:HttpGet(url))
+                if servidores and servidores.data then
+                    for _, s in ipairs(servidores.data) do
+                        if s.playing >= 1 and s.playing < s.maxPlayers and s.id ~= game.JobId then
+                            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+                            break
+                        end
+                    end
+                end
+            end)
+        end)
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Servidor Quase Cheio (Mais Players)",
+    Description = "Busca um servidor bem movimentado",
+    Callback = function()
+        task.spawn(function()
+            pcall(function()
+                local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
+                local servidores = HttpService:JSONDecode(game:HttpGet(url))
+                if servidores and servidores.data then
+                    for _, s in ipairs(servidores.data) do
+                        if s.playing >= (s.maxPlayers - 3) and s.playing < s.maxPlayers and s.id ~= game.JobId then
+                            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+                            break
+                        end
+                    end
+                end
+            end)
+        end)
+    end
+})
+
+-- --------------------------------------------------------------------
+-- SEÇÃO 5: FERRAMENTAS E UTILITÁRIOS DE CONEXÃO
+-- --------------------------------------------------------------------
+TabServidores:AddSection({"Proteções de Conexão"})
+
+local antiAfkConn = nil
+TabServidores:AddToggle({
+    Name = "Anti-AFK (Não Desconectar)",
+    Description = "Evita ser desconectado por inatividade após 20 minutos",
+    Default = false,
+    Callback = function(state)
+        if state then
+            local vu = game:GetService("VirtualUser")
+            antiAfkConn = LocalPlayer.Idled:Connect(function()
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Anti-AFK",
+                Text = "Proteção Anti-AFK ativada!",
+                Duration = 3
+            })
+        else
+            if antiAfkConn then
+                antiAfkConn:Disconnect()
+                antiAfkConn = nil
+            end
+        end
+    end
+})
+
+local autoRejoinAtivo = false
+TabServidores:AddToggle({
+    Name = "Auto-Rejoin se Desconectar",
+    Description = "Tenta reentrar no servidor caso sua conexão caia",
+    Default = false,
+    Callback = function(state)
+        autoRejoinAtivo = state
+        if state then
+            game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+                if autoRejoinAtivo and child.Name == "ErrorPrompt" then
+                    task.wait(1.5)
+                    TeleportService:Teleport(game.PlaceId, LocalPlayer)
+                end
+            end)
+        end
+    end
+})
+
+TabServidores:AddButton({
+    Name = "Gerar Script de Convite do Servidor",
+    Description = "Copia um script em Lua para enviar para seus amigos entrarem aqui",
+    Callback = function()
+        local scriptCode = 'game:GetService("TeleportService"):TeleportToPlaceInstance(' .. game.PlaceId .. ', "' .. game.JobId .. '", game.Players.LocalPlayer)'
+        setclipboard(scriptCode)
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Script Copiado!",
+            Text = "Código de teleporte copiado para mandar no Discord/Zap!",
+            Duration = 3.5
+        })
+    end
+})
 
 -- ====================================================================
 -- ABA: CREDITS 
