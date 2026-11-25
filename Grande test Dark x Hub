@@ -7051,8 +7051,3 @@ TabServidores:AddButton({
     end
 })
 
--- ====================================================================
--- FINALIZAÇÃO
--- ====================================================================
-Window:SelectTab(TabTroll)
-ModernNotify("Dark x Hub", "Script inicializado com sucesso!", 3.5, "success")
