@@ -3,12 +3,12 @@
 --                          by HACKELINDOO                              --
 --====================================================================--
 
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
-local Stats = game:GetService("Stats")
-local LocalPlayer = Players.LocalPlayer
+local lp = Players.LocalPlayer
 
 -- ====================================================================
 -- TELA DE CARREGAMENTO (LOADING SCREEN)
