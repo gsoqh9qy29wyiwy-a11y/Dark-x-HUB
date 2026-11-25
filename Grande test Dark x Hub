@@ -1150,39 +1150,37 @@ local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzH
 local Window = redzlib:MakeWindow({
     Title = "Dark x Hub",
     SubTitle = "Brookhaven RP | by HACKELINDOO",
-    SaveFolder = "UnifiedHubConfig",
-    Size = UDim2.fromOffset(600, 400)
+    SaveFolder = "UnifiedHubConfig"
 })
 
 Window:AddMinimizeButton({
     Button = { 
         Image = "rbxassetid://113088956809836", 
         BackgroundTransparency = 0,
-        Size = UDim2.new(0, 50, 0, 50)
+        Size = UDim2.new(0, 50, 0, 50) -- Altere os valores (50, 50) para o tamanho desejado em pixels
     },
     Corner = { CornerRadius = UDim.new(35, 1) },
 })
 
--- Declaração das Abas
-local Tab1        = Window:MakeTab({Title = "Informações 1", Icon = "rbxassetid://15309138473"})
-local InfoTab     = Window:MakeTab({Title = "Informações 2", Icon = "rbxassetid://15309138473"})
-local TabTroll    = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
-local TrollTab    = Window:MakeTab({Title = "Troll Scripts", Icon = "rbxassetid://13364900349"})
-local PropsTab    = Window:MakeTab({Title = "Props", Icon = "rbxassetid://10709810948"})
-local CasasTab    = Window:MakeTab({Title = "Casas", Icon = "home"})
-local TabTP       = Window:MakeTab({" Teleportes", "map"})
-local Tab3        = Window:MakeTab({"Avatar", "shirt"})
-local TabAntis    = Window:MakeTab({"Proteção", "shield"})
-local TabLag      = Window:MakeTab({"Lag Server", "bomb"})
-local Tab5        = Window:MakeTab({"Carro", "car"})
-local Tabscript   = Window:MakeTab({"Scripts", "scroll"})
-local TabAudio    = Window:MakeTab({"Audio All", "radio"})    
-local TabMusic    = Window:MakeTab({"Music", "music"}) 
-local TabRGB      = Window:MakeTab({Title = "RGB", Icon = "brush"})
+local Tab1 = Window:MakeTab({ Title = "Informações 1", Icon = "rbxassetid://15309138473"})
+local InfoTab = Window:MakeTab({Title = "Informações 2", Icon = "rbxassetid://15309138473"})
+local TabTroll = Window:MakeTab({"Troll", "rbxassetid://131153193945220"})
+local TrollTab = Window:MakeTab({ Title = "Troll Scripts", Icon = "rbxassetid://13364900349" })
+local PropsTab = Window:MakeTab({"Props", "rbxassetid://10709810948"})
+local CasasTab = Window:MakeTab({Title = "Casas",Icon = "home"})
+local TabTP = Window:MakeTab({" Teleportes", "map"})
+local Tab3 = Window:MakeTab({"Avatar", "shirt"})
+local TabAntis = Window:MakeTab({"Proteção", "shield"})
+local TabLag = Window:MakeTab({"Lag Server", "bomb"})
+local Tab5 = Window:MakeTab({"Carro", "car"})
+local Tabscript = Window:MakeTab({"Scripts", "scroll"})
+local TabAudio = Window:MakeTab({"Audio All", "radio"})    
+local TabMusic = Window:MakeTab({"Music", "music"}) 
+local TabRGB = Window:MakeTab({ Title = "RGB", Icon = "brush"})
 local TabExpansao = Window:MakeTab({"Skybox", "home"})
-local Tab2        = Window:MakeTab({Title = "Player", Icon = "user"})
-local ChildTab    = Window:MakeTab({"Criança", "baby"})
-local TabAdmin    = Window:MakeTab({"Admin👑", "home"})
+local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
+local ChildTab = Window:MakeTab({"Criança", "baby"})
+local TabAdmin = Window:MakeTab({"Admin👑", "home"})
 local TabServidores = Window:MakeTab({"Servidores 🌐", "globe"})
 
 -- ====================================================================
