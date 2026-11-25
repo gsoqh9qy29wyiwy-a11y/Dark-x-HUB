@@ -283,6 +283,93 @@ local function ModernNotify(titleText, descText, duration, notifyType)
     end)
 end
 -- ====================================================================
+-- SISTEMA CLICK SELECT PLAYER (SELECIONA NA TABTROLL)
+-- ====================================================================
+local PlayerDrop = nil
+local PlayerDrop2 = nil
+local clickSelectActive = false
+
+-- Função universal para selecionar o jogador atingido pelo clique
+local function SelecionarJogadorPorInstancia(instancia)
+    if not instancia then return end
+    local modelo = instancia:FindFirstAncestorOfClass("Model")
+    if not modelo then return end
+    local alvo = Players:GetPlayerFromCharacter(modelo)
+    
+    if alvo and alvo ~= LocalPlayer then
+        _G.SelectedPlayer = alvo.Name
+        
+        -- Atualiza os dropdowns da TabTroll na interface
+        pcall(function()
+            if PlayerDrop and PlayerDrop.Set then PlayerDrop:Set(alvo.Name) end
+            if PlayerDrop2 and PlayerDrop2.Set then PlayerDrop2:Set(alvo.Name) end
+        end)
+        
+        -- Atualiza a câmera se a opção de ver jogador estiver ativa
+        if viewEnabled then
+            updateCamera()
+        end
+        
+        ModernNotify("Jogador Selecionado", alvo.DisplayName .. " (@" .. alvo.Name .. ")", 3, "success")
+        return true
+    end
+    return false
+end
+
+-- Detecção de clique na tela (Suporte Touch no Celular e Mouse no PC)
+local function ProcessarCliqueTela(posicaoTela)
+    local raio = Camera:ScreenPointToRay(posicaoTela.X, posicaoTela.Y)
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    if LocalPlayer.Character then
+        rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    end
+    local hit = Workspace:Raycast(raio.Origin, raio.Direction * 1500, rayParams)
+    if hit and hit.Instance then
+        SelecionarJogadorPorInstancia(hit.Instance)
+    end
+end
+
+UserInputService.TouchTap:Connect(function(toques, processado)
+    if processado or not clickSelectActive then return end
+    if toques and toques[1] then
+        ProcessarCliqueTela(toques[1])
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, processado)
+    if processado or not clickSelectActive then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        ProcessarCliqueTela(input.Position)
+    end
+end)
+
+-- Função para dar a ferramenta Click Select na mochila
+local function DarToolClickSelect()
+    local NOME_TOOL = "Click Select Player"
+    local mochila = LocalPlayer:WaitForChild("Backpack")
+    
+    if mochila:FindFirstChild(NOME_TOOL) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(NOME_TOOL)) then
+        ModernNotify("Mochila", "Você já tem a ferramenta na mochila!", 2.5, "info")
+        return
+    end
+
+    local tool = Instance.new("Tool")
+    tool.Name = NOME_TOOL
+    tool.RequiresHandle = false
+    tool.CanBeDropped = false
+
+    tool.Activated:Connect(function()
+        local mouse = LocalPlayer:GetMouse()
+        if mouse and mouse.Target then
+            SelecionarJogadorPorInstancia(mouse.Target)
+        end
+    end)
+
+    tool.Parent = mochila
+    ModernNotify("Item Entregue", "Equipe o 'Click Select Player' e clique em qualquer jogador!", 3.5, "success")
+end
+-- ====================================================================
 -- 4. FUNÇÕES DO FLING BALL, BLACK HOLE, COUCH E AUXILIARES
 -- ====================================================================
 local FlingBallAuto = false
@@ -2126,6 +2213,20 @@ TabTroll:AddToggle({
         end
     end
 })
+
+TabTroll:AddSection({Name = "Clicks Select Player"})
+TabTroll:AddToggle({
+    Name = "Click Select Player",
+    Description = "Toque ou clique em qualquer jogador no mapa para selecioná-lo na lista",
+    Default = false,
+    Callback = function(state)
+        clickSelectActive = state
+        if state then
+            ModernNotify("Click Select Ativado", "Dê um toque em qualquer jogador para selecioná-lo!", 3, "info")
+        end
+    end
+})
+
 TabTroll:AddSection({ "Clicks TP" })
 TabTroll:AddButton({
     Name = "Teleport Tool sond",
@@ -2136,12 +2237,12 @@ TabTroll:AddButton({
     Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tptool-107347"))() end
 })
 TabTroll:AddButton({
-    Name = "Pegar Teleport Tool",
+    Name = "Teleporte Tool",
     Callback = function()
         local mouse = game.Players.LocalPlayer:GetMouse()
         local tool = Instance.new("Tool")
         tool.RequiresHandle = false
-        tool.Name = "Tp Tool"
+        tool.Name = "Teleporte Tool"
         tool.Activated:Connect(function()
             local pos = mouse.Hit.Position + Vector3.new(0, 2.5, 0)
             local character = game.Players.LocalPlayer.Character
@@ -2153,7 +2254,7 @@ TabTroll:AddButton({
     end
 })
 
-TabTroll:AddSection({Name = "Clicks"})
+TabTroll:AddSection({Name = "Clicks balls"})
 local jogadores = game:GetService("Players")
 local rep = game:GetService("ReplicatedStorage")
 local mundo = game:GetService("Workspace")
@@ -2360,115 +2461,307 @@ TabTroll:AddButton({
         end)
     end
 })
-                    
+
+TabTroll:AddSection({Name = "Clicks Couch"})
 TabTroll:AddButton({
     Name = "Click Kill Couch (Tool)",
     Callback = function()
         local jogadores = game:GetService("Players")
         local rep = game:GetService("ReplicatedStorage")
-        local loop = game:GetService("RunService")
-        local mundo = game:GetService("Workspace")
         local entrada = game:GetService("UserInputService")
         local eu = jogadores.LocalPlayer
-        local cam = mundo.CurrentCamera
-        local NOME_FERRAMENTA = "Click Kill Couch"
+        local cam = workspace.CurrentCamera
+        local podeClicar = true
         local ferramentaEquipada = false
-        local nomeAlvo = nil
-        local loopTP = nil
-        local sofaEquipado = false
-        local base = nil
-        local posInicial = nil
-        local raiz = nil
+        local NOME_FERRAMENTA = "Click Kill Couch"
         local mochila = eu:WaitForChild("Backpack")
-        if not mochila:FindFirstChild(NOME_FERRAMENTA) then
-            local ferramenta = Instance.new("Tool") ferramenta.Name = NOME_FERRAMENTA
+
+        -- Criação da ferramenta na mochila
+        if not mochila:FindFirstChild(NOME_FERRAMENTA) and not (eu.Character and eu.Character:FindFirstChild(NOME_FERRAMENTA)) then
+            local ferramenta = Instance.new("Tool")
+            ferramenta.Name = NOME_FERRAMENTA
             ferramenta.RequiresHandle = false
             ferramenta.CanBeDropped = false
-            ferramenta.Equipped:Connect(function() ferramentaEquipada = true end)
-            ferramenta.Unequipped:Connect(function() ferramentaEquipada = false nomeAlvo = nil limparSofa() end)
+            ferramenta.Equipped:Connect(function()
+                ferramentaEquipada = true
+            end)
+            ferramenta.Unequipped:Connect(function()
+                ferramentaEquipada = false
+            end)
             ferramenta.Parent = mochila
         end
-        function limparSofa()
-            if loopTP then loopTP:Disconnect() loopTP = nil end
-            if sofaEquipado and eu.Character then
-                local sofa = eu.Character:FindFirstChild("Couch")
-                if sofa then sofa.Parent = eu.Backpack sofaEquipado = false end
+
+        local function matarComSofa(alvo)
+            if not ferramentaEquipada then return end
+            if not alvo or not alvo.Character or alvo == eu then return end
+
+            local jogando = true
+            local raiz = eu.Character and eu.Character:FindFirstChild("HumanoidRootPart")
+            local alvoRaiz = alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart")
+            if not raiz or not alvoRaiz then return end
+
+            local boneco = eu.Character
+            local humano = boneco:FindFirstChildOfClass("Humanoid")
+            local posOriginal = raiz.CFrame
+
+            -- Limpa itens e equipa o sofá
+            rep:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+            task.wait(0.2)
+            rep.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+            task.wait(0.3)
+
+            local sofa = eu.Backpack:FindFirstChild("Couch")
+            if sofa then
+                sofa.Parent = boneco
             end
-            if base then base:Destroy() base = nil end
-            if getgenv().AntiSit then getgenv().AntiSit:Set(false) end
-            local humano = eu.Character and eu.Character:FindFirstChildOfClass("Humanoid")
-            if humano then humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true) humano:ChangeState(Enum.HumanoidStateType.GettingUp) end
-            if posInicial and raiz then raiz.CFrame = posInicial posInicial = nil end
-        end
-        function pegarSofa()
-            local boneco = eu.Character if not boneco then return end
-            if not eu.Backpack:FindFirstChild("Couch") and not boneco:FindFirstChild("Couch") then
-                rep.RE["1Too1l"]:InvokeServer("PickingTools", "Couch")
-                task.wait(0.1)
-            end
-            local sofa = eu.Backpack:FindFirstChild("Couch") or boneco:FindFirstChild("Couch")
-            if sofa then sofa.Parent = boneco sofaEquipado = true end
-        end
-        function posAleatoriaAbaixo(boneco)
-            local rp = boneco:FindFirstChild("HumanoidRootPart") if not rp then return Vector3.new() end
-            return rp.Position + Vector3.new(math.random(-2, 2), -5.1, math.random(-2, 2))
-        end
-        function tpAbaixo(alvo)
-            if not alvo or not alvo.Character or not alvo.Character:FindFirstChild("HumanoidRootPart") then return end
-            local meuBoneco = eu.Character
-            local minhaRaiz = meuBoneco and meuBoneco:FindFirstChild("HumanoidRootPart")
-            local humano = meuBoneco and meuBoneco:FindFirstChildOfClass("Humanoid")
-            if not minhaRaiz or not humano then return end
-            humano:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-            if not base then
-                base = Instance.new("Part") base.Size = Vector3.new(10, 1, 10)
-                base.Anchored = true base.CanCollide = true base.Transparency = 0.5 base.Parent = mundo
-            end
-            local destino = posAleatoriaAbaixo(alvo.Character)
-            base.Position = destino
-            minhaRaiz.CFrame = CFrame.new(destino)
-            humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-        end
-        function arremessarComSofa(alvo)
-            if not alvo then return end
-            nomeAlvo = alvo.Name
-            if not eu.Character then return end
-            posInicial = eu.Character:FindFirstChild("HumanoidRootPart") and eu.Character.HumanoidRootPart.CFrame
-            raiz = eu.Character:FindFirstChild("HumanoidRootPart")
-            pegarSofa()
-            loopTP = loop.Heartbeat:Connect(function()
-                local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
-                if not alvoAtual or not alvoAtual.Character or not alvoAtual.Character:FindFirstChild("Humanoid") then limparSofa() return end
-                if getgenv().AntiSit then getgenv().AntiSit:Set(true) end
-                tpAbaixo(alvoAtual)
-            end)
+            task.wait(0.1)
+
+            -- Ativa o Sofá
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
+            task.wait(0.2)
+
+            workspace.FallenPartsDestroyHeight = 0/0
+
+            humano:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+            humano.PlatformStand = false
+            cam.CameraSubject = alvo.Character:FindFirstChild("Head") or alvoRaiz or humano
+
             task.spawn(function()
-                local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
-                while alvoAtual and alvoAtual.Character and alvoAtual.Character:FindFirstChild("Humanoid") do
-                    task.wait(0.05)
-                    if alvoAtual.Character.Humanoid.SeatPart then
-                        local buraco = CFrame.new(265.46, -450.83, -59.93)
-                        alvoAtual.Character.HumanoidRootPart.CFrame = buraco
-                        eu.Character.HumanoidRootPart.CFrame = buraco
-                        task.wait(0.4) limparSofa() task.wait(0.2)
-                        if posInicial then eu.Character.HumanoidRootPart.CFrame = posInicial end
+                local angulo = 0
+                local tempoInicio = tick()
+
+                -- Gira sobre o alvo até ele sentar
+                while jogando and alvo and alvo.Character and alvo.Character:FindFirstChildOfClass("Humanoid") do
+                    local alvoHum = alvo.Character:FindFirstChildOfClass("Humanoid")
+                    local hrp = alvo.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- Condição de ativação do Kill: Alvo sentou
+                    if alvoHum and (alvoHum.Sit or alvoHum.SeatPart) then
                         break
+                    end
+
+                    -- Tempo limite de segurança (10s)
+                    if tick() - tempoInicio > 10 then
+                        break
+                    end
+
+                    if hrp then
+                        angulo = angulo + 50
+                        local pos = hrp.Position + (hrp.Velocity / 1.5)
+                        raiz.CFrame = CFrame.new(pos) * CFrame.Angles(math.rad(angulo), 0, 0)
+                    end
+                    task.wait()
+                end
+
+                -- AÇÃO DE KILL (Manda para o Void)
+                local alvoHum = alvo and alvo.Character and alvo.Character:FindFirstChildOfClass("Humanoid")
+                if alvoHum and (alvoHum.Sit or alvoHum.SeatPart) then
+                    local buraco = CFrame.new(alvoRaiz.Position.X, -450, alvoRaiz.Position.Z)
+                    raiz.CFrame = buraco
+                    task.wait(0.3)
+                end
+
+                jogando = false
+
+                -- Remove o sofá para soltar o alvo no Void
+                rep:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+                task.wait(0.1)
+
+                -- Retorna seu personagem para o ponto seguro onde estava
+                humano:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+                humano.PlatformStand = false
+                raiz.CFrame = posOriginal
+                cam.CameraSubject = humano
+
+                for _, p in pairs(boneco:GetDescendants()) do
+                    if p:IsA("BasePart") then
+                        p.Velocity = Vector3.zero
+                        p.RotVelocity = Vector3.zero
                     end
                 end
             end)
+
+            while jogando do
+                task.wait()
+            end
         end
+
+        -- Ativação ao tocar na tela com a ferramenta equipada
         entrada.TouchTap:Connect(function(toques, processado)
-            if not ferramentaEquipada or processado then return end
+            if processado or not podeClicar or not ferramentaEquipada then return end
             local pos = toques[1]
             local raio = cam:ScreenPointToRay(pos.X, pos.Y)
-            local hit = mundo:Raycast(raio.Origin, raio.Direction * 1000)
-            if hit and hit.Instance then
-                local jogador = jogadores:GetPlayerFromCharacter(hit.Instance:FindFirstAncestorOfClass("Model"))
-                if jogador and jogador ~= eu then arremessarComSofa(jogador) end
+            local acerto = workspace:Raycast(raio.Origin, raio.Direction * 1000)
+            if acerto and acerto.Instance then
+                local alvo = jogadores:GetPlayerFromCharacter(acerto.Instance:FindFirstAncestorOfClass("Model"))
+                if alvo and alvo ~= eu then
+                    podeClicar = false
+                    matarComSofa(alvo)
+                    task.delay(2, function()
+                        podeClicar = true
+                    end)
+                end
             end
         end)
     end
 })
+
+TabTroll:AddButton({
+    Name = "Click Bring Couch (Tool)",
+    Callback = function()
+        local jogadores = game:GetService("Players")
+        local rep = game:GetService("ReplicatedStorage")
+        local entrada = game:GetService("UserInputService")
+        local eu = jogadores.LocalPlayer
+        local cam = workspace.CurrentCamera
+        local podeClicar = true
+        local ferramentaEquipada = false
+        local NOME_FERRAMENTA = "Click Bring Couch"
+        local mochila = eu:WaitForChild("Backpack")
+
+        -- Criação da ferramenta na mochila
+        if not mochila:FindFirstChild(NOME_FERRAMENTA) and not (eu.Character and eu.Character:FindFirstChild(NOME_FERRAMENTA)) then
+            local ferramenta = Instance.new("Tool")
+            ferramenta.Name = NOME_FERRAMENTA
+            ferramenta.RequiresHandle = false
+            ferramenta.CanBeDropped = false
+            ferramenta.Equipped:Connect(function()
+                ferramentaEquipada = true
+            end)
+            ferramenta.Unequipped:Connect(function()
+                ferramentaEquipada = false
+            end)
+            ferramenta.Parent = mochila
+        end
+
+        local function trazerComSofa(alvo)
+            if not ferramentaEquipada then return end
+            if not alvo or not alvo.Character or alvo == eu then return end
+
+            local jogando = true
+            local raiz = eu.Character and eu.Character:FindFirstChild("HumanoidRootPart")
+            local alvoRaiz = alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart")
+            if not raiz or not alvoRaiz then return end
+
+            local boneco = eu.Character
+            local humano = boneco:FindFirstChildOfClass("Humanoid")
+            -- Salva a sua posição antes de ir buscar o alvo
+            local posOriginal = raiz.CFrame
+
+            -- Limpa itens e equipa o sofá
+            rep:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+            task.wait(0.2)
+            rep.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+            task.wait(0.3)
+
+            local sofa = eu.Backpack:FindFirstChild("Couch")
+            if sofa then
+                sofa.Parent = boneco
+            end
+            task.wait(0.1)
+
+            -- Ativa o Sofá
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
+            task.wait(0.2)
+
+            workspace.FallenPartsDestroyHeight = 0/0
+
+            humano:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+            humano.PlatformStand = false
+            cam.CameraSubject = alvo.Character:FindFirstChild("Head") or alvoRaiz or humano
+
+            task.spawn(function()
+                local angulo = 0
+                local tempoInicio = tick()
+
+                -- Gira sobre o alvo até ele sentar
+                while jogando and alvo and alvo.Character and alvo.Character:FindFirstChildOfClass("Humanoid") do
+                    local alvoHum = alvo.Character:FindFirstChildOfClass("Humanoid")
+                    local hrp = alvo.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- Condição de ativação do Bring: Alvo sentou
+                    if alvoHum and (alvoHum.Sit or alvoHum.SeatPart) then
+                        break
+                    end
+
+                    -- Tempo limite de segurança (10s)
+                    if tick() - tempoInicio > 10 then
+                        break
+                    end
+
+                    if hrp then
+                        angulo = angulo + 50
+                        local pos = hrp.Position + (hrp.Velocity / 1.5)
+                        raiz.CFrame = CFrame.new(pos) * CFrame.Angles(math.rad(angulo), 0, 0)
+                    end
+                    task.wait()
+                end
+
+                -- AÇÃO DE BRING: Teleporta de volta para a posição inicial com o jogador no sofá
+                local alvoHum = alvo and alvo.Character and alvo.Character:FindFirstChildOfClass("Humanoid")
+                if alvoHum and (alvoHum.Sit or alvoHum.SeatPart) then
+                    -- Coloca o alvo logo à sua frente (-3 studs)
+                    raiz.CFrame = posOriginal * CFrame.new(0, 0, -3)
+                    task.wait(0.25)
+                end
+
+                jogando = false
+
+                -- Remove o sofá para soltar o alvo onde você está
+                rep:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+                task.wait(0.1)
+
+                -- Restaura a posição e câmera do seu personagem
+                humano:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+                humano.PlatformStand = false
+                raiz.CFrame = posOriginal
+                cam.CameraSubject = humano
+
+                for _, p in pairs(boneco:GetDescendants()) do
+                    if p:IsA("BasePart") then
+                        p.Velocity = Vector3.zero
+                        p.RotVelocity = Vector3.zero
+                    end
+                end
+            end)
+
+            while jogando do
+                task.wait()
+            end
+        end
+
+        -- Função auxiliar de clique
+        local function processarClique(posicaoTela)
+            local raio = cam:ScreenPointToRay(posicaoTela.X, posicaoTela.Y)
+            local acerto = workspace:Raycast(raio.Origin, raio.Direction * 1000)
+            if acerto and acerto.Instance then
+                local alvo = jogadores:GetPlayerFromCharacter(acerto.Instance:FindFirstAncestorOfClass("Model"))
+                if alvo and alvo ~= eu then
+                    podeClicar = false
+                    trazerComSofa(alvo)
+                    task.delay(2, function()
+                        podeClicar = true
+                    end)
+                end
+            end
+        end
+
+        -- Suporte a Celular (Touch)
+        entrada.TouchTap:Connect(function(toques, processado)
+            if processado or not podeClicar or not ferramentaEquipada then return end
+            processarClique(toques[1])
+        end)
+
+        -- Suporte a PC (Mouse)
+        entrada.InputEnded:Connect(function(input, processado)
+            if processado or not podeClicar or not ferramentaEquipada then return end
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                processarClique(input.Position)
+            end
+        end)
+    end
+})
+
 TabTroll:AddButton({
  Name = "Click Fling Couch (Tool)",
  Callback = function()
