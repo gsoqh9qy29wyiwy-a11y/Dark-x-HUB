@@ -3,23 +3,78 @@
 --                          by HACKELINDOO                              --
 --====================================================================--
 
+-- ====================================================================
+-- 1. SERVIÇOS E INICIALIZAÇÃO BLINDADA
+-- ====================================================================
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
-local lp = LocalPlayer
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local CoreGui = game:GetService("CoreGui")
 local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
-local Camera = Workspace.CurrentCamera
+local Stats = game:GetService("Stats")
 
--- Atalhos de compatibilidade
-local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, Workspace, RunService, Camera
+-- Garante que o jogador carregou completamente antes de prosseguir
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    repeat task.wait() until Players.LocalPlayer
+    LocalPlayer = Players.LocalPlayer
+end
+local lp = LocalPlayer -- Para compatibilidade com a tela de carregamento
+
+-- Garante que a câmera existe
+local Camera = workspace.CurrentCamera
+if not Camera then
+    repeat task.wait() until workspace.CurrentCamera
+    Camera = workspace.CurrentCamera
+end
+
+-- Atalhos de compatibilidade do script
+local vu6, vu7, vu8, vu9, vu10, vuCam = Players, LocalPlayer, ReplicatedStorage, workspace, RunService, Camera
+
+-- ====================================================================
+-- 2. SISTEMA DE SALVAMENTO DE SERVIDORES
+-- ====================================================================
+local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
+local ServidoresSalvos = {}
+local NomeDoServidorDigitado = ""
+local ServidorSelecionado = ""
+local JobIdManualDigitado = ""
+
+-- Carrega os servidores salvos do arquivo do executor
+if isfile and isfile(ARQUIVO_SERVIDORES) then
+    local sucesso, resultado = pcall(function()
+        return HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
+    end)
+    if sucesso and type(resultado) == "table" then
+        ServidoresSalvos = resultado
+    end
+end
+
+-- Função interna para salvar a lista no dispositivo
+local function SalvarDadosNoArquivo()
+    if writefile then
+        pcall(function()
+            writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos))
+        end)
+    end
+end
+
+-- Função para listar os servidores no Dropdown
+local function ObterListaParaDropdown()
+    local lista = {}
+    for nome, _ in pairs(ServidoresSalvos) do
+        table.insert(lista, nome)
+    end
+    if #lista == 0 then
+        table.insert(lista, "Nenhum servidor salvo")
+    end
+    return lista
+end
 
 -- ====================================================================
 -- TELA DE CARREGAMENTO (LOADING SCREEN)
@@ -6836,4 +6891,3 @@ TabRGB:AddToggle({
     end
 })
 
--
