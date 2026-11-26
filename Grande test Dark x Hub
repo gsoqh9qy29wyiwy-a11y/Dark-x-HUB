@@ -743,33 +743,6 @@ pcall(function()
 end)
 
 -- ====================================================================
--- CONFIGURAÇÃO DE SERVIDORES SALVOS
--- ====================================================================
-local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
-local ServidoresSalvos = {}
-local NomeDoServidorDigitado = ""
-local ServidorSelecionado = ""
-local JobIdManualDigitado = ""
-
-if isfile and isfile(ARQUIVO_SERVIDORES) then
-    pcall(function()
-        local r = HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
-        if type(r) == "table" then ServidoresSalvos = r end
-    end)
-end
-
-local function SalvarDadosNoArquivo()
-    if writefile then pcall(function() writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos)) end) end
-end
-
-local function ObterListaParaDropdown()
-    local lista = {}
-    for nome, _ in pairs(ServidoresSalvos) do table.insert(lista, nome) end
-    if #lista == 0 then table.insert(lista, "Nenhum servidor salvo") end
-    return lista
-end
-
--- ====================================================================
 -- VARIÁVEIS DE CONTROLE
 -- ====================================================================
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
@@ -1956,6 +1929,33 @@ local function flingWithBus(targetPlayer)
         end)
         if tick() - startTime > 8 then StopTestFling() end
     end)
+end
+
+-- ====================================================================
+-- CONFIGURAÇÃO DE SERVIDORES SALVOS
+-- ====================================================================
+local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
+local ServidoresSalvos = {}
+local NomeDoServidorDigitado = ""
+local ServidorSelecionado = ""
+local JobIdManualDigitado = ""
+
+if isfile and isfile(ARQUIVO_SERVIDORES) then
+    pcall(function()
+        local r = HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
+        if type(r) == "table" then ServidoresSalvos = r end
+    end)
+end
+
+local function SalvarDadosNoArquivo()
+    if writefile then pcall(function() writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos)) end) end
+end
+
+local function ObterListaParaDropdown()
+    local lista = {}
+    for nome, _ in pairs(ServidoresSalvos) do table.insert(lista, nome) end
+    if #lista == 0 then table.insert(lista, "Nenhum servidor salvo") end
+    return lista
 end
 
 -- ====================================================================
