@@ -4,7 +4,7 @@
 --====================================================================--
 
 -- ====================================================================
--- SERVIÇOS E INICIALIZAÇÃO
+-- SERVIÇOS INICIAIS
 -- ====================================================================
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
@@ -35,7 +35,7 @@ if not LocalPlayer then
 end
 
 -- ====================================================================
--- CONFIGURAÇÕES DA TELA DE CARREGAMENTO
+-- NOVO SISTEMA DE CARREGAMENTO (LOADING SCREEN PERSONALIZADA)
 -- ====================================================================
 local LoadingConfig = {
     Duration = 8,
@@ -54,12 +54,8 @@ local LoadingElements = {
 }
 
 local Particles = {}
-local RectangleParticles = {}
 local AnimationConnections = {}
 
--- ====================================================================
--- SISTEMA DE PARTÍCULAS
--- ====================================================================
 local function CreateStarParticle(parent, x, y)
     local star = Instance.new("Frame")
     star.Name = "StarParticle"
@@ -97,6 +93,7 @@ end
 
 local function CreateParticleSystem(parent)
     local screenSize = workspace.CurrentCamera.ViewportSize
+
     for i = 1, LoadingConfig.ParticleCount do
         local x = math.random(0, screenSize.X)
         local y = math.random(0, screenSize.Y)
@@ -104,6 +101,8 @@ local function CreateParticleSystem(parent)
         table.insert(Particles, particle)
     end
 end
+
+local RectangleParticles = {}
 
 local function CreateRectangleParticle(parent, x)
     local rect = Instance.new("Frame")
@@ -115,7 +114,6 @@ local function CreateRectangleParticle(parent, x)
     rect.BorderSizePixel = 0
     rect.ZIndex = 8
     rect.BackgroundTransparency = math.random(20, 60) / 100 
-
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, math.random(2, 8))
     corner.Parent = rect
@@ -157,6 +155,7 @@ end
 
 local function UpdateRectangles()
     local screenSize = workspace.CurrentCamera.ViewportSize
+
     for i, particle in pairs(RectangleParticles) do
         if particle.frame and particle.frame.Parent then
             local newY = particle.frame.Position.Y.Offset + particle.speedY
@@ -205,9 +204,6 @@ local function UpdateParticles(parentFrame)
     end
 end
 
--- ====================================================================
--- ELEMENTOS VISUAIS DA INTERFACE
--- ====================================================================
 local function CreateAdvancedBackground(parent)
     local bgFrame = Instance.new("Frame")
     bgFrame.Name = "AdvancedBackground"
@@ -333,7 +329,7 @@ local function CreateLoadingScreen()
     Icon.BackgroundTransparency = 1
     Icon.Size = UDim2.new(0, 80, 0, 80)
     Icon.Position = UDim2.new(0.5, -40, 0, -40)
-    Icon.Image = "rbxassetid://93720481956340"
+    Icon.Image = "rbxassetid://13458212275"
     Icon.ZIndex = 13
 
     local iconRotation = TweenService:Create(
@@ -403,12 +399,12 @@ local function CreateLoadingScreen()
     titleAnimation:Play()
     table.insert(AnimationConnections, titleAnimation)
 
-local glowTween = TweenService:Create(
+    local glowTween = TweenService:Create(
         titleStroke,
         TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
         {Transparency = 0.1}
     )
-    glowTween:Play()
+glowTween:Play()
     table.insert(AnimationConnections, glowTween)
 
     local SubtitleLabel = Instance.new("TextLabel")
@@ -422,6 +418,7 @@ local glowTween = TweenService:Create(
     SubtitleLabel.TextScaled = false
     SubtitleLabel.TextSize = 12
     SubtitleLabel.Font = Enum.Font.Gotham
+
     SubtitleLabel.ZIndex = 12
     SubtitleLabel.TextXAlignment = Enum.TextXAlignment.Center
     SubtitleLabel.TextYAlignment = Enum.TextYAlignment.Bottom
@@ -535,9 +532,6 @@ local function AnimateDots(dotsLabel)
     end)
 end
 
--- ====================================================================
--- EXECUÇÃO DO CARREGAMENTO
--- ====================================================================
 local function solutionsLoad()
     local screenGui, progressBar, percentageLabel, statusLabel, dotsLabel, glowEffect, mainFrame = CreateLoadingScreen()
 
@@ -568,7 +562,7 @@ local function solutionsLoad()
         local percentTween = TweenService:Create(
             percentageLabel,
             TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-            {TextColor3 = Color3.fromRGB(255 + (percentage * 0.2), 45 + (percentage * 0.1), 0)}
+            {TextColor3 = Color3.fromRGB(255+ (percentage * 0.2), 45+ (percentage * 0.1), 0)}
         )
         percentTween:Play()
         
@@ -643,10 +637,10 @@ local function solutionsLoad()
 end
 
 -- ====================================================================
--- ÁUDIO E INICIALIZAÇÃO PARALELA
+-- SOM E EXECUÇÃO SIMULTÂNEA DO CARREGAMENTO
 -- ====================================================================
 local sound = Instance.new("Sound")
-sound.SoundId = "rbxassetid://1848354536"
+sound.SoundId = "rbxassetid://9085027122"
 sound.Volume = 1
 sound.Looped = false
 sound.PlaybackSpeed = 1
@@ -664,55 +658,48 @@ task.spawn(function()
     sound:Play()
 end)
 
-task.wait(5)
+task.wait(LoadingConfig.Duration + 1)
 
 -- ====================================================================
--- CHECAGEM DE PLACE E EXECUÇÃO
+-- CHECAGEM DE PLACE (BROOKHAVEN)
 -- ====================================================================
 local Brokhavem = 4924922222
 local maconha = 4924922222
 
-if game.PlaceId == maconha then
-    -- Exibe a notificação de boas-vindas
-    StarterGui:SetCore("SendNotification", {
-        Title = "DARK X HUB",
-        Text = "Bem-vindo à  DARK X HUB",
-        Duration = 4
-    })
-
-    -- Configuração de Bio, Nome e Cores de Roleplay
-    pcall(function()
-        ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer(table.unpack({
-            [1] = "RolePlayBio",
-            [2] = "DARK X HUB",
-        }))
-
-        ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer(table.unpack({
-            [1] = "RolePlayName",
-            [2] = "DONO:HACKELINDOO",
-        }))
-
-        ReplicatedStorage.RE["1RPNam1eColo1r"]:FireServer(table.unpack({
-            [1] = "PickingRPBioColor",
-            [2] = Color3.new(255, 0, 0),
-        }))
-
-        ReplicatedStorage.RE["1RPNam1eColo1r"]:FireServer(table.unpack({
-            [1] = "PickingRPNameColor",
-            [2] = Color3.new(255, 0, 0),
-        }))
-    end)
-
-    loadstring(game:HttpGet("https://scriptsbinsauth.pages.dev/api/scripts/0accbbec-1d28-44ab-a76e-94e119c9e8cb/raw"))()
-    loadstring(game:HttpGet("https://scriptsbinsauth.pages.dev/api/scripts/0accbbec-1d28-44ab-a76e-94e119c9e8cb/raw"))()
-else   
-    if game.GameId == maconha then
-        print("Nada Não.")
-        loadstring(game:HttpGet("https://scriptsbinsauth.pages.dev/api/scripts/0accbbec-1d28-44ab-a76e-94e119c9e8cb/raw"))()
-    else
-        game.Players.LocalPlayer:Kick("This game is not supported.")
-    end
+if game.PlaceId ~= maconha and game.GameId ~= maconha then
+    LocalPlayer:Kick("This game is not supported.")
+    return
 end
+
+-- Exibe a notificação de boas-vindas
+StarterGui:SetCore("SendNotification", {
+    Title = "DARK X HUB",
+    Text = "Bem-vindo à  DARK X HUB",
+    Duration = 4
+})
+
+-- Seta o Roleplay Bio / Nome / Cores
+pcall(function()
+    ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+        [1] = "RolePlayBio",
+        [2] = "In Execution",
+    }))
+
+    ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+        [1] = "RolePlayName",
+        [2] = "ま S4turn Hub",
+    }))
+
+    ReplicatedStorage.RE["1RPNam1eColo1r"]:FireServer(table.unpack({
+        [1] = "PickingRPBioColor",
+        [2] = Color3.new(0, 0, 0),
+    }))
+
+    ReplicatedStorage.RE["1RPNam1eColo1r"]:FireServer(table.unpack({
+        [1] = "PickingRPNameColor",
+        [2] = Color3.new(255, 255, 255),
+    }))
+end)
 
 -- ====================================================================
 -- VARIÁVEIS DE CONTROLE
