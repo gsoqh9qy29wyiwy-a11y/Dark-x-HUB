@@ -68,7 +68,7 @@ local function createLoadingScreen()
     titleText.BackgroundTransparency = 1
     titleText.Font = Enum.Font.GothamBold
     titleText.TextScaled = true
-    titleText.Text = "Dark x Hub"
+    titleText.Text = ""
     titleText.TextSize = 32
     titleText.ZIndex = 3
     titleText.Parent = container
@@ -146,7 +146,7 @@ local function createLoadingScreen()
                 task.wait(0.4)
                 
                 pcall(function()
-                    ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer("RolePlayName", "[ Dark User ]")
+                    ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer("RolePlayName", "DARK X HUB")
                     ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer("RolePlayBio", "Criador: HACKELINDOO")
                 end)
                 
@@ -1379,7 +1379,7 @@ local Window = redzlib:MakeWindow({
 
 Window:AddMinimizeButton({
     Button = { 
-        Image = "rbxassetid://113088956809836", 
+        Image = "rbxassetid://87399935835332", 
         BackgroundTransparency = 0,
         Size = UDim2.new(0, 50, 0, 50) -- Altere os valores (50, 50) para o tamanho desejado em pixels
     },
