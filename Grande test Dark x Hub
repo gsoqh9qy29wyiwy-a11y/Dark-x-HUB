@@ -702,6 +702,74 @@ pcall(function()
 end)
 
 -- ====================================================================
+-- CHECAGEM DE PLACE (BROOKHAVEN)
+-- ====================================================================
+local Brokhavem = 4924922222
+local maconha = 4924922222
+
+if game.PlaceId ~= maconha and game.GameId ~= maconha then
+    LocalPlayer:Kick("This game is not supported.")
+    return
+end
+
+-- Exibe a notificação de boas-vindas
+StarterGui:SetCore("SendNotification", {
+    Title = "DARK X HUB",
+    Text = "Bem-vindo à  DARK X HUB",
+    Duration = 4
+})
+
+-- Seta o Roleplay Bio / Nome / Cores
+pcall(function()
+    ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+        [1] = "RolePlayBio",
+        [2] = "In Execution",
+    }))
+
+    ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer(table.unpack({
+        [1] = "RolePlayName",
+        [2] = "ま S4turn Hub",
+    }))
+
+    ReplicatedStorage.RE["1RPNam1eColo1r"]:FireServer(table.unpack({
+        [1] = "PickingRPBioColor",
+        [2] = Color3.new(0, 0, 0),
+    }))
+
+    ReplicatedStorage.RE["1RPNam1eColo1r"]:FireServer(table.unpack({
+        [1] = "PickingRPNameColor",
+        [2] = Color3.new(255, 255, 255),
+    }))
+end)
+
+-- ====================================================================
+-- CONFIGURAÇÃO DE SERVIDORES SALVOS
+-- ====================================================================
+local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
+local ServidoresSalvos = {}
+local NomeDoServidorDigitado = ""
+local ServidorSelecionado = ""
+local JobIdManualDigitado = ""
+
+if isfile and isfile(ARQUIVO_SERVIDORES) then
+    pcall(function()
+        local r = HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
+        if type(r) == "table" then ServidoresSalvos = r end
+    end)
+end
+
+local function SalvarDadosNoArquivo()
+    if writefile then pcall(function() writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos)) end) end
+end
+
+local function ObterListaParaDropdown()
+    local lista = {}
+    for nome, _ in pairs(ServidoresSalvos) do table.insert(lista, nome) end
+    if #lista == 0 then table.insert(lista, "Nenhum servidor salvo") end
+    return lista
+end
+
+-- ====================================================================
 -- VARIÁVEIS DE CONTROLE
 -- ====================================================================
 local walkSpeed, jumpPower, gravity = 16, 50, 192.2
@@ -1932,45 +2000,6 @@ local TabExpansao = Window:MakeTab({"Skybox", "home"})
 local Tab2 = Window:MakeTab({Title = "Player", Icon = "user"})
 local ChildTab = Window:MakeTab({"Criança", "baby"})
 local TabAdmin = Window:MakeTab({"Admin👑", "home"})
-
--- ====================================================================
--- ABA: SERVIDORES 🌐 (SISTEMA COMPLETO DE CONEXÃO E GERENCIAMENTO)
--- ====================================================================
-local ARQUIVO_SERVIDORES = "DarkXHub_SavedServers.json"
-local ServidoresSalvos = {}
-local NomeDoServidorDigitado = ""
-local ServidorSelecionado = ""
-local JobIdManualDigitado = ""
-
-if isfile and isfile(ARQUIVO_SERVIDORES) then
-    local sucesso, resultado = pcall(function()
-        return HttpService:JSONDecode(readfile(ARQUIVO_SERVIDORES))
-    end)
-    if sucesso and type(resultado) == "table" then
-        ServidoresSalvos = resultado
-    end
-end
-
-local function SalvarDadosNoArquivo()
-    if writefile then
-        pcall(function()
-            writefile(ARQUIVO_SERVIDORES, HttpService:JSONEncode(ServidoresSalvos))
-        end)
-    end
-end
-
-local function ObterListaParaDropdown()
-    local lista = {}
-    for nome, _ in pairs(ServidoresSalvos) do
-        table.insert(lista, nome)
-    end
-    if #lista == 0 then
-        table.insert(lista, "Nenhum servidor salvo")
-    end
-    return lista
-end
-
--- CRIA A TAB NA INTERFACE (Fica embaixo da TabAdmin)
 local TabServidores = Window:MakeTab({"Servidores 🌐", "globe"})
 
 -- SEÇÃO: INFORMAÇÕES DO SERVIDOR
@@ -1978,6 +2007,17 @@ TabServidores:AddSection({"Informações do Servidor"})
 
 TabServidores:AddParagraph({"Jogadores Online", tostring(#Players:GetPlayers()) .. " / " .. tostring(Players.MaxPlayers)})
 TabServidores:AddParagraph({"Place ID", tostring(game.PlaceId)})
+
+task.spawn(function()
+    while task.wait(3) do
+        pcall(function()
+            local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+            local fps = math.floor(1 / math.max(RunService.RenderStepped:Wait(), 0.001))
+            ParagraphStatus:SetTitle("Conexão: " .. ping .. "ms | " .. fps .. " FPS")
+            ParagraphStatus:SetContent("👥 Players: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers .. "\n🆔 JobId: " .. string.sub(game.JobId, 1, 15) .. "...")
+        end)
+    end
+end)
 
 TabServidores:AddButton({
     Name = "Copiar JobId do Servidor Atual",
